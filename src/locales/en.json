@@ -1,0 +1,697 @@
+{
+  "meta": {
+    "title": "EduHub Gaza | Educational Hub & Coworking Space",
+    "description": "A non-profit educational and coworking space providing stable solar power, high-speed satellite internet, and equipped study desks in the heart of Gaza."
+  },
+  "nav": {
+    "logoTitle": "EduHub",
+    "logoSubtitle": "Gaza Educational Hub & Coworking Space",
+    "home": "Home",
+    "bookSeat": "Book a Seat",
+    "spaceAndTraining": "Space & Training",
+    "eventsSchedule": "Events Schedule",
+    "successStories": "Success Stories & Gallery",
+    "videoLibrary": "Video Library",
+    "donateNow": "Donate Now",
+    "login": "Sign In",
+    "langToggle": "العربية",
+    "impact": "Impact",
+    "transparency": "Transparency",
+    "stories": "Stories",
+    "faq": "FAQ",
+    "contact": "Contact Us",
+    "langAria": "Select website language",
+    "hubStatus": "Hub Open Today (Until 07:00 PM)",
+    "verifiedBadge": "Verified Gaza Non-Profit Hub"
+  },
+  "hero": {
+    "liveStatusBadge": "The center is open now for students and professionals (until 07:00 PM)",
+    "titlePart1": "A Lifeline of Hope & Learning",
+    "titleHighlight": "in the Heart of Gaza",
+    "description": "A non-profit coworking and education hub providing stable solar power, high-speed satellite internet, and equipped study workstations empowering university students and freelancers to continue their education and remote careers despite all challenges.",
+    "bookSeatFreeCta": "Book a Free Seat",
+    "supportZeffyCta": "Support via Zeffy",
+    "trustBadge": "100% Free for Students | Funded Entirely by Community Giving",
+    "highlights": {
+      "solarPower": "Continuous Solar Power",
+      "satelliteInternet": "Ultra-Fast Satellite Internet",
+      "quietAcEnv": "Quiet & Air-Conditioned Environment",
+      "mentorship": "Tech Mentorship & Workshops"
+    },
+    "slides": [
+      {
+        "src": "/images/hero-main.jpg",
+        "alt": "Main hall of Gaza Educational Hub — Students working on laptops",
+        "caption": "Main Sanctuary — Free Coworking & University Study Hall"
+      },
+      {
+        "src": "/images/hero-workspace.jpg",
+        "alt": "Quiet workspace powered by solar energy and satellite internet",
+        "caption": "Continuous Solar Energy & Uninterrupted Starlink Internet"
+      },
+      {
+        "src": "/images/hero-focus.jpg",
+        "alt": "Student focusing on his academic and professional project",
+        "caption": "Determination of Gaza's Youth to Learn, Build & Thrive"
+      }
+    ],
+    "campaignBadge": "Emergency Campaign: Keep Gaza's Youth Learning & Connected",
+    "campaignRaised": "$18,450",
+    "campaignGoal": "$25,000",
+    "campaignPercentage": 74,
+    "campaignDonors": "412 Generous Donors",
+    "campaignDaysLeft": "6 Days Remaining This Cycle",
+    "donateNowCta": "Donate & Sponsor a Student",
+    "quickTiersTitle": "Direct Sponsorship Tiers:",
+    "quickTiers": [
+      {
+        "amount": 25,
+        "label": "$25",
+        "impact": "1 Week of Solar Power & Desk Station for 1 Student"
+      },
+      {
+        "amount": 50,
+        "label": "$50",
+        "impact": "2 Weeks Internet & Electricity for University Exams"
+      },
+      {
+        "amount": 100,
+        "label": "$100",
+        "impact": "Full 1-Month Student Sponsorship + Tech Training"
+      },
+      {
+        "amount": 250,
+        "label": "$250",
+        "impact": "Maintains Hall Battery Bank & Satellite Link for 2 Weeks"
+      }
+    ],
+    "missionBadge": "Non-profit Educational & Work Sanctuary in Gaza",
+    "sponsorStudentCta": "Sponsor a Student",
+    "closeLightbox": "Close"
+  },
+  "dashboard": {
+    "badge": "Field Operations Dashboard",
+    "title": "Real-time Field Operations & Capacity Dashboard",
+    "subtitle": "Live telemetry data to help students and freelancers plan before visiting the hub",
+    "lastUpdated": "Auto-updated: 2 minutes ago",
+    "powerStatus": {
+      "title": "Power & Energy Status",
+      "value": "100% Stable",
+      "desc": "Solar Array + Backup Battery Bank",
+      "percentage": 100
+    },
+    "internetStatus": {
+      "title": "Satellite Internet",
+      "value": "85-120 Mbps",
+      "desc": "Direct low-earth orbit satellite link (LEO)",
+      "percentage": 88
+    },
+    "seatsStatus": {
+      "title": "Available Seats Right Now",
+      "value": "14 Seats",
+      "desc": "Hall capacity: 40 seats",
+      "occupancy": "Current Occupancy: 65%",
+      "percentage": 65
+    },
+    "hoursStatus": {
+      "title": "Today's Operating Hours",
+      "value": "08:00 AM - 07:00 PM",
+      "desc": "3 daily shifts to maximize community access",
+      "percentage": 80
+    },
+    "powerTitle": "Solar Power",
+    "internetTitle": "Starlink Satellite Link",
+    "seatsTitle": "Equipped Study Desks",
+    "beneficiariesTitle": "Monthly Active Learners"
+  },
+  "pillars": {
+    "badge": "Community Pillars",
+    "title": "What Does the Hub Provide for Gaza's Youth?",
+    "subtitle": "We provide comprehensive tech and educational infrastructure to protect academic and professional futures during power and telecom blackouts.",
+    "cards": [
+      {
+        "id": "workspace",
+        "title": "Equipped Study & Workstations",
+        "description": "Ergonomic individual desks with multi-port charging stations for laptops/phones and eye-friendly ambient lighting.",
+        "tag": "100% uninterrupted power supply"
+      },
+      {
+        "id": "internet",
+        "title": "High-Speed Satellite Internet",
+        "description": "Optimized for attending Zoom university lectures, client remote interviews, downloading academic resources and software libraries.",
+        "tag": "Dedicated bandwidth per terminal"
+      },
+      {
+        "id": "training",
+        "title": "Skill Building & Tech Training",
+        "description": "Intensive hands-on workshops in software development, UI/UX design, freelancing marketplaces, and professional English.",
+        "tag": "Certificates of completion & mentorship"
+      },
+      {
+        "id": "community",
+        "title": "Supportive Community & Networking",
+        "description": "A collaborative safe haven to connect with fellow engineers, writers, and designers to exchange knowledge and win international contracts.",
+        "tag": "Individual guidance & career pairing"
+      }
+    ]
+  },
+  "bookingSection": {
+    "badge": "100% Free for Students",
+    "title": "Book Your Seat in Just 2 Steps",
+    "subtitle": "To ensure fair distribution of available seats and maintain high-speed connectivity for all, please book your shift in advance and arrive on schedule.",
+    "features": [
+      "Dedicated charging station + independent power outlet for each desk",
+      "Immediate entry barcode and booking confirmation via WhatsApp",
+      "Flexible one-click cancellation to allow peers to take vacant seats"
+    ],
+    "emergencyBox": {
+      "title": "Facing an emergency? (Immediate Exam or Interview)",
+      "desc": "Contact the field supervisor directly via WhatsApp to allocate an immediate emergency desk.",
+      "cta": "Contact Emergency Supervisor Now"
+    },
+    "form": {
+      "step1Title": "1. Select Reservation Day:",
+      "days": [
+        {
+          "id": "today",
+          "name": "Today (Now)",
+          "status": "14 seats available",
+          "available": true
+        },
+        {
+          "id": "tomorrow",
+          "name": "Tomorrow",
+          "status": "22 seats available",
+          "available": true
+        },
+        {
+          "id": "afterTomorrow",
+          "name": "Day After",
+          "status": "Booking Open",
+          "available": true
+        }
+      ],
+      "step2Title": "2. Choose Your Preferred Shift:",
+      "periods": [
+        {
+          "id": "morning",
+          "name": "Morning Shift",
+          "time": "08:00 AM - 12:00 PM"
+        },
+        {
+          "id": "afternoon",
+          "name": "Afternoon Shift",
+          "time": "12:00 PM - 04:00 PM"
+        },
+        {
+          "id": "evening",
+          "name": "Evening Shift",
+          "time": "04:00 PM - 07:00 PM"
+        }
+      ],
+      "step3Title": "3. Activity / Intended Usage:",
+      "activities": [
+        "University Online Lectures & Exams",
+        "Graduation Research & Capstone Projects",
+        "Remote Freelance Work (Upwork, Freelancer)",
+        "Self-Paced Software & Coding Courses"
+      ],
+      "nameLabel": "Full Name",
+      "namePlaceholder": "e.g. Mohammed Al-Najjar",
+      "phoneLabel": "WhatsApp Number (For Entry Pass)",
+      "phonePlaceholder": "+970 59 000 0000",
+      "submitBtn": "Confirm Instant Booking (Free)",
+      "successTitle": "Your Desk Reservation is Confirmed!",
+      "successDesc": "Your entry QR barcode and desk details have been dispatched to your WhatsApp."
+    }
+  },
+  "impactSection": {
+    "badge": "Impact Report & Operational Transparency",
+    "title": "Impact by the Numbers: How Your Donations Change Lives in Gaza",
+    "subtitle": "Every single dollar donated directly covers backup generator fuel, Starlink satellite subscriptions, and solar maintenance to prevent a single hour of educational interruption.",
+    "stats": [
+      {
+        "number": "4,200+",
+        "title": "Study & Work Hours",
+        "desc": "Completed monthly inside the hub workstations"
+      },
+      {
+        "number": "180+",
+        "title": "Students & Grads Served",
+        "desc": "Benefiting daily from complimentary power and connectivity"
+      },
+      {
+        "number": "35+",
+        "title": "Remote Job Contracts",
+        "desc": "Signed by hub members with international employers"
+      },
+      {
+        "number": "100%",
+        "title": "Financial Transparency",
+        "desc": "Tracked through Zeffy dedicated non-profit platform"
+      }
+    ],
+    "donationBanner": {
+      "badge": "Sponsor Academic & Tech Desks",
+      "title": "With a $25 donation, you secure a workstation with internet & power for a university student for a full week.",
+      "desc": "Zeffy charges 0% administrative fees, ensuring 100% of your gift reaches the center and beneficiaries directly in Gaza.",
+      "cta": "Donate Now via Zeffy"
+    },
+    "transparency": {
+      "badge": "100% Operational & Financial Transparency",
+      "title": "Where Every Dollar Goes: Real Monthly Budget Breakdown",
+      "subtitle": "We are a grassroots team in Gaza publishing our operating costs with complete transparency. We have no exorbitant admin overhead, no corporate headquarters. This is exactly what it takes to keep one center open in Gaza City.",
+      "monthlyBudgetTotal": 3000,
+      "monthlyBudgetTitle": "$3,000 Monthly. Here is the full breakdown.",
+      "monthlyBudgetDesc": "We are a small grassroots team, so we publish our operating costs with complete transparency. We have no exorbitant admin overhead, no corporate headquarters. This is what it takes to keep one center open in Gaza City.",
+      "studentCostPerMonth": 15,
+      "calculatorTitle": "Interactive Student Sponsorship Calculator",
+      "calculatorDesc": "Just $15 provides approximately one full month of education access for one student. Choose how many students to sponsor.",
+      "selectAmountLabel": "Select student sponsorship or cover a specific budget line item:",
+      "customAmountLabel": "Or enter a custom donation amount ($):",
+      "breakdownTitle": "Detailed Monthly Operating Budget ($3,000/month total)",
+      "donateAmountCta": "Proceed to Sponsor with",
+      "items": [
+        {
+          "id": "volunteers",
+          "title": "Volunteer & Team Stipends",
+          "amount": 1200,
+          "percentage": 40,
+          "desc": "The team that keeps the center open every day",
+          "details": "Field coordinators managing student reception, facility security, and daily equipment operations."
+        },
+        {
+          "id": "rent",
+          "title": "Facility Rent & Physical Space",
+          "amount": 700,
+          "percentage": 23,
+          "desc": "The physical space itself in Gaza City",
+          "details": "Safe, central hub premises in Gaza City hosting university students and digital workers."
+        },
+        {
+          "id": "electricity",
+          "title": "Electricity & Power Backup",
+          "amount": 300,
+          "percentage": 10,
+          "desc": "Solar energy backup system",
+          "details": "Hybrid solar array, lithium storage, and emergency generators guaranteeing 24/7 power."
+        },
+        {
+          "id": "repairs",
+          "title": "Repairs & Equipment",
+          "amount": 300,
+          "percentage": 10,
+          "desc": "Desks, chairs, cables, routers, equipment",
+          "details": "Continuous maintenance of study desks, routers, power adapters, and rapid charging stations."
+        },
+        {
+          "id": "internet",
+          "title": "High-Speed Internet (100 Mbps)",
+          "amount": 260,
+          "percentage": 9,
+          "desc": "Everything depends on this connection",
+          "details": "High-speed satellite and LEO links allowing students to attend classes and submit freelance work."
+        },
+        {
+          "id": "water_cleaning",
+          "title": "Water, Cleaning & Office Supplies",
+          "amount": 240,
+          "percentage": 8,
+          "desc": "Keeping the space usable, hygienic and clean",
+          "details": "Pure drinking water, sanitizing materials, and supplies maintaining a safe environment."
+        }
+      ],
+      "trustGuarantees": [
+        {
+          "title": "0% Platform Deductions (Zeffy)",
+          "desc": "Unlike platforms taking 3-8%, Zeffy is 100% free for registered non-profits, ensuring 100% reaches Gaza directly."
+        },
+        {
+          "title": "Audited Field Invoices",
+          "desc": "Every dollar spent on power, satellite links, and supplies is documented with clear field receipts."
+        },
+        {
+          "title": "Youth-Led Grassroots Impact",
+          "desc": "Led directly by local youth in Gaza to empower an entire generation to finish university degrees."
+        }
+      ]
+    }
+  },
+  "eventsSection": {
+    "badge": "Continuous Growth & Opportunities",
+    "title": "Current Events & Workshops",
+    "viewAll": "View Full Calendar",
+    "items": [
+      {
+        "id": "event-dentistry",
+        "title": "Cavity Preparation for Amalgam (Class I & II) — Dental Training",
+        "dateBadge": "March 3, 2026",
+        "statusBadge": "Field Verified",
+        "desc": "Specialized clinical training for dental students delivered by Crown Nexus at EduHub Gaza, featuring theoretical principles, live demo, and supervised typodont hands-on practice.",
+        "tag": "Crown Nexus × EduHub",
+        "meta": "Hands-on Training",
+        "image": "/images/workshop-dentistry-hall.jpg"
+      },
+      {
+        "id": "event-chess",
+        "title": "Chess Championship for Medical Students (MCI)",
+        "dateBadge": "3 Days Tournament",
+        "statusBadge": "Field Verified",
+        "desc": "A strategic tournament organized by MCI (Medical Crisis Incubator) at the hub, bringing together medical students for focus, mental discipline, and strategic thinking.",
+        "tag": "MCI × EduHub",
+        "meta": "Strategic & Mental",
+        "image": "/images/workshop-chess.png"
+      }
+    ]
+  },
+  "storiesSection": {
+    "badge": "Voices from the Field",
+    "title": "Stories of Resilience from Inside the Hub",
+    "subtitle": "Behind every workstation is a student or creator refusing to surrender their future.",
+    "items": [
+      {
+        "name": "Amal Shawa",
+        "role": "Information Technology Student, 19 Years Old",
+        "highlight": "After losing my home and living in a tent, I didn't know how I would continue my education. Gaza Educational Center provided me with a place where I can study, attend my classes, and complete my university degree.",
+        "story": "After our displacement, I lost my home and began living in a tent with my family. Our access to basic necessities like electricity and clean water was extremely limited, making continuing my university studies very difficult. I registered at Gaza Educational Center and was accepted. Thanks to a space equipped with reliable power, internet, and a peaceful study environment, I was able to continue my university education, submit assignments, and attend online lectures.",
+        "quote": "After losing my home and living in a tent, I didn't know how I would continue my education. Gaza Educational Center provided me with a place where I can study, attend my classes, and complete my university degree.",
+        "avatar": "/images/avatar-amal.jpg"
+      },
+      {
+        "name": "Ahmed Al-Najjar",
+        "role": "Software Engineering Student, 22 Years Old",
+        "highlight": "With continuous blackouts, I was at risk of losing my senior university year. The stable high-speed link allowed me to submit my capstone project and pass finals.",
+        "story": "Amidst the complete blackout, the center provided me with reliable solar power and satellite connectivity daily, enabling me to attend classes and complete my graduation requirements.",
+        "quote": "Due to relentless power outages in our neighborhood, I was about to lose my final academic year. The reliable high-speed connection allowed me to submit my graduation capstone and attend exams.",
+        "avatar": "/images/avatar-ahmed.jpg"
+      },
+      {
+        "name": "Maryam Khalil",
+        "role": "Freelance Graphic Designer, 24 Years Old",
+        "highlight": "The hub was my only sanctuary to fulfill design contracts with overseas clients and upload large files. The income enabled me to support my family.",
+        "story": "Remote freelancing is our primary lifeline. Thanks to the uninterrupted Starlink connection, I maintained international client work and secured our family's daily necessities.",
+        "quote": "EduHub was my only sanctuary to deliver design deliverables to international clients and upload massive project files. The remote income I earned here allowed me to sustain my entire family.",
+        "avatar": "/images/avatar-maryam.jpg"
+      }
+    ],
+    "prevStory": "Previous Story",
+    "nextStory": "Next Story"
+  },
+  "faqSection": {
+    "badge": "Clear & Transparent Answers",
+    "title": "Frequently Asked Questions",
+    "items": [
+      {
+        "question": "Is reserving desks and internet truly free for students?",
+        "answer": "Yes, workstations, stable electricity, and satellite internet are 100% free for university students, recent graduates, and freelancers."
+      },
+      {
+        "question": "How do I reach the center and what are the booking conditions?",
+        "answer": "The center is located on Al-Wehda Street, Sondos Building (1st Floor). Booking requires prior reservation via the website to receive an entry code and adhere to reserved time slots."
+      },
+      {
+        "question": "How can I donate and verify my support reaches the hub?",
+        "answer": "You can donate directly through the official 100% fee-free Zeffy platform. All contributions go directly to maintain Starlink satellite subscriptions, backup fuel, and solar panels."
+      },
+      {
+        "question": "What happens during unexpected power or telecom emergencies?",
+        "answer": "The hub operates a dedicated power system with generators to assure continuous 100% uptime for electricity and internet without any interruptions."
+      }
+    ],
+    "subtitle": "Clear answers regarding free desk reservations, satellite connectivity, and donations."
+  },
+  "ctaBanner": {
+    "title": "Need a quiet space for your study or work today?",
+    "subtitle": "Reserve your seat now in under 30 seconds and benefit from stable electricity and satellite internet.",
+    "bookBtn": "Reserve Your Seat Now",
+    "donateBtn": "Sponsor a Student"
+  },
+  "bookingModal": {
+    "title": "Reserve a Study / Work Desk",
+    "subtitle": "Book your free desk to benefit from stable power and satellite connectivity",
+    "fullName": "Full Name",
+    "fullNamePlaceholder": "e.g. John Doe",
+    "email": "Email Address",
+    "emailPlaceholder": "name@example.com",
+    "phone": "WhatsApp / Phone Number",
+    "phonePlaceholder": "+970 / +972...",
+    "category": "Field or Status",
+    "categories": [
+      "University Student",
+      "Freelancer / Remote Worker",
+      "Software Developer",
+      "UI/UX Designer",
+      "Academic Researcher"
+    ],
+    "period": "Preferred Shift",
+    "periods": [
+      "Morning Shift (08:00 AM - 12:00 PM)",
+      "Afternoon Shift (12:00 PM - 03:30 PM)",
+      "Evening Shift (03:30 PM - 07:00 PM)"
+    ],
+    "submitBtn": "Confirm Desk Reservation",
+    "successMsg": "Your desk reservation has been submitted successfully! A confirmation notice will be sent via WhatsApp/Email.",
+    "closeBtn": "Close",
+    "mvpPlanBadge": "MVP Plan",
+    "workingHours": "Hours: 08:00 - 16:00",
+    "modalTitle": "EduHub Desk Reservation Hub",
+    "modalSubtitle": "Choose the appropriate path to book your free workstation, electricity, and high-speed internet:",
+    "activeMemberTitle": "Active Member (Direct Desk Booking)",
+    "activeMemberDesc": "For approved members: track monthly quota, instant booking, and self-service cancellation with refund.",
+    "studentBadge": "Student: 25h/mo (up to 4h/day)",
+    "freelancerBadge": "Freelancer: 35h/mo (up to 8h/day)",
+    "newMemberTitle": "New Member? Apply for Membership",
+    "newMemberDesc": "No password required at submission: submit basic info, and receive password activation link upon approval.",
+    "freeMembershipBadge": "100% Free Membership to support Gaza",
+    "visitorPassTitle": "1-Day Visitor Pass (No Account)",
+    "visitorPassDesc": "For urgent submissions or exams: apply for a temporary 1-4 hour day pass with no account needed.",
+    "manualReviewBadge": "Reviewed and approved manually",
+    "hubFooterNote": "EduHub — Co-working and learning sanctuary in Gaza"
+  },
+  "donationModal": {
+    "title": "Sponsor a Student, Shape Their Future",
+    "subtitle": "Provide uninterrupted solar power, high-speed Starlink internet, and equipped desks for students refusing to give up on their future.",
+    "oneTime": "One-Time Donation",
+    "monthly": "Monthly Sustainer (Most Impactful)",
+    "selectAmount": "Select Your Contribution Level:",
+    "customAmount": "Custom Amount",
+    "customPlaceholder": "Enter amount in USD (e.g. 150)",
+    "tiers": [
+      {
+        "amount": 25,
+        "label": "$25",
+        "impact": "Sponsors 1 student's workstation with unlimited solar power & internet for a full week."
+      },
+      {
+        "amount": 50,
+        "label": "$50",
+        "impact": "Secures 2 students uninterrupted study time to complete their semester exams and graduation projects."
+      },
+      {
+        "amount": 100,
+        "label": "$100",
+        "impact": "Full 1-month complete sponsorship for a student + covers their technical bootcamp and freelancing mentorship."
+      },
+      {
+        "amount": 250,
+        "label": "$250",
+        "impact": "Funds essential satellite bandwidth and lithium battery array upkeep for an entire study group."
+      },
+      {
+        "amount": 500,
+        "label": "$500",
+        "impact": "Major Community Lifeline: covers significant solar infrastructure and satellite equipment resilience."
+      }
+    ],
+    "customImpactPrefix": "Your generous contribution directly powers student workstations and equipment in Gaza.",
+    "trustBadge": "Official 501(c)(3) Partner • 100% Direct Delivery • 0% Platform Fees via Zeffy",
+    "proceedBtn": "Proceed to Official Donation Form via Zeffy",
+    "closeBtn": "Cancel",
+    "monthlyNote": "Monthly gifts provide reliable predictability to keep the center open every single day.",
+    "directImpactTitle": "Your Direct Tangible Impact:",
+    "donationUrl": "https://www.zeffy.com/en-US/donation-form/gaza-education-hub?utm_source=ig&utm_medium=social&utm_content=link_in_bio&fbclid=PAb21jcAVFvLBleHRuA2FlbQIxMQBwZG9mAnNydGMGYXBwX2lkDzU2NzA2NzM0MzM1MjQyNwABpwp255SgaYdkj3D7ygehqdTput2WDY9GP_-tPbjrGDBfJVI_L_hLH-0k8oq6_aem_mKc9gZwDE_yYG1QS-p900A"
+  },
+  "footer": {
+    "aboutTitle": "EduHub Gaza",
+    "aboutDesc": "A non-profit community space providing an educational and tech lifeline for Gaza's youth, supported by independent solar energy and satellite internet.",
+    "nonProfitBadge": "Serving students & remote workers daily",
+    "quickLinksTitle": "Quick Links",
+    "quickLinks": [
+      "Book Your Seat",
+      "Training & Workshops",
+      "Donate to Support EduHub"
+    ],
+    "transparencyTitle": "Transparency & Operations",
+    "transparencyItems": [
+      "Working Hours: 08:00 AM - 07:00 PM",
+      "Location: Gaza - Al-Wehda St, Sondos Bldg (1st Floor)",
+      "Energy System: Solar energy & generators for continuous uptime",
+      "Connectivity: Dedicated Starlink Satellite Terminals",
+      "Capacity: Collaborative Workstations & Lecture Hall"
+    ],
+    "contactTitle": "CONNECT",
+    "contactDesc": "Official communication and support channels for EduHub:",
+    "email": "eduhubgaza@gmail.com",
+    "facebook": "Facebook",
+    "linkedin": "LinkedIn",
+    "instagram": "Instagram",
+    "facebookUrl": "https://www.facebook.com/share/1BrEBigQbH/",
+    "linkedinUrl": "https://www.linkedin.com/company/gaza-edu-hub/",
+    "instagramUrl": "https://www.instagram.com/gaza_edhub?rpxt=dGJjcWtna3pxaHBz",
+    "telegram": "Telegram Channel for Capacity & Energy Alerts",
+    "whatsapp": "Community WhatsApp Support & Inquiries",
+    "footerNote": "Engineered for maximum reliability and low bandwidth consumption in emergency environments.",
+    "rights": "© 2026 Gaza Education Hub. Youth-led, Gaza City.",
+    "donateMonthly": "Donate Monthly",
+    "motto": "FROM THE RUBBLE, WE RISE"
+  },
+  "transparencyWall": {
+    "badge": "100% Operational Transparency • 0% Platform Fees",
+    "title": "Where Does Every Dollar Go?",
+    "subtitle": "An integrated $3,000/month operational ecosystem ensuring uninterrupted education, internet, and power for Gaza students.",
+    "ofBudget": "of budget",
+    "monthlyTotal": "Monthly Total",
+    "pillarsCount": "6 Pillars",
+    "sponsorThisItemPrefix": "Sponsor This Item",
+    "hoverHint": "Hover or tap any pillar to view its impact",
+    "pillarsTitle": "The 6 Operating Pillars",
+    "resetView": "Reset View",
+    "ofTotal": "of total",
+    "sponsorBtn": "Sponsor",
+    "items": [
+      {
+        "id": "volunteers",
+        "title": "Volunteer Team Stipends",
+        "amount": 1200,
+        "percentage": 40,
+        "tagline": "Stipends for 7 on-ground coordinators managing safety, hardware & student desks daily."
+      },
+      {
+        "id": "rent",
+        "title": "Facility Rent & Physical Space",
+        "amount": 700,
+        "percentage": 23,
+        "tagline": "Central, secure AC sanctuary in Gaza City hosting 200 learners daily to study and work."
+      },
+      {
+        "id": "electricity",
+        "title": "Electricity & Solar Backup",
+        "amount": 300,
+        "percentage": 10,
+        "tagline": "Continuous 220V power upkeep: lithium storage, solar inverters, and emergency fuel."
+      },
+      {
+        "id": "repairs",
+        "title": "Repairs & Equipment",
+        "amount": 300,
+        "percentage": 10,
+        "tagline": "Ongoing maintenance of ergonomic desks, laptop power adapters, and high-gain routers."
+      },
+      {
+        "id": "internet",
+        "title": "High-Speed Starlink Internet",
+        "amount": 260,
+        "percentage": 9,
+        "tagline": "LEO satellite terminal subscription powering exams, remote jobs, and university research."
+      },
+      {
+        "id": "water_cleaning",
+        "title": "Drinking Water & Hygiene",
+        "amount": 240,
+        "percentage": 8,
+        "tagline": "Sterile drinking water supply, facility sanitization, and daily hygienic upkeep."
+      }
+    ],
+    "guarantees": [
+      {
+        "title": "0% Platform Deductions (Zeffy)",
+        "desc": "Unlike other platforms taking 3% to 8%, Zeffy is 100% fee-free so every dollar reaches the sanctuary."
+      },
+      {
+        "title": "Audited Field Invoices",
+        "desc": "Every single dollar spent on power batteries, Starlink data, and desk repairs is recorded with verified receipts."
+      },
+      {
+        "title": "Youth-Led Grassroots Impact",
+        "desc": "Our Gaza-based team manages operations daily to empower an entire generation of students and freelancers."
+      }
+    ]
+  },
+  "bookingPortal": {
+    "badge": "Desk Reservation & Coworking Portal",
+    "title": "Select Your Access Path at EduHub",
+    "subtitle": "Providing students and remote freelancers in Gaza with free access to solar power, high-speed satellite internet, and quiet workstations according to a fair system.",
+    "tabMember": "Active Member",
+    "tabNewMember": "New Member Request",
+    "tabVisitor": "1-Day Visitor Pass",
+    "loginTitle": "Member Sign In",
+    "loginSubtitle": "Sign in to book your study and work hours directly",
+    "emailLabel": "Email Address",
+    "passwordLabel": "Password",
+    "forgotPassword": "Forgot Password?",
+    "forgotPasswordAlert": "Reset link sent to your email",
+    "signInBtn": "Sign In to Book",
+    "noAccountApply": "Don't have an account? Apply for membership",
+    "demoUser": "Sara Ahmed",
+    "demoPlan": "Freelancer (35h/mo)",
+    "logout": "Log out",
+    "logoutTitle": "Log out and return to sign in",
+    "quotaUsedPrefix": "Used",
+    "quotaUsedMid": "of",
+    "quotaUsedSuffix": "hours this month",
+    "quotaRemaining": "Remaining:",
+    "dailyLimitNote": "Daily limit: up to {limit} hours per day",
+    "workingHoursNote": "Working hours: 08:00 AM – 04:00 PM",
+    "bookNewDesk": "Book a New Desk",
+    "myBookings": "My Bookings",
+    "bookingDate": "Booking Date",
+    "startTime": "Start Time",
+    "morningTimeSuffix": "AM",
+    "noonTimeSuffix": "PM",
+    "afternoonTimeSuffix": "PM",
+    "durationPrefix": "Duration",
+    "hourSingle": "1 hour",
+    "hourDouble": "2 hours",
+    "hourPlural": "hours",
+    "hoursSuffixEn": "hours",
+    "endTimeLabel": "Auto-Calculated End Time:",
+    "exceedsClose": "(Exceeds 16:00 close)",
+    "deductNotePrefix": "Deduction:",
+    "deductNoteSuffix": "hours from balance",
+    "notesLabel": "Notes (Optional)",
+    "notesPlaceholder": "e.g. Quiet desk needed for university exam...",
+    "confirmBtn": "Confirm Desk Reservation",
+    "cancelPolicy": "Cancellation policy: up to 2 hours before start, hours refunded automatically.",
+    "noBookings": "No bookings recorded yet",
+    "confirmed": "Confirmed",
+    "cancelled": "Cancelled",
+    "cancelRefund": "Cancel & Refund Hours",
+    "newMemberPendingTitle": "Membership Request Pending",
+    "newMemberPendingDesc": "Your request has been received and will be reviewed by management. Upon approval, you will receive an activation email within 72 hours.",
+    "returnToHub": "Return to Hub",
+    "step1Membership": "1. Choose Membership Category",
+    "studentMembership": "University Student",
+    "freelancerMembership": "Freelancer / Remote",
+    "step2Info": "2. Personal & Contact Information",
+    "fullName": "Full Name",
+    "fullNamePlaceholder": "Sara Ahmed...",
+    "phone": "Phone / WhatsApp",
+    "newMemberNote": "Note: No password required now. Once approved, you'll receive a secure link to create your password and activate your account.",
+    "submitMemberBtn": "Submit Membership Application",
+    "visitorReceivedTitle": "Visitor Request Received",
+    "visitorReceivedDesc": "Thank you. Management will verify desk availability for your chosen time and notify you via WhatsApp or Email.",
+    "submitAnotherVisitor": "Submit Another Pass",
+    "visitorNamePlaceholder": "Visitor Name...",
+    "emailOptional": "Email (Optional)",
+    "visitDate": "Visit Date",
+    "hoursCount": "Hours (1 to 4)",
+    "visitReason": "Reason for Visit (Optional)",
+    "visitReasonPlaceholder": "e.g. Online exam, urgent remote meeting, device recharge...",
+    "submitVisitorBtn": "Submit Visitor Pass Request",
+    "errClosingTime": "Booking must conclude before 16:00 (closing time 08:00 to 16:00).",
+    "errDailyLimit": "Daily limit for freelancer plan is {limit} hours.",
+    "errQuotaRemaining": "Your remaining monthly quota ({remaining}h) is insufficient for {duration}h.",
+    "errAlreadyBooked": "You already have a confirmed booking on this date. One reservation per day is allowed.",
+    "successBooked": "Desk reservation confirmed successfully ({id})! {duration} hours deducted from monthly balance."
+  }
+}

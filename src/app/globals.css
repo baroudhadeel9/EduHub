@@ -1,0 +1,176 @@
+@import "tailwindcss";
+
+:root {
+  /* Typography Fonts */
+  --font-arabic: var(--font-cairo), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-latin: var(--font-jakarta), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+
+  /* Brand Primary Navy Palette */
+  --color-brand-navy: #0c2340;
+  --color-brand-navy-hover: #15345d;
+  --color-brand-navy-dark: #091226;
+
+  /* Brand Emerald Green Palette */
+  --color-brand-emerald: #059669;
+  --color-brand-emerald-hover: #047857;
+  --color-brand-emerald-light: #10b981;
+  --color-brand-emerald-soft: #ecfdf5;
+  --color-brand-emerald-border: #a7f3d0;
+
+  /* Neutral & Background Palette */
+  --color-brand-bg: #f8fafc;
+  --color-brand-surface: #ffffff;
+  --color-brand-border: #e2e8f0;
+  --color-brand-text: #0c2340;
+  --color-brand-body: #1e293b;
+  --color-brand-muted: #64748b;
+
+  /* Chart & Analytics Palette */
+  --color-chart-emerald: #10b981;
+  --color-chart-sky: #0284c7;
+  --color-chart-amber: #f59e0b;
+  --color-chart-violet: #8b5cf6;
+  --color-chart-cyan: #06b6d4;
+  --color-chart-teal: #14b8a6;
+}
+
+@theme {
+  --color-brand-navy: var(--color-brand-navy);
+  --color-brand-navy-hover: var(--color-brand-navy-hover);
+  --color-brand-navy-dark: var(--color-brand-navy-dark);
+
+  --color-brand-emerald: var(--color-brand-emerald);
+  --color-brand-emerald-hover: var(--color-brand-emerald-hover);
+  --color-brand-emerald-light: var(--color-brand-emerald-light);
+  --color-brand-emerald-soft: var(--color-brand-emerald-soft);
+  --color-brand-emerald-border: var(--color-brand-emerald-border);
+
+  --color-brand-bg: var(--color-brand-bg);
+  --color-brand-surface: var(--color-brand-surface);
+  --color-brand-border: var(--color-brand-border);
+  --color-brand-text: var(--color-brand-text);
+  --color-brand-body: var(--color-brand-body);
+  --color-brand-muted: var(--color-brand-muted);
+
+  --color-chart-emerald: var(--color-chart-emerald);
+  --color-chart-sky: var(--color-chart-sky);
+  --color-chart-amber: var(--color-chart-amber);
+  --color-chart-violet: var(--color-chart-violet);
+  --color-chart-cyan: var(--color-chart-cyan);
+  --color-chart-teal: var(--color-chart-teal);
+}
+
+html[lang="ar"], html[dir="rtl"],
+html[lang="ar"] body,
+html[lang="ar"] button,
+html[lang="ar"] input {
+  font-family: var(--font-arabic);
+}
+
+html[lang="en"], html[dir="ltr"],
+html[lang="en"] body,
+html[lang="en"] button,
+html[lang="en"] input {
+  font-family: var(--font-latin);
+}
+
+/* English Typography: Balanced, airy, legible, no overlapping */
+html[lang="en"] {
+  letter-spacing: -0.011em;
+}
+
+html[lang="en"] h1,
+html[lang="en"] h2,
+html[lang="en"] h3,
+html[lang="en"] h4 {
+  letter-spacing: -0.02em;
+  line-height: 1.25;
+}
+
+body {
+  overflow-x: hidden;
+  background-color: var(--color-brand-bg);
+  color: var(--color-brand-body);
+  font-size: 1rem;
+  line-height: 1.65;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Accessible focus ring for interactive elements (excluding form inputs) */
+:focus-visible:not(input):not(textarea):not(select) {
+  outline: 2px solid var(--color-brand-emerald);
+  outline-offset: 2px;
+}
+
+/* Remove default black border and outline on focus for all form inputs & textareas */
+input:focus,
+input:focus-visible,
+textarea:focus,
+textarea:focus-visible,
+select:focus,
+select:focus-visible {
+  outline: none !important;
+  outline-offset: 0 !important;
+  border-color: var(--color-brand-emerald) !important;
+  box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.18) !important;
+}
+
+/* Accessibility: Respect user motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Smooth glassmorphism */
+.glass-panel {
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(226, 232, 240, 0.8);
+}
+
+.glass-card {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+/* Custom animations */
+@keyframes pulse-glow {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.6);
+  }
+  50% {
+    opacity: 0.85;
+    transform: scale(1.05);
+    box-shadow: 0 0 0 8px rgba(34, 197, 94, 0);
+  }
+}
+
+.live-pulse {
+  animation: pulse-glow 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes slide-in-fade {
+  from {
+    opacity: 0;
+    transform: translateY(6px) scale(0.995);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.animate-slide-in {
+  animation: slide-in-fade 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
