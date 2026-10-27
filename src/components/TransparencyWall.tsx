@@ -149,7 +149,7 @@ export default function TransparencyWall({ onOpenDonation }: TransparencyWallPro
   const arcs = budgetItems.reduce<
     Array<{ id: string; arcLength: number; offset: number; color: string }>
   >((acc, item) => {
-    const arcLength = (item.amount / 3000) * usableCircumference;
+    const arcLength = (item.amount / 2500) * usableCircumference;
     const offset =
       acc.length === 0
         ? 0
@@ -268,7 +268,7 @@ export default function TransparencyWall({ onOpenDonation }: TransparencyWallPro
                           {tw?.monthlyTotal}
                         </span>
                         <div className="text-3xl sm:text-4xl font-black text-emerald-800 font-mono tracking-tight">
-                          $3,000
+                          $2,500
                         </div>
                         <span className="inline-block text-[11px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800">
                           {tw?.pillarsCount}

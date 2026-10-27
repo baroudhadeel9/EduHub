@@ -261,62 +261,62 @@
       "badge": "100% Operational & Financial Transparency",
       "title": "Where Every Dollar Goes: Real Monthly Budget Breakdown",
       "subtitle": "We are a grassroots team in Gaza publishing our operating costs with complete transparency. We have no exorbitant admin overhead, no corporate headquarters. This is exactly what it takes to keep one center open in Gaza City.",
-      "monthlyBudgetTotal": 3000,
-      "monthlyBudgetTitle": "$3,000 Monthly. Here is the full breakdown.",
+      "monthlyBudgetTotal": 2500,
+      "monthlyBudgetTitle": ",500 Monthly. Here is the full breakdown.",
       "monthlyBudgetDesc": "We are a small grassroots team, so we publish our operating costs with complete transparency. We have no exorbitant admin overhead, no corporate headquarters. This is what it takes to keep one center open in Gaza City.",
       "studentCostPerMonth": 15,
       "calculatorTitle": "Interactive Student Sponsorship Calculator",
       "calculatorDesc": "Just $15 provides approximately one full month of education access for one student. Choose how many students to sponsor.",
       "selectAmountLabel": "Select student sponsorship or cover a specific budget line item:",
       "customAmountLabel": "Or enter a custom donation amount ($):",
-      "breakdownTitle": "Detailed Monthly Operating Budget ($3,000/month total)",
+      "breakdownTitle": "Detailed Monthly Operating Budget (,500/month total)",
       "donateAmountCta": "Proceed to Sponsor with",
       "items": [
         {
           "id": "volunteers",
-          "title": "Volunteer & Team Stipends",
-          "amount": 1200,
-          "percentage": 40,
+          "title": "Volunteer Team Stipends",
+          "amount": 800,
+          "percentage": 32,
           "desc": "The team that keeps the center open every day",
           "details": "Field coordinators managing student reception, facility security, and daily equipment operations."
         },
         {
           "id": "rent",
           "title": "Facility Rent & Physical Space",
-          "amount": 700,
-          "percentage": 23,
+          "amount": 650,
+          "percentage": 26,
           "desc": "The physical space itself in Gaza City",
           "details": "Safe, central hub premises in Gaza City hosting university students and digital workers."
         },
         {
           "id": "electricity",
-          "title": "Electricity & Power Backup",
-          "amount": 300,
-          "percentage": 10,
+          "title": "Electricity & Solar Backup",
+          "amount": 600,
+          "percentage": 24,
           "desc": "Solar energy backup system",
           "details": "Hybrid solar array, lithium storage, and emergency generators guaranteeing 24/7 power."
         },
         {
           "id": "repairs",
-          "title": "Repairs & Equipment",
-          "amount": 300,
-          "percentage": 10,
+          "title": "Monthly Maintenance & Repairs",
+          "amount": 100,
+          "percentage": 4,
           "desc": "Desks, chairs, cables, routers, equipment",
           "details": "Continuous maintenance of study desks, routers, power adapters, and rapid charging stations."
         },
         {
           "id": "internet",
           "title": "High-Speed Internet (100 Mbps)",
-          "amount": 260,
-          "percentage": 9,
+          "amount": 250,
+          "percentage": 10,
           "desc": "Everything depends on this connection",
           "details": "High-speed satellite and LEO links allowing students to attend classes and submit freelance work."
         },
         {
           "id": "water_cleaning",
-          "title": "Water, Cleaning & Office Supplies",
-          "amount": 240,
-          "percentage": 8,
+          "title": "Water & Sanitation",
+          "amount": 100,
+          "percentage": 4,
           "desc": "Keeping the space usable, hygienic and clean",
           "details": "Pure drinking water, sanitizing materials, and supplies maintaining a safe environment."
         }
@@ -548,7 +548,7 @@
   "transparencyWall": {
     "badge": "100% Operational Transparency • 0% Platform Fees",
     "title": "Where Does Every Dollar Go?",
-    "subtitle": "An integrated $3,000/month operational ecosystem ensuring uninterrupted education, internet, and power for Gaza students.",
+    "subtitle": "An integrated ,500/month operational ecosystem ensuring uninterrupted education, internet, and power for Gaza students.",
     "ofBudget": "of budget",
     "monthlyTotal": "Monthly Total",
     "pillarsCount": "6 Pillars",
@@ -562,43 +562,43 @@
       {
         "id": "volunteers",
         "title": "Volunteer Team Stipends",
-        "amount": 1200,
-        "percentage": 40,
+        "amount": 800,
+        "percentage": 32,
         "tagline": "Stipends for 7 on-ground coordinators managing safety, hardware & student desks daily."
       },
       {
         "id": "rent",
         "title": "Facility Rent & Physical Space",
-        "amount": 700,
-        "percentage": 23,
+        "amount": 650,
+        "percentage": 26,
         "tagline": "Central, secure AC sanctuary in Gaza City hosting 200 learners daily to study and work."
       },
       {
         "id": "electricity",
         "title": "Electricity & Solar Backup",
-        "amount": 300,
-        "percentage": 10,
+        "amount": 600,
+        "percentage": 24,
         "tagline": "Continuous 220V power upkeep: lithium storage, solar inverters, and emergency fuel."
       },
       {
         "id": "repairs",
-        "title": "Repairs & Equipment",
-        "amount": 300,
-        "percentage": 10,
+        "title": "Monthly Maintenance & Repairs",
+        "amount": 100,
+        "percentage": 4,
         "tagline": "Ongoing maintenance of ergonomic desks, laptop power adapters, and high-gain routers."
       },
       {
         "id": "internet",
         "title": "High-Speed Internet (100 Mbps)",
-        "amount": 260,
-        "percentage": 9,
+        "amount": 250,
+        "percentage": 10,
         "tagline": "LEO satellite terminal subscription powering exams, remote jobs, and university research."
       },
       {
         "id": "water_cleaning",
-        "title": "Drinking Water & Hygiene",
-        "amount": 240,
-        "percentage": 8,
+        "title": "Water & Sanitation",
+        "amount": 100,
+        "percentage": 4,
         "tagline": "Sterile drinking water supply, facility sanitization, and daily hygienic upkeep."
       }
     ],
