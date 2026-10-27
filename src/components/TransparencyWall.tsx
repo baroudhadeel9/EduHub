@@ -201,7 +201,10 @@ export default function TransparencyWall({ onOpenDonation }: TransparencyWallPro
               
               {/* Left Column: Interactive Radial Ecosystem Dial (SVG Donut Chart) */}
               <div className="lg:col-span-5 flex flex-col items-center justify-center">
-                <div className="relative w-full max-w-[290px] aspect-square flex items-center justify-center">
+                <div
+                  className="relative w-full max-w-[290px] aspect-square flex items-center justify-center"
+                  onMouseLeave={() => setActiveCategoryId(null)}
+                >
                   
                   {/* SVG Donut */}
                   <svg
@@ -242,6 +245,7 @@ export default function TransparencyWall({ onOpenDonation }: TransparencyWallPro
                             filter: isSelected ? `drop-shadow(0 0 8px ${arc.color}66)` : "none",
                           }}
                           onMouseEnter={() => setActiveCategoryId(arc.id)}
+                          onMouseLeave={() => setActiveCategoryId(null)}
                           onClick={() => setActiveCategoryId(activeCategoryId === arc.id ? null : arc.id)}
                         />
                       );
@@ -318,7 +322,10 @@ export default function TransparencyWall({ onOpenDonation }: TransparencyWallPro
                   )}
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div
+                  className="grid grid-cols-1 sm:grid-cols-2 gap-3"
+                  onMouseLeave={() => setActiveCategoryId(null)}
+                >
                   {budgetItems.map((item) => {
                     const IconComp = item.icon;
                     const isSelected = activeCategoryId === item.id;
@@ -326,6 +333,7 @@ export default function TransparencyWall({ onOpenDonation }: TransparencyWallPro
                       <div
                         key={item.id}
                         onMouseEnter={() => setActiveCategoryId(item.id)}
+                        onMouseLeave={() => setActiveCategoryId(null)}
                         onClick={() => setActiveCategoryId(isSelected ? null : item.id)}
                         className={`p-4 rounded-2xl border transition-all duration-300 flex flex-col justify-between cursor-pointer ${
                           isSelected
