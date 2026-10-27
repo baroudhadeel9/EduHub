@@ -1,28 +1,12 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
-export const ADMIN_COOKIE_NAME = "eduhub_admin_token";
-
 export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
-  const token = request.cookies.get(ADMIN_COOKIE_NAME)?.value;
 
-  // Protect all /admin routes
-  if (pathname.startsWith("/admin")) {
-    if (pathname === "/admin/login") {
-      if (token && token.trim() !== "") {
-        return NextResponse.redirect(new URL("/admin/overview", request.url));
-      }
-      return NextResponse.next();
-    }
-
-    if (!token || token.trim() === "") {
-      const loginUrl = new URL("/admin/login", request.url);
-      if (pathname !== "/admin" && pathname !== "/admin/overview") {
-        loginUrl.searchParams.set("from", pathname);
-      }
-      return NextResponse.redirect(loginUrl);
-    }
+  // If anyone tries to access /admin/login, send them straight to the overview dashboard
+  if (pathname === "/admin/login") {
+    return NextResponse.redirect(new URL("/admin/overview", request.url));
   }
 
   return NextResponse.next();
