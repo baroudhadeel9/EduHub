@@ -84,6 +84,16 @@ export default function LoginPage() {
             }}
           />
         </div>
+
+        {/* Link to Admin Login */}
+        <div className="mt-4 text-center">
+          <Link
+            href="/admin/login"
+            className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-500 hover:text-[#5243e1] transition-colors py-2 px-3 rounded-xl hover:bg-slate-100"
+          >
+            <span>{isRTL ? "هل أنت مدير للمساحة؟ الدخول للوحة التحكم الإدارية ←" : "Are you an admin? Sign in to Admin Portal →"}</span>
+          </Link>
+        </div>
       </main>
 
       {/* ── Footer note ── */}

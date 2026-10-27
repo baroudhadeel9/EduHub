@@ -13,11 +13,11 @@ export function proxy(request: NextRequest) {
       if (token && token.trim() !== "") {
         return NextResponse.redirect(new URL("/admin/overview", request.url));
       }
-      return NextResponse.redirect(new URL("/login", request.url));
+      return NextResponse.next();
     }
 
     if (!token || token.trim() === "") {
-      const loginUrl = new URL("/login", request.url);
+      const loginUrl = new URL("/admin/login", request.url);
       if (pathname !== "/admin" && pathname !== "/admin/overview") {
         loginUrl.searchParams.set("from", pathname);
       }
