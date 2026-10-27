@@ -2,6 +2,7 @@
 
 import React from "react";
 import Image from "next/image";
+import Link from "next/link";
 import { useLanguage } from "@/context/LanguageContext";
 import { Mail, Heart } from "lucide-react";
 import { OFFICIAL_ZEFFY_DONATION_URL } from "@/constants/links";
@@ -226,9 +227,18 @@ export default function Footer({ onOpenDonation }: FooterProps) {
            ═══════════════════════════════════════════ */}
         <div className="pt-6 border-t border-slate-800/60 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-400 font-normal text-center sm:text-start">
           <p className="text-slate-400">{t.footer.rights}</p>
-          <p className="text-slate-400 font-medium tracking-wider uppercase text-[11px] sm:text-xs">
-            {t.footer.motto}
-          </p>
+          <div className="flex items-center gap-4">
+            <Link
+              href="/admin"
+              className="text-slate-400 hover:text-emerald-400 font-medium transition-colors"
+            >
+              {dir === "rtl" ? "لوحة الإدارة" : "Admin Panel"}
+            </Link>
+            <span className="text-slate-700">•</span>
+            <p className="text-slate-400 font-medium tracking-wider uppercase text-[11px] sm:text-xs">
+              {t.footer.motto}
+            </p>
+          </div>
         </div>
       </div>
     </footer>

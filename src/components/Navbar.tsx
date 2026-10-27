@@ -2,8 +2,9 @@
 
 import React, { useState, useEffect } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import { useLanguage } from "@/context/LanguageContext";
-import { Heart, Menu, X, CalendarCheck } from "lucide-react";
+import { Heart, Menu, X, CalendarCheck, UserPlus, LogIn } from "lucide-react";
 import { OFFICIAL_ZEFFY_DONATION_URL } from "@/constants/links";
 
 interface NavbarProps {
@@ -108,8 +109,8 @@ export default function Navbar({ onOpenBooking, onOpenDonation }: NavbarProps) {
             })}
           </nav>
 
-          {/* Action Controls & Prominent Language Switcher */}
-          <div className="hidden lg:flex items-center gap-2 xl:gap-2.5 shrink-0">
+          {/* Action Controls: Language Switcher, Member Login & Donate Now */}
+          <div className="hidden lg:flex items-center gap-2 xl:gap-3 shrink-0">
             
             {/* Prominent Segmented Language Switcher (AR / EN) */}
             <div
@@ -121,7 +122,7 @@ export default function Navbar({ onOpenBooking, onOpenDonation }: NavbarProps) {
                 type="button"
                 onClick={() => setLocale("ar")}
                 aria-pressed={locale === "ar"}
-                className={`px-2 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
+                className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
                   locale === "ar"
                     ? "bg-white text-emerald-800 shadow-xs"
                     : "text-slate-600 hover:text-slate-900"
@@ -133,7 +134,7 @@ export default function Navbar({ onOpenBooking, onOpenDonation }: NavbarProps) {
                 type="button"
                 onClick={() => setLocale("en")}
                 aria-pressed={locale === "en"}
-                className={`px-2 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
+                className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
                   locale === "en"
                     ? "bg-white text-emerald-800 shadow-xs"
                     : "text-slate-600 hover:text-slate-900"
@@ -143,7 +144,16 @@ export default function Navbar({ onOpenBooking, onOpenDonation }: NavbarProps) {
               </button>
             </div>
 
-            {/* Donate Now Button (High-converting CTA) */}
+            {/* Member Login CTA (Clean secondary outline / soft button) */}
+            <Link
+              href="/login"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 xl:px-3.5 xl:py-2 rounded-xl text-xs xl:text-sm font-bold text-slate-700 hover:text-emerald-800 bg-slate-100 hover:bg-emerald-50 border border-slate-200 hover:border-emerald-200 shadow-2xs transition-all active:scale-95 cursor-pointer whitespace-nowrap focus-visible:ring-2 focus-visible:ring-emerald-500"
+            >
+              <LogIn className="w-3.5 h-3.5 text-emerald-700 shrink-0" />
+              <span>{locale === "ar" ? "دخول الأعضاء" : "Member Login"}</span>
+            </Link>
+
+            {/* Donate Now Button (Primary Emerald High-converting CTA) */}
             <button
               type="button"
               onClick={() =>
@@ -151,20 +161,10 @@ export default function Navbar({ onOpenBooking, onOpenDonation }: NavbarProps) {
                   ? onOpenDonation()
                   : window.open(OFFICIAL_ZEFFY_DONATION_URL, "_blank", "noopener,noreferrer")
               }
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 xl:px-3.5 xl:py-2 rounded-xl text-xs xl:text-sm font-bold text-white bg-emerald-600 hover:bg-emerald-700 shadow-sm shadow-emerald-700/20 transition-all active:scale-95 group cursor-pointer whitespace-nowrap focus-visible:ring-2 focus-visible:ring-emerald-500"
+              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 xl:px-4 xl:py-2 rounded-xl text-xs xl:text-sm font-bold text-white bg-emerald-600 hover:bg-emerald-700 shadow-sm shadow-emerald-700/20 transition-all active:scale-95 group cursor-pointer whitespace-nowrap focus-visible:ring-2 focus-visible:ring-emerald-500"
             >
               <Heart className="w-3.5 h-3.5 fill-white text-white group-hover:scale-110 transition-transform shrink-0" />
               <span>{t.nav.donateNow}</span>
-            </button>
-
-            {/* Book Seat CTA */}
-            <button
-              type="button"
-              onClick={onOpenBooking}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 xl:px-3.5 xl:py-2 rounded-xl text-xs xl:text-sm font-bold text-white bg-brand-navy hover:bg-brand-navy-hover shadow-sm transition-all active:scale-95 cursor-pointer whitespace-nowrap focus-visible:ring-2 focus-visible:ring-brand-navy"
-            >
-              <CalendarCheck className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
-              <span>{t.nav.bookSeat}</span>
             </button>
           </div>
 
@@ -261,17 +261,32 @@ export default function Navbar({ onOpenBooking, onOpenDonation }: NavbarProps) {
           </nav>
 
           <div className="pt-3 border-t border-slate-100 flex flex-col gap-2.5">
-            <button
-              type="button"
-              onClick={() => {
-                setMobileMenuOpen(false);
-                onOpenBooking();
-              }}
-              className="w-full py-3 rounded-xl font-bold text-white bg-brand-navy flex items-center justify-center gap-2 cursor-pointer shadow-sm text-base"
+            <Link
+              href="/login"
+              onClick={() => setMobileMenuOpen(false)}
+              className="w-full py-3 rounded-xl font-bold text-white bg-emerald-600 hover:bg-emerald-700 flex items-center justify-center gap-2 cursor-pointer shadow-sm text-base"
             >
-              <CalendarCheck className="w-5 h-5 text-emerald-400" />
-              <span>{t.nav.bookSeat}</span>
-            </button>
+              <LogIn className="w-5 h-5 text-white" />
+              <span>{locale === "ar" ? "دخول الأعضاء وحجز الساعات" : "Member Login & Booking"}</span>
+            </Link>
+
+            <Link
+              href="/join"
+              onClick={() => setMobileMenuOpen(false)}
+              className="w-full py-3 rounded-xl font-bold text-emerald-900 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 flex items-center justify-center gap-2 cursor-pointer shadow-sm text-base"
+            >
+              <UserPlus className="w-5 h-5 text-emerald-700" />
+              <span>{locale === "ar" ? "تقديم طلب عضوية جديدة" : "Apply for Membership"}</span>
+            </Link>
+
+            <Link
+              href="/visit"
+              onClick={() => setMobileMenuOpen(false)}
+              className="w-full py-3 rounded-xl font-bold text-slate-700 bg-slate-100 hover:bg-slate-200 border border-slate-200 flex items-center justify-center gap-2 cursor-pointer shadow-sm text-base"
+            >
+              <CalendarCheck className="w-5 h-5 text-emerald-600" />
+              <span>{locale === "ar" ? "طلب تصريح زيارة (ليوم واحد)" : "1-Day Visitor Pass"}</span>
+            </Link>
             <button
               type="button"
               onClick={() => {

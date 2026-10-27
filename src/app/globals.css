@@ -104,6 +104,12 @@ body {
 }
 
 /* Remove default black border and outline on focus for all form inputs & textareas */
+input,
+textarea,
+select {
+  outline: none !important;
+}
+
 input:focus,
 input:focus-visible,
 textarea:focus,
@@ -111,7 +117,8 @@ textarea:focus-visible,
 select:focus,
 select:focus-visible {
   outline: none !important;
-  outline-offset: 0 !important;
+  outline-style: none !important;
+  outline-width: 0 !important;
   border-color: var(--color-brand-emerald) !important;
   box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.18) !important;
 }

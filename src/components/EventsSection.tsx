@@ -6,7 +6,7 @@ import { useLanguage } from "@/context/LanguageContext";
 import { Calendar, ArrowUpRight } from "lucide-react";
 
 export default function EventsSection() {
-  const { t, locale } = useLanguage();
+  const { t } = useLanguage();
   const sectionRef = useRef<HTMLElement>(null);
   const [isInView, setIsInView] = useState(false);
 

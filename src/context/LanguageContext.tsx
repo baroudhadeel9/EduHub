@@ -1,6 +1,6 @@
 "use client";
 
-import React, { createContext, useContext, useState, useEffect } from "react";
+import React, { createContext, useContext, useEffect, useSyncExternalStore } from "react";
 import { Locale, Translation, translations, defaultLocale } from "../locales";
 
 interface LanguageContextType {
@@ -13,20 +13,48 @@ interface LanguageContextType {
 
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
 
-export function LanguageProvider({ children }: { children: React.ReactNode }) {
-  const [locale, setLocaleState] = useState<Locale>(() => {
+const listeners = new Set<() => void>();
+
+function subscribe(callback: () => void) {
+  listeners.add(callback);
+  if (typeof window !== "undefined") {
+    window.addEventListener("storage", callback);
+  }
+  return () => {
+    listeners.delete(callback);
     if (typeof window !== "undefined") {
-      const saved = localStorage.getItem("cehub_locale") as Locale;
-      if (saved === "ar" || saved === "en") {
-        return saved;
-      }
+      window.removeEventListener("storage", callback);
     }
-    return defaultLocale;
-  });
+  };
+}
+
+function getSnapshot(): Locale {
+  if (typeof window === "undefined") return defaultLocale;
+  try {
+    const saved = localStorage.getItem("cehub_locale");
+    if (saved === "ar" || saved === "en") {
+      return saved;
+    }
+  } catch {
+    // Ignore restricted storage
+  }
+  return defaultLocale;
+}
+
+function getServerSnapshot(): Locale {
+  return defaultLocale;
+}
+
+export function LanguageProvider({ children }: { children: React.ReactNode }) {
+  const locale = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
 
   const setLocale = (newLocale: Locale) => {
-    setLocaleState(newLocale);
-    localStorage.setItem("cehub_locale", newLocale);
+    try {
+      localStorage.setItem("cehub_locale", newLocale);
+    } catch {
+      // Ignore
+    }
+    listeners.forEach((listener) => listener());
   };
 
   const toggleLocale = () => {

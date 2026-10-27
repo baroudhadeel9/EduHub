@@ -7,7 +7,13 @@ import {
   Wifi,
   Armchair,
   Users,
+  Radio,
 } from "lucide-react";
+import {
+  getHubPublicStatsApi,
+  warmupBackendApi,
+  HubPublicStats,
+} from "@/services/applications";
 
 // ── Smooth Animated Number Counter ──
 function AnimatedNumber({
@@ -47,11 +53,36 @@ export default function OperationsDashboard() {
   const { t, locale } = useLanguage();
   const isRTL = locale === "ar";
 
+  const [stats, setStats] = useState<HubPublicStats>({
+    powerHours: 24,
+    internetSpeedMbps: 120,
+    availableSeats: 50,
+    activeLearnersCount: 450,
+    isLive: false,
+  });
+
+  useEffect(() => {
+    // 1. Silently warm up Render server on page load
+    warmupBackendApi();
+
+    // 2. Fetch live telemetry from backend
+    let isMounted = true;
+    getHubPublicStatsApi().then((data) => {
+      if (isMounted) {
+        setStats(data);
+      }
+    });
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
   const cards = [
     {
       id: "power",
       title: t.dashboard.powerTitle || (isRTL ? "الطاقة الشمسية" : "Solar Power"),
-      numericTarget: 24,
+      numericTarget: stats.powerHours,
       displayPrefix: "",
       displaySuffix: "/7",
       icon: Zap,
@@ -60,7 +91,7 @@ export default function OperationsDashboard() {
     {
       id: "internet",
       title: t.dashboard.internetTitle || (isRTL ? "إنترنت Starlink الفضائي" : "Starlink Satellite Link"),
-      numericTarget: 120,
+      numericTarget: stats.internetSpeedMbps,
       displayPrefix: "+",
       displaySuffix: " Mbps",
       icon: Wifi,
@@ -69,7 +100,7 @@ export default function OperationsDashboard() {
     {
       id: "capacity",
       title: t.dashboard.seatsTitle || (isRTL ? "المقاعد الدراسية المجهزة" : "Equipped Study Desks"),
-      numericTarget: 50,
+      numericTarget: stats.availableSeats,
       displayPrefix: "",
       displaySuffix: "",
       icon: Armchair,
@@ -78,7 +109,7 @@ export default function OperationsDashboard() {
     {
       id: "beneficiaries",
       title: t.dashboard.beneficiariesTitle || (isRTL ? "الطلاب والمستفيدون" : "Monthly Active Learners"),
-      numericTarget: 450,
+      numericTarget: stats.activeLearnersCount,
       displayPrefix: "+",
       displaySuffix: "",
       icon: Users,
@@ -94,7 +125,7 @@ export default function OperationsDashboard() {
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
-        <div className="mb-8">
+        <div className="mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
           <h2
             id="dashboard-title"
             className="text-2xl sm:text-3xl lg:text-4xl font-black text-brand-navy tracking-tight"
@@ -103,6 +134,16 @@ export default function OperationsDashboard() {
               ? "الأثر والعمليات الميدانية بالأرقام"
               : "Real-Time Telemetry & Impact Metrics")}
           </h2>
+
+          {/* Live indicator badge */}
+          <div className="inline-flex items-center gap-2 self-start sm:self-auto px-3 py-1.5 rounded-full bg-white border border-slate-200/80 shadow-2xs text-xs font-bold text-slate-700">
+            <span className="relative flex h-2.5 w-2.5">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
+            </span>
+            <Radio className="w-3.5 h-3.5 text-emerald-600" />
+            <span>{isRTL ? "بث العمليات الميدانية" : "Live Operational Feed"}</span>
+          </div>
         </div>
 
         {/* 4 Clean Minimal Metric Cards */}
@@ -126,7 +167,7 @@ export default function OperationsDashboard() {
                   </div>
                 </div>
 
-                {/* Main Metric Value with Animated Counter (No extra sentences or clutter) */}
+                {/* Main Metric Value with Animated Counter */}
                 <div className="flex items-baseline gap-1 font-mono">
                   {item.displayPrefix && (
                     <span className="text-2xl sm:text-3xl font-black text-brand-navy">

@@ -481,6 +481,7 @@ export const translationSchema = z.object({
       successBooked: z.string().optional(),
     })
     .optional(),
+  admin: z.record(z.string(), z.any()).optional(),
 });
 
 export type Translation = z.infer<typeof translationSchema>;

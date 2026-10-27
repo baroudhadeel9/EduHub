@@ -37,8 +37,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" dir="ltr" className={`${plusJakartaSans.variable} ${cairo.variable}`}>
-      <body className="min-h-screen bg-brand-bg text-slate-800 antialiased selection:bg-emerald-500 selection:text-white">
+    <html lang="ar" dir="rtl" className={`${plusJakartaSans.variable} ${cairo.variable}`} suppressHydrationWarning>
+      <body className="min-h-screen bg-brand-bg text-slate-800 antialiased selection:bg-emerald-500 selection:text-white" suppressHydrationWarning>
         <LanguageProvider>
           {children}
         </LanguageProvider>
