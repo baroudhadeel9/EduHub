@@ -112,8 +112,8 @@ export default function JoinPage() {
 
             <p className="text-xs sm:text-sm text-slate-600 leading-relaxed font-normal">
               {isRTL
-                ? "نوفر للطلاب والرياديين والفريلانسرز في قطاع غزة بيئة دراسة وعمل مجهزة بالكهرباء المستقرة، الإنترنت الفضائي (Starlink)، ومساحات عمل هادئة مجاناً 100% وفق معايير العدالة والاستحقاق."
-                : "Providing Gaza students and freelancers with a free, stable work sanctuary powered by solar energy and Starlink internet."}
+                ? "نوفر للطلاب والرياديين والفريلانسرز في قطاع غزة بيئة دراسة وعمل مجهزة بالكهرباء المستقرة، إنترنت عالي السرعة (100 ميجا)، ومساحات عمل هادئة مجاناً 100% وفق معايير العدالة والاستحقاق."
+                : "Providing Gaza students and freelancers with a free, stable work sanctuary powered by solar energy and high-speed 100 Mbps internet."}
             </p>
           </div>
 
@@ -128,7 +128,7 @@ export default function JoinPage() {
                   {isRTL ? "طاقة وإنترنت مجاناً 100%" : "100% Free Power & Net"}
                 </h4>
                 <p className="text-[11px] text-slate-500">
-                  {isRTL ? "ألواح شمسية وإنترنت Starlink" : "Solar panels & Starlink"}
+                  {isRTL ? "ألواح شمسية وإنترنت 100 ميجا" : "Solar panels & 100 Mbps net"}
                 </p>
               </div>
             </div>

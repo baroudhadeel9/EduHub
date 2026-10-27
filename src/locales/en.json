@@ -47,7 +47,7 @@
       {
         "src": "/images/hero-workspace.jpg",
         "alt": "Quiet workspace powered by solar energy and satellite internet",
-        "caption": "Continuous Solar Energy & Uninterrupted Starlink Internet"
+        "caption": "Continuous Solar Energy & High-Speed 100 Mbps Internet"
       },
       {
         "src": "/images/hero-focus.jpg",
@@ -102,7 +102,7 @@
     },
     "internetStatus": {
       "title": "Satellite Internet",
-      "value": "85-120 Mbps",
+      "value": "100 Mbps",
       "desc": "Direct low-earth orbit satellite link (LEO)",
       "percentage": 88
     },
@@ -120,7 +120,7 @@
       "percentage": 80
     },
     "powerTitle": "Solar Power",
-    "internetTitle": "Starlink Satellite Link",
+    "internetTitle": "High-Speed Internet (100 Mbps)",
     "seatsTitle": "Equipped Study Desks",
     "beneficiariesTitle": "Monthly Active Learners"
   },
@@ -228,7 +228,7 @@
   "impactSection": {
     "badge": "Impact Report & Operational Transparency",
     "title": "Impact by the Numbers: How Your Donations Change Lives in Gaza",
-    "subtitle": "Every single dollar donated directly covers backup generator fuel, Starlink satellite subscriptions, and solar maintenance to prevent a single hour of educational interruption.",
+    "subtitle": "Every single dollar donated directly covers backup generator fuel, high-speed 100 Mbps internet subscriptions, and solar maintenance to prevent a single hour of educational interruption.",
     "stats": [
       {
         "number": "4,200+",
@@ -389,7 +389,7 @@
         "name": "Maryam Khalil",
         "role": "Freelance Graphic Designer, 24 Years Old",
         "highlight": "The hub was my only sanctuary to fulfill design contracts with overseas clients and upload large files. The income enabled me to support my family.",
-        "story": "Remote freelancing is our primary lifeline. Thanks to the uninterrupted Starlink connection, I maintained international client work and secured our family's daily necessities.",
+        "story": "Remote freelancing is our primary lifeline. Thanks to the uninterrupted 100 Mbps connection, I maintained international client work and secured our family's daily necessities.",
         "quote": "EduHub was my only sanctuary to deliver design deliverables to international clients and upload massive project files. The remote income I earned here allowed me to sustain my entire family.",
         "avatar": "/images/avatar-maryam.jpg"
       }
@@ -411,7 +411,7 @@
       },
       {
         "question": "How can I donate and verify my support reaches the hub?",
-        "answer": "You can donate directly through the official 100% fee-free Zeffy platform. All contributions go directly to maintain Starlink satellite subscriptions, backup fuel, and solar panels."
+        "answer": "You can donate directly through the official 100% fee-free Zeffy platform. All contributions go directly to maintain high-speed 100 Mbps internet subscriptions, backup fuel, and solar panels."
       },
       {
         "question": "What happens during unexpected power or telecom emergencies?",
@@ -470,7 +470,7 @@
   },
   "donationModal": {
     "title": "Sponsor a Student, Shape Their Future",
-    "subtitle": "Provide uninterrupted solar power, high-speed Starlink internet, and equipped desks for students refusing to give up on their future.",
+    "subtitle": "Provide uninterrupted solar power, high-speed 100 Mbps internet, and equipped desks for students refusing to give up on their future.",
     "oneTime": "One-Time Donation",
     "monthly": "Monthly Sustainer (Most Impactful)",
     "selectAmount": "Select Your Contribution Level:",
@@ -526,7 +526,7 @@
       "Working Hours: 08:00 AM - 07:00 PM",
       "Location: Gaza - Al-Wehda St, Sondos Bldg (1st Floor)",
       "Energy System: Solar energy & generators for continuous uptime",
-      "Connectivity: Dedicated Starlink Satellite Terminals",
+      "Connectivity: Dedicated High-Speed 100 Mbps Internet",
       "Capacity: Collaborative Workstations & Lecture Hall"
     ],
     "contactTitle": "CONNECT",
@@ -589,7 +589,7 @@
       },
       {
         "id": "internet",
-        "title": "High-Speed Starlink Internet",
+        "title": "High-Speed Internet (100 Mbps)",
         "amount": 260,
         "percentage": 9,
         "tagline": "LEO satellite terminal subscription powering exams, remote jobs, and university research."
@@ -609,7 +609,7 @@
       },
       {
         "title": "Audited Field Invoices",
-        "desc": "Every single dollar spent on power batteries, Starlink data, and desk repairs is recorded with verified receipts."
+        "desc": "Every single dollar spent on power batteries, high-speed internet data, and desk repairs is recorded with verified receipts."
       },
       {
         "title": "Youth-Led Grassroots Impact",

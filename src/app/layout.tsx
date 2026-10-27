@@ -20,7 +20,7 @@ const plusJakartaSans = Plus_Jakarta_Sans({
 export const metadata: Metadata = {
   title: "EduHub Gaza",
   description:
-    "A non-profit educational and coworking sanctuary providing stable solar energy, high-speed Starlink internet, and workstations in Gaza.",
+    "A non-profit educational and coworking sanctuary providing stable solar energy, high-speed 100 Mbps internet, and workstations in Gaza.",
   icons: {
     icon: [
       { url: "/images/logo.png", type: "image/png" },

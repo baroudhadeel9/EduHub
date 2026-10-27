@@ -50,8 +50,8 @@ export default function BookingSection() {
 
           <p className="text-sm sm:text-base text-slate-600 leading-relaxed font-normal max-w-2xl mx-auto">
             {isRTL
-              ? "نوفر لطلاب الجامعات والمستقلين في غزة بيئة دراسة وعمل مجهزة بالكهرباء المستقرة والإنترنت الفضائي مجاناً 100% وفق نظام حجز عادل ومنظم."
-              : "Providing Gaza students and freelancers with a free, stable work sanctuary powered by solar energy and Starlink internet."}
+              ? "نوفر لطلاب الجامعات والمستقلين في غزة بيئة دراسة وعمل مجهزة بالكهرباء المستقرة وإنترنت عالي السرعة (100 ميجا) مجاناً 100% وفق نظام حجز عادل ومنظم."
+              : "Providing Gaza students and freelancers with a free, stable work sanctuary powered by solar energy and high-speed 100 Mbps internet."}
           </p>
         </div>
 

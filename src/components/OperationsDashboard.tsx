@@ -55,9 +55,9 @@ export default function OperationsDashboard() {
 
   const [stats, setStats] = useState<HubPublicStats>({
     powerHours: 24,
-    internetSpeedMbps: 120,
+    internetSpeedMbps: 100,
     availableSeats: 50,
-    activeLearnersCount: 450,
+    activeLearnersCount: 1500,
     isLive: false,
   });
 
@@ -90,10 +90,10 @@ export default function OperationsDashboard() {
     },
     {
       id: "internet",
-      title: t.dashboard.internetTitle || (isRTL ? "إنترنت Starlink الفضائي" : "Starlink Satellite Link"),
+      title: t.dashboard.internetTitle || (isRTL ? "إنترنت فائق السرعة" : "High-Speed Internet Link"),
       numericTarget: stats.internetSpeedMbps,
-      displayPrefix: "+",
-      displaySuffix: " Mbps",
+      displayPrefix: "",
+      displaySuffix: isRTL ? " ميجا" : " Mbps",
       icon: Wifi,
       iconBg: "bg-sky-500/10 text-sky-600 group-hover:bg-sky-500 group-hover:text-white",
     },

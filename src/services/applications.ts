@@ -1473,9 +1473,9 @@ export function warmupBackendApi(): void {
 export async function getHubPublicStatsApi(): Promise<HubPublicStats> {
   const defaultStats: HubPublicStats = {
     powerHours: 24,
-    internetSpeedMbps: 120,
+    internetSpeedMbps: 100,
     availableSeats: 50,
-    activeLearnersCount: 450,
+    activeLearnersCount: 1500,
     isLive: false,
   };
 
