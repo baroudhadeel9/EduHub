@@ -1,7 +1,11 @@
 import { MembershipApplication, ApplicationStatus } from "@/components/admin/applications/data";
 
+const REMOTE_API_URL = "https://eduhub-api-uz1z.onrender.com/api";
+
 const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_BASE_URL || "https://eduhub-api-uz1z.onrender.com/api";
+  typeof window !== "undefined"
+    ? "/api/proxy"
+    : process.env.NEXT_PUBLIC_API_BASE_URL || REMOTE_API_URL;
 
 const ADMIN_STORAGE_KEY = "eduhub_admin_auth";
 export const ADMIN_COOKIE_NAME = "eduhub_admin_token";
@@ -209,11 +213,13 @@ export async function getAdminMembershipApplications(
   query?: string,
   sort?: string
 ): Promise<MembershipApplication[]> {
-  const url = new URL(`${API_BASE_URL}/admin/membership-applications`);
-  if (query) url.searchParams.set("query", query);
-  if (sort) url.searchParams.set("sort", sort);
+  const params = new URLSearchParams();
+  if (query) params.set("query", query);
+  if (sort) params.set("sort", sort);
+  const queryStr = params.toString() ? `?${params.toString()}` : "";
+  const url = `${API_BASE_URL}/admin/membership-applications${queryStr}`;
 
-  const response = await fetch(url.toString(), {
+  const response = await fetch(url, {
     method: "GET",
     headers: getAdminHeaders(),
     cache: "no-store",
