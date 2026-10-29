@@ -55,18 +55,36 @@ export function extractErrorMessage(
   defaultMessage: string
 ): string {
   const r = result as Record<string, unknown> | null;
-  if (r && typeof r.message === "string" && r.message.trim()) {
-    return r.message;
-  }
+
+  let msg: string | null = null;
   if (r && r.errors && typeof r.errors === "object") {
     const values = Object.values(r.errors);
     if (values.length > 0) {
       const first = values[0];
       if (Array.isArray(first) && first.length > 0 && typeof first[0] === "string") {
-        return first[0];
+        msg = first[0];
       }
     }
   }
+
+  if (!msg && r && typeof r.message === "string" && r.message.trim()) {
+    msg = r.message;
+  }
+
+  // Friendly Arabic translations for common Laravel upload/validation errors
+  if (msg) {
+    if (msg.includes("proof file failed to upload") || msg.includes("proofFile")) {
+      return "تعذر رفع ملف الإثبات. يرجى التأكد من اختيار ملف بحجم مناسب (أقل من 15 ميجابايت).";
+    }
+    if (msg.includes("charger photo failed to upload") || msg.includes("chargerPhoto")) {
+      return "تعذر رفع صورة الشاحن. يرجى التأكد من أن الصورة واضحة وبحجم مناسب.";
+    }
+    if (msg.includes("failed to upload")) {
+      return "تعذر رفع الملف المرفق. يرجى اختيار ملف أصغر حجماً والمحاولة مرة أخرى.";
+    }
+    return msg;
+  }
+
   if (response.status >= 500) {
     return "الخادم قيد التجهيز أو الاستجابة حالياً، يرجى المحاولة بعد لحظات.";
   }
@@ -113,6 +131,41 @@ export async function submitMembershipApplication(
   }
 
   return result;
+}
+
+export interface CheckEmailResponse {
+  exists: boolean;
+  status?: string;
+  message: string;
+}
+
+/**
+ * Verify if email already has a registered membership or pending application
+ */
+export async function checkEmailAvailabilityApi(
+  email: string
+): Promise<CheckEmailResponse> {
+  try {
+    const url = `${API_BASE_URL}/membership-applications/check-email?email=${encodeURIComponent(
+      email.trim()
+    )}`;
+    const response = await fetch(url, {
+      method: "GET",
+      headers: {
+        Accept: "application/json",
+      },
+      cache: "no-store",
+    });
+
+    const result = await safeJsonParse<CheckEmailResponse>(response);
+    if (!result) {
+      return { exists: false, message: "" };
+    }
+    return result;
+  } catch {
+    // In case of transient network issue, don't block user
+    return { exists: false, message: "" };
+  }
 }
 
 

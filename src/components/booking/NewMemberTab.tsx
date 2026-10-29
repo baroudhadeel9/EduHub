@@ -22,12 +22,89 @@ import {
   Check,
   Loader2,
 } from "lucide-react";
-import { submitMembershipApplication } from "@/services/applications";
+import {
+  submitMembershipApplication,
+  checkEmailAvailabilityApi,
+} from "@/services/applications";
 
 type MemberCategory = "طالب/ة" | "فريلانسر Freelancer" | "باحث عن عمل وتطوير مهارات";
 
 interface NewMemberTabProps {
   onReturnToHub: () => void;
+}
+
+/**
+ * Compresses an image file client-side before sending over HTTP
+ * Reduces mobile camera photos (typically 5MB - 12MB) to ~200-400KB
+ * ensuring fast uploads and avoiding PHP / Vercel body limits.
+ */
+async function compressImageIfNeeded(
+  file: File | null,
+  maxDimension = 1600,
+  quality = 0.82
+): Promise<File | null> {
+  if (!file || typeof window === "undefined" || !file.type.startsWith("image/")) {
+    return file;
+  }
+
+  // Already lightweight, skip compression
+  if (file.size < 500 * 1024) {
+    return file;
+  }
+
+  return new Promise<File>((resolve) => {
+    try {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const img = new Image();
+        img.onload = () => {
+          let { width, height } = img;
+          if (width > maxDimension || height > maxDimension) {
+            if (width > height) {
+              height = Math.round((height * maxDimension) / width);
+              width = maxDimension;
+            } else {
+              width = Math.round((width * maxDimension) / height);
+              height = maxDimension;
+            }
+          }
+
+          const canvas = document.createElement("canvas");
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext("2d");
+          if (!ctx) {
+            resolve(file);
+            return;
+          }
+
+          ctx.drawImage(img, 0, 0, width, height);
+          canvas.toBlob(
+            (blob) => {
+              if (!blob || blob.size >= file.size) {
+                resolve(file);
+              } else {
+                const safeName = file.name.replace(/\.[^/.]+$/, "") + ".jpg";
+                const compressedFile = new File([blob], safeName, {
+                  type: "image/jpeg",
+                  lastModified: Date.now(),
+                });
+                resolve(compressedFile);
+              }
+            },
+            "image/jpeg",
+            quality
+          );
+        };
+        img.onerror = () => resolve(file);
+        img.src = e.target?.result as string;
+      };
+      reader.onerror = () => resolve(file);
+      reader.readAsDataURL(file);
+    } catch {
+      resolve(file);
+    }
+  });
 }
 
 export default function NewMemberTab({ onReturnToHub }: NewMemberTabProps) {
@@ -41,6 +118,7 @@ export default function NewMemberTab({ onReturnToHub }: NewMemberTabProps) {
   const [reqSubmitted, setReqSubmitted] = useState<boolean>(false);
   const [validationError, setValidationError] = useState<string>("");
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+  const [isCheckingEmail, setIsCheckingEmail] = useState<boolean>(false);
   const [submittedAppNumber, setSubmittedAppNumber] = useState<string>("");
 
   // 1. Personal & Contact Info
@@ -158,7 +236,7 @@ export default function NewMemberTab({ onReturnToHub }: NewMemberTabProps) {
     return "";
   };
 
-  const handleNext = () => {
+  const handleNext = async () => {
     setValidationError("");
     if (currentStep === 1) {
       const err = validateStep1();
@@ -166,6 +244,25 @@ export default function NewMemberTab({ onReturnToHub }: NewMemberTabProps) {
         setValidationError(err);
         return;
       }
+
+      setIsCheckingEmail(true);
+      try {
+        const res = await checkEmailAvailabilityApi(email);
+        if (res.exists) {
+          setValidationError(
+            res.message ||
+              (isRTL
+                ? "هذا البريد الإلكتروني مسجل بالفعل وله عضوية في المساحة. يرجى استخدام بريد إلكتروني آخر أو التوجه لتسجيل الدخول."
+                : "This email address is already registered with a membership. Please use another email or sign in.")
+          );
+          return;
+        }
+      } catch {
+        // If pre-check fails due to network, continue and backend will validate on submit
+      } finally {
+        setIsCheckingEmail(false);
+      }
+
       setCurrentStep(2);
     } else if (currentStep === 2) {
       const err = validateStep2();
@@ -204,6 +301,11 @@ export default function NewMemberTab({ onReturnToHub }: NewMemberTabProps) {
 
     setIsSubmitting(true);
     try {
+      const [finalProof, finalCharger] = await Promise.all([
+        compressImageIfNeeded(proofFile),
+        compressImageIfNeeded(chargerPhoto),
+      ]);
+
       const fd = new FormData();
       fd.append("email", email);
       fd.append("fullName", fullName);
@@ -227,12 +329,12 @@ export default function NewMemberTab({ onReturnToHub }: NewMemberTabProps) {
 
       if (customPurpose) fd.append("customPurpose", customPurpose);
       fd.append("durationSchedule", durationSchedule);
-      fd.append("proofFile", proofFile);
+      if (finalProof) fd.append("proofFile", finalProof);
 
       fd.append("deviceType", deviceType);
       if (customDevice) fd.append("customDevice", customDevice);
       fd.append("chargerWattage", chargerWattage);
-      fd.append("chargerPhoto", chargerPhoto);
+      if (finalCharger) fd.append("chargerPhoto", finalCharger);
       fd.append("powerConnectivityStatus", powerConnectivityStatus);
       if (customConnectivity) fd.append("customConnectivity", customConnectivity);
       fd.append("preferredShift", preferredShift);
@@ -260,18 +362,32 @@ export default function NewMemberTab({ onReturnToHub }: NewMemberTabProps) {
     }
   };
 
-  const handleFileChange = (
+  const handleFileChange = async (
     e: React.ChangeEvent<HTMLInputElement>,
     setter: (f: File | null) => void
   ) => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
-      if (file.size > 10 * 1024 * 1024) {
-        setValidationError(isRTL ? "حجم الملف يتجاوز الحد الأقصى المسموح (10 MB)." : "File size exceeds 10 MB.");
+      if (file.size > 20 * 1024 * 1024) {
+        setValidationError(
+          isRTL
+            ? "حجم الملف يتجاوز الحد الأقصى المسموح (20 MB)."
+            : "File size exceeds 20 MB."
+        );
         return;
       }
-      setter(file);
       setValidationError("");
+
+      if (file.type.startsWith("image/")) {
+        try {
+          const compressed = await compressImageIfNeeded(file);
+          setter(compressed);
+        } catch {
+          setter(file);
+        }
+      } else {
+        setter(file);
+      }
     }
   };
 
@@ -421,7 +537,10 @@ export default function NewMemberTab({ onReturnToHub }: NewMemberTabProps) {
                     type="email"
                     required
                     value={email}
-                    onChange={(e) => setEmail(e.target.value)}
+                    onChange={(e) => {
+                      setEmail(e.target.value);
+                      if (validationError) setValidationError("");
+                    }}
                     placeholder="name@example.com"
                     className="w-full bg-[#f8fafc] border border-slate-200 rounded-xl px-4 py-2.5 text-xs sm:text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-600 transition-all font-medium"
                   />
@@ -1040,10 +1159,22 @@ export default function NewMemberTab({ onReturnToHub }: NewMemberTabProps) {
               <button
                 type="button"
                 onClick={handleNext}
-                className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-[#5243e1] hover:bg-[#4335c9] text-white text-xs sm:text-sm font-bold transition-all shadow-md shadow-indigo-600/20 active:scale-98 cursor-pointer"
+                disabled={isCheckingEmail}
+                className={`inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-[#5243e1] hover:bg-[#4335c9] text-white text-xs sm:text-sm font-bold transition-all shadow-md shadow-indigo-600/20 active:scale-98 ${
+                  isCheckingEmail ? "opacity-75 cursor-wait" : "cursor-pointer"
+                }`}
               >
-                <span>{isRTL ? "المتابعة للخطوة التالية" : "Continue"}</span>
-                <ArrowNext className="w-4 h-4" />
+                {isCheckingEmail ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    <span>{isRTL ? "جارٍ التحقق من البريد..." : "Checking email..."}</span>
+                  </>
+                ) : (
+                  <>
+                    <span>{isRTL ? "المتابعة للخطوة التالية" : "Continue"}</span>
+                    <ArrowNext className="w-4 h-4" />
+                  </>
+                )}
               </button>
             ) : (
               <button
