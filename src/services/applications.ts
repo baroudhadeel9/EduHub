@@ -25,7 +25,7 @@ export function getAdminAuthSession(): { token: string; admin: unknown } | null 
   }
 }
 
-function getAdminHeaders(extraHeaders: Record<string, string> = {}): Record<string, string> {
+export function getAdminHeaders(extraHeaders: Record<string, string> = {}): Record<string, string> {
   const headers: Record<string, string> = {
     Accept: "application/json",
     ...extraHeaders,
@@ -35,6 +35,10 @@ function getAdminHeaders(extraHeaders: Record<string, string> = {}): Record<stri
     headers["Authorization"] = `Bearer ${session.token}`;
   }
   return headers;
+}
+
+export function getAdminToken(): string | null {
+  return getAdminAuthSession()?.token || null;
 }
 
 export async function safeJsonParse<T = unknown>(response: Response): Promise<T | null> {
@@ -156,6 +160,42 @@ export function normalizeMembershipApplication(
     `APP-${id.padStart(4, "0")}`
   );
 
+  const hasProof = Boolean(
+    raw.has_proof_file ||
+    raw.proof_file_path ||
+    raw.proof_file_base64 ||
+    raw.proofFileBase64 ||
+    raw.proof_file_url ||
+    raw.proofFileUrl ||
+    raw.proofFileName ||
+    raw.proof_file_name
+  );
+  const hasCharger = Boolean(
+    raw.has_charger_photo ||
+    raw.charger_photo_path ||
+    raw.charger_photo_base64 ||
+    raw.chargerPhotoBase64 ||
+    raw.charger_photo_url ||
+    raw.chargerPhotoUrl ||
+    raw.chargerPhotoName ||
+    raw.charger_photo_name
+  );
+
+  const token = getAdminAuthSession()?.token;
+  const tokenSuffix = token ? `?token=${encodeURIComponent(token)}` : "";
+
+  const proofFileUrl = safeStr(
+    raw.proofFileUrl ||
+    raw.proof_file_url ||
+    (hasProof && id ? `/api/proxy/admin/files/proof/${id}${tokenSuffix}` : "")
+  );
+
+  const chargerPhotoUrl = safeStr(
+    raw.chargerPhotoUrl ||
+    raw.charger_photo_url ||
+    (hasCharger && id ? `/api/proxy/admin/files/charger/${id}${tokenSuffix}` : "")
+  );
+
   return {
     ...raw,
     id,
@@ -189,13 +229,17 @@ export function normalizeMembershipApplication(
     durationSchedule: safeStr(raw.durationSchedule || raw.duration_schedule, "-"),
     proofFileName: safeStr(raw.proofFileName || raw.proof_file_name, "وثيقة_الطلب.pdf"),
     proofFileSize: safeStr(raw.proofFileSize || raw.proof_file_size, "غير محدد"),
-    proofFileUrl: safeStr(raw.proofFileUrl || raw.proof_file_url),
+    proofFileUrl,
+    proofFileBase64: safeStr(raw.proofFileBase64 || raw.proof_file_base64),
+    proofFileMime: safeStr(raw.proofFileMime || raw.proof_file_mime, "application/pdf"),
 
     // 3. Devices & Power
     deviceType: safeStr(raw.deviceType || raw.device_type, "كمبيوتر محمول"),
     chargerWattage: safeStr(raw.chargerWattage || raw.charger_wattage, "65W"),
     chargerPhotoName: safeStr(raw.chargerPhotoName || raw.charger_photo_name, "charger_photo.jpg"),
-    chargerPhotoUrl: safeStr(raw.chargerPhotoUrl || raw.charger_photo_url),
+    chargerPhotoUrl,
+    chargerPhotoBase64: safeStr(raw.chargerPhotoBase64 || raw.charger_photo_base64),
+    chargerPhotoMime: safeStr(raw.chargerPhotoMime || raw.charger_photo_mime, "image/jpeg"),
     powerConnectivityStatus: safeStr(raw.powerConnectivityStatus || raw.power_connectivity_status, "عادي"),
     preferredShift: safeStr(raw.preferredShift || raw.preferred_shift, "صباحي"),
     weeklyUsage: safeStr(raw.weeklyUsage || raw.weekly_usage, "-"),

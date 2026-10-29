@@ -32,12 +32,16 @@ export interface MembershipApplication {
   proofFileName: string;
   proofFileSize: string;
   proofFileUrl?: string;
+  proofFileBase64?: string;
+  proofFileMime?: string;
 
   // ─── 3. Devices, Power & Attendance Schedule (6 fields) ───
   deviceType: string;
   chargerWattage: string;
   chargerPhotoName: string;
   chargerPhotoUrl?: string;
+  chargerPhotoBase64?: string;
+  chargerPhotoMime?: string;
   powerConnectivityStatus: string;
   preferredShift: string;
   weeklyUsage: string;

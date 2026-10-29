@@ -14,9 +14,14 @@ async function handleProxy(
   const forwardHeaders = new Headers();
 
   const auth = req.headers.get("authorization");
-  if (auth) forwardHeaders.set("Authorization", auth);
+  const queryToken = req.nextUrl.searchParams.get("token");
+  if (auth) {
+    forwardHeaders.set("Authorization", auth);
+  } else if (queryToken) {
+    forwardHeaders.set("Authorization", `Bearer ${queryToken}`);
+  }
 
-  const accept = req.headers.get("accept") || "application/json";
+  const accept = req.headers.get("accept") || "*/*";
   forwardHeaders.set("Accept", accept);
 
   const contentType = req.headers.get("content-type");
@@ -48,6 +53,14 @@ async function handleProxy(
     const upContentType = upstreamRes.headers.get("content-type");
     if (upContentType) {
       resHeaders.set("Content-Type", upContentType);
+    }
+    const upContentDisposition = upstreamRes.headers.get("content-disposition");
+    if (upContentDisposition) {
+      resHeaders.set("Content-Disposition", upContentDisposition);
+    }
+    const upContentLength = upstreamRes.headers.get("content-length");
+    if (upContentLength) {
+      resHeaders.set("Content-Length", upContentLength);
     }
 
     resHeaders.set("Access-Control-Allow-Origin", "*");

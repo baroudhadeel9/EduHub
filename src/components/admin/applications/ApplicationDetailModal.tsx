@@ -1,9 +1,10 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useLanguage } from "@/context/LanguageContext";
 import { MembershipApplication } from "./data";
+import { getAdminHeaders } from "@/services/applications";
 import {
   X,
   User,
@@ -16,6 +17,8 @@ import {
   Eye,
   FileText,
   Image as ImageIcon,
+  Loader2,
+  AlertCircle,
 } from "lucide-react";
 
 interface ApplicationDetailModalProps {
@@ -46,24 +49,148 @@ export default function ApplicationDetailModal({
     email: string;
   } | null>(null);
 
-  if (!isOpen || !application) return null;
+  // File loading & download states
+  const [isDownloadingProof, setIsDownloadingProof] = useState<boolean>(false);
+  const [proofDownloadError, setProofDownloadError] = useState<string>("");
 
-  const handleDownloadProof = () => {
-    if (application.proofFileUrl) {
-      window.open(application.proofFileUrl, "_blank");
+  const [chargerPhotoBlobUrl, setChargerPhotoBlobUrl] = useState<string | null>(null);
+  const [isLoadingChargerPhoto, setIsLoadingChargerPhoto] = useState<boolean>(false);
+  const [chargerPhotoError, setChargerPhotoError] = useState<string>("");
+
+  // Clean up blob URLs when application changes or modal closes
+  useEffect(() => {
+    return () => {
+      if (chargerPhotoBlobUrl && chargerPhotoBlobUrl.startsWith("blob:")) {
+        URL.revokeObjectURL(chargerPhotoBlobUrl);
+      }
+    };
+  }, [chargerPhotoBlobUrl]);
+
+  // Load charger photo whenever previewPhoto is triggered
+  useEffect(() => {
+    if (!previewPhoto || !application) return;
+
+    let active = true;
+
+    // 1. If we already have base64 in the application model
+    if (application.chargerPhotoBase64) {
+      const mime = application.chargerPhotoMime || "image/jpeg";
+      setChargerPhotoBlobUrl(`data:${mime};base64,${application.chargerPhotoBase64}`);
+      setIsLoadingChargerPhoto(false);
+      setChargerPhotoError("");
       return;
     }
-    // Generate a simple text/dummy file download simulating the proof
-    const content = `وثيقة إثبات - حاضنة CEHUB غزة\nاسم مقدم الطلب: ${application.fullName}\nرقم الهوية: ${application.nationalId}\nالفئة: ${application.category}\nاسم المستند: ${application.proofFileName}\nحجم الملف: ${application.proofFileSize}`;
-    const blob = new Blob([content], { type: "text/plain;charset=utf-8" });
-    const url = URL.createObjectURL(blob);
+
+    // 2. Fetch via authenticated endpoint
+    const fetchPhoto = async () => {
+      setIsLoadingChargerPhoto(true);
+      setChargerPhotoError("");
+
+      try {
+        const targetUrl =
+          application.chargerPhotoUrl || `/api/proxy/admin/files/charger/${application.id}`;
+
+        const res = await fetch(targetUrl, {
+          headers: getAdminHeaders({ Accept: "image/*,*/*" }),
+        });
+
+        if (!res.ok) {
+          throw new Error("تعذر تحميل صورة الشاحن من الخادم (رمز الخطأ: " + res.status + ")");
+        }
+
+        const blob = await res.blob();
+        if (!active) return;
+
+        const objectUrl = URL.createObjectURL(blob);
+        setChargerPhotoBlobUrl(objectUrl);
+      } catch (err: unknown) {
+        if (!active) return;
+        console.error("Charger photo load error:", err);
+        const msg = err instanceof Error ? err.message : "تعذر جلب صورة الشاحن من الخادم";
+        setChargerPhotoError(msg);
+      } finally {
+        if (active) setIsLoadingChargerPhoto(false);
+      }
+    };
+
+    fetchPhoto();
+
+    return () => {
+      active = false;
+    };
+  }, [previewPhoto, application]);
+
+  if (!isOpen || !application) return null;
+
+  const handleDownloadProof = async () => {
+    setIsDownloadingProof(true);
+    setProofDownloadError("");
+
+    try {
+      // 1. If base64 is already embedded
+      if (application.proofFileBase64) {
+        const mime = application.proofFileMime || "application/pdf";
+        const byteCharacters = atob(application.proofFileBase64);
+        const byteNumbers = new Array(byteCharacters.length);
+        for (let i = 0; i < byteCharacters.length; i++) {
+          byteNumbers[i] = byteCharacters.charCodeAt(i);
+        }
+        const byteArray = new Uint8Array(byteNumbers);
+        const blob = new Blob([byteArray], { type: mime });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = application.proofFileName || "proof_document.pdf";
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+        return;
+      }
+
+      // 2. Fetch authenticated from proxy endpoint
+      const targetUrl =
+        application.proofFileUrl || `/api/proxy/admin/files/proof/${application.id}`;
+
+      const res = await fetch(targetUrl, {
+        headers: getAdminHeaders({ Accept: "*/*" }),
+      });
+
+      if (!res.ok) {
+        throw new Error(
+          isRTL
+            ? `تعذر تنزيل المستند من الخادم (رمز الحالة: ${res.status}). قد يكون الملف غير محفوظ.`
+            : `Failed to download file from server (Status: ${res.status}).`
+        );
+      }
+
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = application.proofFileName || "proof_document.pdf";
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    } catch (err: unknown) {
+      console.error("Proof download error:", err);
+      const msg =
+        err instanceof Error ? err.message : isRTL ? "فشل تنزيل المستند" : "Download failed";
+      setProofDownloadError(msg);
+    } finally {
+      setIsDownloadingProof(false);
+    }
+  };
+
+  const handleDownloadChargerPhoto = () => {
+    if (!chargerPhotoBlobUrl) return;
     const link = document.createElement("a");
-    link.href = url;
-    link.download = application.proofFileName;
+    link.href = chargerPhotoBlobUrl;
+    link.download = application.chargerPhotoName || "charger_photo.jpg";
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
-    URL.revokeObjectURL(url);
   };
 
   const handleApprove = async () => {
@@ -167,7 +294,7 @@ export default function ApplicationDetailModal({
           </div>
         )}
 
-        {/* ── Body: Simple, clean fields list ── */}
+        {/* ── Body: Fields list ── */}
         <div className="flex-1 overflow-y-auto p-5 sm:p-6 space-y-6 text-xs sm:text-sm">
           
           {/* Section 1: البيانات الشخصية ومعلومات الاتصال */}
@@ -255,25 +382,39 @@ export default function ApplicationDetailModal({
               </div>
 
               {/* Document Download Row */}
-              <div className="bg-slate-50 p-3.5 rounded-xl border border-slate-200 sm:col-span-2 flex items-center justify-between gap-3">
-                <div className="flex items-center gap-2.5">
-                  <div className="w-9 h-9 rounded-lg bg-emerald-100/80 text-emerald-800 flex items-center justify-center shrink-0">
-                    <FileText className="w-5 h-5" />
+              <div className="bg-slate-50 p-3.5 rounded-xl border border-slate-200 sm:col-span-2 space-y-2">
+                <div className="flex items-center justify-between gap-3">
+                  <div className="flex items-center gap-2.5 min-w-0">
+                    <div className="w-9 h-9 rounded-lg bg-emerald-100/80 text-emerald-800 flex items-center justify-center shrink-0">
+                      <FileText className="w-5 h-5" />
+                    </div>
+                    <div className="min-w-0">
+                      <span className="text-slate-400 block text-[11px]">{isRTL ? "المستند المرفق (إفادة جامعية أو إثبات عمل)" : "Proof File"}</span>
+                      <span className="font-semibold text-slate-900 truncate block">{application.proofFileName}</span>
+                      <span className="text-slate-400 text-xs">({application.proofFileSize})</span>
+                    </div>
                   </div>
-                  <div>
-                    <span className="text-slate-400 block text-[11px]">{isRTL ? "المستند المرفق (إفادة جامعية أو عقد)" : "Proof File"}</span>
-                    <span className="font-semibold text-slate-900">{application.proofFileName}</span>
-                    <span className="text-slate-400 text-xs ms-1">({application.proofFileSize})</span>
-                  </div>
+                  <button
+                    type="button"
+                    onClick={handleDownloadProof}
+                    disabled={isDownloadingProof}
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white border border-slate-200 text-slate-700 hover:text-emerald-700 hover:border-emerald-300 hover:bg-emerald-50 text-xs font-bold transition-all shadow-2xs cursor-pointer shrink-0 disabled:opacity-50"
+                  >
+                    {isDownloadingProof ? (
+                      <Loader2 className="w-3.5 h-3.5 animate-spin text-emerald-600" />
+                    ) : (
+                      <Download className="w-3.5 h-3.5" />
+                    )}
+                    <span>{isDownloadingProof ? (isRTL ? "جاري التنزيل..." : "Downloading...") : (isRTL ? "تنزيل المستند" : "Download")}</span>
+                  </button>
                 </div>
-                <button
-                  type="button"
-                  onClick={handleDownloadProof}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white border border-slate-200 text-slate-700 hover:text-emerald-700 hover:border-emerald-300 hover:bg-emerald-50 text-xs font-bold transition-all shadow-2xs cursor-pointer shrink-0"
-                >
-                  <Download className="w-3.5 h-3.5" />
-                  <span>{isRTL ? "تنزيل المستند" : "Download"}</span>
-                </button>
+
+                {proofDownloadError && (
+                  <div className="flex items-center gap-1.5 text-[11px] text-rose-600 bg-rose-50 p-2 rounded-lg border border-rose-200">
+                    <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+                    <span>{proofDownloadError}</span>
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -298,13 +439,13 @@ export default function ApplicationDetailModal({
 
               {/* Photo View Row */}
               <div className="bg-slate-50 p-3.5 rounded-xl border border-slate-200 sm:col-span-2 flex items-center justify-between gap-3">
-                <div className="flex items-center gap-2.5">
+                <div className="flex items-center gap-2.5 min-w-0">
                   <div className="w-9 h-9 rounded-lg bg-teal-100/80 text-teal-800 flex items-center justify-center shrink-0">
                     <ImageIcon className="w-5 h-5" />
                   </div>
-                  <div>
+                  <div className="min-w-0">
                     <span className="text-slate-400 block text-[11px]">{isRTL ? "صورة ملصق مواصفات الشاحن" : "Charger Photo"}</span>
-                    <span className="font-medium text-slate-900">{application.chargerPhotoName}</span>
+                    <span className="font-medium text-slate-900 truncate block">{application.chargerPhotoName}</span>
                   </div>
                 </div>
                 <button
@@ -313,7 +454,7 @@ export default function ApplicationDetailModal({
                   className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white border border-slate-200 text-slate-700 hover:text-emerald-700 hover:border-emerald-300 hover:bg-emerald-50 text-xs font-bold transition-all shadow-2xs cursor-pointer shrink-0"
                 >
                   <Eye className="w-3.5 h-3.5" />
-                  <span>{isRTL ? "فتح الصورة" : "Open Photo"}</span>
+                  <span>{isRTL ? "عرض الصورة الحقيقية" : "View Photo"}</span>
                 </button>
               </div>
 
@@ -356,7 +497,7 @@ export default function ApplicationDetailModal({
 
         </div>
 
-        {/* ── Footer Actions: Simple & Fast ── */}
+        {/* ── Footer Actions ── */}
         <div className="p-4 border-t border-slate-100 bg-slate-50 flex items-center justify-between gap-3">
           <div className="flex items-center gap-2">
             <button
@@ -390,20 +531,23 @@ export default function ApplicationDetailModal({
         </div>
       </div>
 
-      {/* ── Photo Preview Lightbox ── */}
+      {/* ── Photo Preview Lightbox (Shows REAL uploaded charger photo) ── */}
       {previewPhoto && (
         <div
           className="fixed inset-0 z-60 bg-slate-950/80 backdrop-blur-xs flex items-center justify-center p-4"
           onClick={() => setPreviewPhoto(null)}
         >
           <div
-            className="bg-white rounded-2xl max-w-lg w-full overflow-hidden shadow-2xl border border-slate-700"
+            className="bg-white rounded-2xl max-w-xl w-full overflow-hidden shadow-2xl border border-slate-700 flex flex-col max-h-[90vh]"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="p-4 border-b border-slate-100 flex items-center justify-between bg-slate-50">
-              <div className="flex items-center gap-2">
-                <ImageIcon className="w-4 h-4 text-emerald-600" />
-                <span className="font-bold text-sm text-slate-900">{previewPhoto}</span>
+              <div className="flex items-center gap-2 min-w-0">
+                <ImageIcon className="w-4 h-4 text-emerald-600 shrink-0" />
+                <span className="font-bold text-sm text-slate-900 truncate">
+                  {isRTL ? "صورة ملصق الشاحن المرفوعة" : "Uploaded Charger Photo"}
+                </span>
+                <span className="text-xs text-slate-400 font-mono">({application.chargerWattage})</span>
               </div>
               <button
                 type="button"
@@ -415,42 +559,55 @@ export default function ApplicationDetailModal({
             </div>
 
             {/* Charger Photo Display */}
-            <div className="p-6 bg-slate-900 flex flex-col items-center justify-center text-center space-y-4">
-              {application.chargerPhotoUrl ? (
-                <div className="max-w-md w-full flex flex-col items-center">
+            <div className="p-6 bg-slate-900 flex-1 overflow-auto flex flex-col items-center justify-center min-h-[300px]">
+              {isLoadingChargerPhoto ? (
+                <div className="flex flex-col items-center gap-3 text-slate-300">
+                  <Loader2 className="w-8 h-8 animate-spin text-emerald-500" />
+                  <span className="text-xs">{isRTL ? "جاري تحميل الصورة من السيرفر..." : "Loading photo..."}</span>
+                </div>
+              ) : chargerPhotoBlobUrl ? (
+                <div className="w-full flex flex-col items-center gap-3">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
-                    src={application.chargerPhotoUrl}
+                    src={chargerPhotoBlobUrl}
                     alt={application.chargerPhotoName || "Charger Photo"}
-                    className="max-h-80 w-auto rounded-xl object-contain shadow-md border border-slate-700"
+                    className="max-h-[60vh] max-w-full rounded-xl object-contain shadow-2xl border border-slate-700"
                   />
-                  <div className="text-[11px] text-slate-400 mt-2 font-mono">
+                  <div className="text-[11px] text-slate-400 font-mono text-center">
                     {application.chargerPhotoName} • {application.chargerWattage}
                   </div>
                 </div>
               ) : (
-                <div className="w-full max-w-sm bg-slate-800 rounded-xl p-5 border border-slate-700 text-white font-mono text-xs space-y-2 text-start">
-                  <div className="text-emerald-400 font-bold border-b border-slate-700 pb-1.5 flex items-center justify-between">
-                    <span>AC POWER ADAPTER</span>
-                    <span>{application.chargerWattage}</span>
-                  </div>
-                  <div className="text-slate-300">
-                    MODEL: ADLX65YLC3A
-                  </div>
-                  <div className="text-slate-300">
-                    INPUT: 100-240V ~ 1.5A 50-60Hz
-                  </div>
-                  <div className="text-slate-300">
-                    OUTPUT: 20V ⎓ 3.25A / 15V ⎓ 3A
-                  </div>
-                  <div className="text-[10px] text-slate-500 pt-2 border-t border-slate-700">
-                    صورة فحص ملصق الشاحن الأصلية - مطابقة للمعايير المسموحة (أقل من 100 واط)
+                <div className="w-full max-w-sm bg-slate-800 rounded-xl p-6 border border-slate-700 text-slate-300 text-center space-y-3">
+                  <AlertCircle className="w-10 h-10 text-amber-400 mx-auto" />
+                  <div>
+                    <h4 className="font-bold text-sm text-white">
+                      {isRTL ? "لم يتم العثور على صورة الشاحن" : "No Charger Photo Available"}
+                    </h4>
+                    <p className="text-xs text-slate-400 mt-1">
+                      {chargerPhotoError ||
+                        (isRTL
+                          ? "لم يتم حفظ ملف الصورة في الخادم أثناء تقديم الطلب، أو قد تم حذفه."
+                          : "Photo file is not found on the server.")}
+                    </p>
                   </div>
                 </div>
               )}
             </div>
 
-            <div className="p-3 bg-slate-50 border-t border-slate-100 flex justify-end">
+            <div className="p-3 bg-slate-50 border-t border-slate-100 flex items-center justify-between">
+              {chargerPhotoBlobUrl ? (
+                <button
+                  type="button"
+                  onClick={handleDownloadChargerPhoto}
+                  className="px-3 py-1.5 rounded-lg bg-white border border-slate-200 text-slate-700 hover:text-emerald-700 hover:border-emerald-300 hover:bg-emerald-50 text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer"
+                >
+                  <Download className="w-3.5 h-3.5" />
+                  <span>{isRTL ? "تنزيل الصورة" : "Download Photo"}</span>
+                </button>
+              ) : (
+                <div />
+              )}
               <button
                 type="button"
                 onClick={() => setPreviewPhoto(null)}
