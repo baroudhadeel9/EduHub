@@ -140,21 +140,22 @@ export default function AdminSidebar({
       {isOpen && (
         <div
           onClick={onClose}
-          className="fixed inset-0 z-40 bg-slate-900/40 backdrop-blur-xs lg:hidden"
+          className="fixed inset-0 z-40 bg-slate-950/60 backdrop-blur-sm lg:hidden transition-opacity duration-300"
+          aria-hidden="true"
         />
       )}
 
       <aside
-        className={`fixed top-0 bottom-0 z-50 flex flex-col justify-between w-64 xl:w-72 bg-white border-slate-200/90 transition-transform duration-300 ease-in-out ${
+        className={`fixed top-0 bottom-0 z-50 flex flex-col justify-between w-72 max-w-[85vw] xl:w-72 bg-white border-slate-200/90 transition-all duration-300 ease-in-out ${
           isRTL
-            ? "right-0 border-l shadow-[-4px_0_24px_rgba(0,0,0,0.02)]"
-            : "left-0 border-r shadow-[4px_0_24px_rgba(0,0,0,0.02)]"
+            ? "right-0 border-l shadow-[-4px_0_24px_rgba(0,0,0,0.06)]"
+            : "left-0 border-r shadow-[4px_0_24px_rgba(0,0,0,0.06)]"
         } ${
           isOpen
-            ? "translate-x-0"
+            ? "translate-x-0 visible opacity-100 shadow-2xl"
             : isRTL
-            ? "translate-x-full lg:translate-x-0"
-            : "-translate-x-full lg:translate-x-0"
+            ? "translate-x-full max-lg:hidden max-lg:invisible max-lg:pointer-events-none max-lg:opacity-0 lg:visible lg:pointer-events-auto lg:opacity-100 lg:translate-x-0"
+            : "-translate-x-full max-lg:hidden max-lg:invisible max-lg:pointer-events-none max-lg:opacity-0 lg:visible lg:pointer-events-auto lg:opacity-100 lg:translate-x-0"
         }`}
       >
         <div className="flex flex-col flex-1 overflow-y-auto p-5 sm:p-6">

@@ -311,8 +311,23 @@ export default function AdminBookingsPage() {
         <main className="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto space-y-6">
           {/* Header */}
           <AdminHeader
-            onOpenCheckIn={() => setIsQuickBookingOpen(true)}
+            title={isRTL ? "جدول الحجوزات" : "Bookings Roster"}
+            subtitle={
+              isRTL
+                ? `استعراض وإدارة حجوزات المقاعد ليوم ${formattedDateTitle}`
+                : `Managing seat reservations for ${formattedDateTitle}`
+            }
             onOpenMobileMenu={() => setMobileMenuOpen(true)}
+            actionButton={
+              <button
+                type="button"
+                onClick={() => setIsQuickBookingOpen(true)}
+                className="inline-flex items-center justify-center gap-1.5 px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs sm:text-sm font-bold shadow-xs transition-all cursor-pointer active:scale-95"
+              >
+                <Plus className="w-4 h-4" />
+                <span>{isRTL ? "حجز مقعد لعضو" : "Book for Member"}</span>
+              </button>
+            }
           />
 
           {/* ── Toast Notification Banner ── */}
@@ -341,30 +356,6 @@ export default function AdminBookingsPage() {
               </button>
             </div>
           )}
-
-          {/* ── Page Header: Title & Quick Booking CTA ── */}
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <div>
-              <h1 className="text-xl sm:text-2xl font-black text-[#0c2340] tracking-tight">
-                {isRTL ? "جدول الحجوزات" : "Bookings Roster"}
-              </h1>
-              <p className="text-xs sm:text-sm text-slate-500 mt-0.5">
-                {isRTL
-                  ? `استعراض وإدارة حجوزات المقاعد ليوم ${formattedDateTitle}`
-                  : `Managing seat reservations for ${formattedDateTitle}`}
-              </p>
-            </div>
-
-            {/* Focused Action Button */}
-            <button
-              type="button"
-              onClick={() => setIsQuickBookingOpen(true)}
-              className="inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs sm:text-sm font-bold shadow-xs transition-all cursor-pointer active:scale-95 self-start sm:self-auto"
-            >
-              <Plus className="w-4 h-4" />
-              <span>{isRTL ? "حجز مقعد لعضو" : "Book for Member"}</span>
-            </button>
-          </div>
 
           {/* ── 1. Sleek Compact Date Navigator ── */}
           <div className="bg-white rounded-2xl border border-slate-200/80 p-3 sm:p-3.5 shadow-2xs flex flex-col sm:flex-row sm:items-center justify-between gap-3">
@@ -638,158 +629,297 @@ export default function AdminBookingsPage() {
                 </p>
               </div>
             ) : (
-              <div className="overflow-x-auto">
-                <table className="w-full text-right rtl:text-right ltr:text-left text-xs sm:text-sm">
-                  <thead className="bg-[#f8fafc] text-slate-500 text-[11px] font-bold border-b border-slate-200/80 uppercase">
-                    <tr>
-                      <th className="py-3 px-4 sm:px-5">{isRTL ? "العضو" : "Member"}</th>
-                      <th className="py-3 px-4 sm:px-5">{isRTL ? "الفئة" : "Category"}</th>
-                      <th className="py-3 px-4 sm:px-5">{isRTL ? "الموعد والمدة" : "Schedule"}</th>
-                      <th className="py-3 px-4 sm:px-5">{isRTL ? "الملاحظات" : "Notes"}</th>
-                      <th className="py-3 px-4 sm:px-5">{isRTL ? "الحالة" : "Status"}</th>
-                      <th className="py-3 px-4 sm:px-5 text-center">{isRTL ? "الإجراءات" : "Actions"}</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-100">
-                    {filteredBookings.map((b) => {
-                      const user = b.user || {};
-                      const isStudent = (user.member_type || "student") === "student";
-                      const isCheckedIn =
-                        checkedInBookingIds.has(b.id) || checkedInBookingIds.has(String(b.id));
-                      const isConfirmed = b.status === "confirmed";
-                      const isCancelled = b.status === "cancelled";
-                      const isLoadingThis = actionLoadingId === b.id;
+              <>
+                {/* ── Mobile Responsive Card View (sm:hidden) ── */}
+                <div className="block sm:hidden divide-y divide-slate-100 p-2.5 space-y-2.5">
+                  {filteredBookings.map((b) => {
+                    const user = b.user || {};
+                    const isStudent = (user.member_type || "student") === "student";
+                    const isCheckedIn =
+                      checkedInBookingIds.has(b.id) || checkedInBookingIds.has(String(b.id));
+                    const isConfirmed = b.status === "confirmed";
+                    const isCancelled = b.status === "cancelled";
+                    const isLoadingThis = actionLoadingId === b.id;
 
-                      return (
-                        <tr
-                          key={b.id}
-                          className="hover:bg-slate-50/70 transition-colors group"
-                        >
-                          {/* Member info */}
-                          <td className="py-3.5 px-4 sm:px-5">
-                            <div className="flex items-center gap-2.5">
-                              <div
-                                className={`w-8 h-8 rounded-xl flex items-center justify-center font-bold text-xs shrink-0 border ${
-                                  isStudent
-                                    ? "bg-emerald-50 text-emerald-800 border-emerald-200"
-                                    : "bg-teal-50 text-teal-800 border-teal-200"
-                                }`}
-                              >
-                                {user.name ? user.name.charAt(0) : "ع"}
-                              </div>
-                              <div className="min-w-0">
-                                <div className="font-bold text-slate-900 truncate flex items-center gap-1.5">
-                                  <span>{user.name || (isRTL ? "عضو مسجل" : "Registered Member")}</span>
-                                  <span className="text-[10px] text-slate-400 font-mono">#{b.id}</span>
-                                </div>
-                                {user.phone && (
-                                  <div className="text-[11px] text-slate-400 font-mono flex items-center gap-1">
-                                    <Phone className="w-3 h-3 text-slate-400" />
-                                    <span>{user.phone}</span>
-                                  </div>
-                                )}
-                              </div>
+                    return (
+                      <div
+                        key={`mob-${b.id}`}
+                        className="bg-white p-3.5 rounded-xl border border-slate-200/90 shadow-2xs space-y-2.5"
+                      >
+                        {/* Member Header */}
+                        <div className="flex items-center justify-between gap-2">
+                          <div className="flex items-center gap-2 min-w-0">
+                            <div
+                              className={`w-8 h-8 rounded-xl flex items-center justify-center font-bold text-xs shrink-0 border ${
+                                isStudent
+                                  ? "bg-emerald-50 text-emerald-800 border-emerald-200"
+                                  : "bg-teal-50 text-teal-800 border-teal-200"
+                              }`}
+                            >
+                              {user.name ? user.name.charAt(0) : "ع"}
                             </div>
-                          </td>
-
-                          {/* Member type badge */}
-                          <td className="py-3.5 px-4 sm:px-5 whitespace-nowrap">
-                            {isStudent ? (
-                              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md text-[11px] font-bold bg-emerald-50 text-emerald-800 border border-emerald-200">
-                                <GraduationCap className="w-3 h-3 text-emerald-600" />
-                                <span>{isRTL ? "طالب" : "Student"}</span>
+                            <div className="min-w-0">
+                              <span className="font-bold text-slate-900 text-xs sm:text-sm block truncate">
+                                {user.name || (isRTL ? "عضو مسجل" : "Registered Member")}
                               </span>
-                            ) : (
-                              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md text-[11px] font-bold bg-teal-50 text-teal-800 border border-teal-200">
-                                <Briefcase className="w-3 h-3 text-teal-600" />
-                                <span>{isRTL ? "مستقل" : "Freelancer"}</span>
-                              </span>
-                            )}
-                          </td>
-
-                          {/* Time Slot & Duration merged cleanly */}
-                          <td className="py-3.5 px-4 sm:px-5 whitespace-nowrap">
-                            <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-100 border border-slate-200/70 font-mono text-xs font-bold text-slate-800">
-                              <Clock className="w-3 h-3 text-emerald-700" />
-                              <span>{b.start_time} – {b.end_time}</span>
-                              <span className="text-slate-400 text-[10px]">({b.hours_count} س)</span>
+                              {user.phone && (
+                                <span className="text-[11px] text-slate-400 font-mono block" dir="ltr">
+                                  {user.phone}
+                                </span>
+                              )}
                             </div>
-                          </td>
+                          </div>
 
-                          {/* Notes */}
-                          <td className="py-3.5 px-4 sm:px-5 max-w-xs">
-                            <span className="text-xs text-slate-500 line-clamp-1">
-                              {b.notes || (isRTL ? "حجز مقعد دراسة/عمل" : "Standard booking")}
+                          {/* Member Category */}
+                          {isStudent ? (
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-bold bg-emerald-50 text-emerald-800 border border-emerald-200 shrink-0">
+                              <GraduationCap className="w-3 h-3 text-emerald-600" />
+                              <span>{isRTL ? "طالب" : "Student"}</span>
                             </span>
-                          </td>
+                          ) : (
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-bold bg-teal-50 text-teal-800 border border-teal-200 shrink-0">
+                              <Briefcase className="w-3 h-3 text-teal-600" />
+                              <span>{isRTL ? "مستقل" : "Freelancer"}</span>
+                            </span>
+                          )}
+                        </div>
 
-                          {/* Status */}
-                          <td className="py-3.5 px-4 sm:px-5 whitespace-nowrap">
+                        {/* Timing and Status Row */}
+                        <div className="flex items-center justify-between gap-2 pt-1 border-t border-slate-100">
+                          <div className="inline-flex items-center gap-1.5 px-2 py-1 rounded-lg bg-slate-100 font-mono text-[11px] font-bold text-slate-800">
+                            <Clock className="w-3 h-3 text-emerald-700" />
+                            <span>{b.start_time} – {b.end_time}</span>
+                            <span className="text-slate-400">({b.hours_count} س)</span>
+                          </div>
+
+                          <div>
                             {isCancelled ? (
-                              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-bold bg-rose-50 text-rose-800 border border-rose-200">
+                              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-bold bg-rose-50 text-rose-800 border border-rose-200">
                                 <XCircle className="w-3 h-3 text-rose-600" />
                                 <span>{isRTL ? "ملغي" : "Cancelled"}</span>
                               </span>
                             ) : isCheckedIn ? (
-                              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-bold bg-emerald-50 text-emerald-800 border border-emerald-200">
+                              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-bold bg-emerald-50 text-emerald-800 border border-emerald-200">
                                 <CheckCircle2 className="w-3 h-3 text-emerald-600" />
                                 <span>{isRTL ? "حاضر بالمساحة" : "Checked In"}</span>
                               </span>
                             ) : (
-                              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-bold bg-blue-50 text-blue-800 border border-blue-200">
+                              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-bold bg-blue-50 text-blue-800 border border-blue-200">
                                 <Clock className="w-3 h-3 text-blue-600" />
                                 <span>{isRTL ? "مؤكد" : "Confirmed"}</span>
                               </span>
                             )}
-                          </td>
+                          </div>
+                        </div>
 
-                          {/* Actions */}
-                          <td className="py-3.5 px-4 sm:px-5 text-center whitespace-nowrap">
-                            <div className="inline-flex items-center gap-1.5">
-                              {isConfirmed && !isCheckedIn && (
-                                <button
-                                  type="button"
-                                  onClick={() => handleCheckInBooking(b)}
-                                  disabled={isLoadingThis}
-                                  className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition-all cursor-pointer active:scale-95 disabled:opacity-50"
-                                  title={isRTL ? "تسجيل وصول العضو فوراً" : "Check In"}
+                        {/* Notes if any */}
+                        {b.notes && (
+                          <p className="text-[11px] text-slate-500 bg-slate-50 p-2 rounded-lg border border-slate-100 line-clamp-2">
+                            {b.notes}
+                          </p>
+                        )}
+
+                        {/* Action buttons */}
+                        <div className="flex items-center justify-between gap-2 pt-1">
+                          <span className="text-[10px] text-slate-400 font-mono">#{b.id}</span>
+
+                          <div className="flex items-center gap-2">
+                            {isConfirmed && !isCheckedIn && (
+                              <button
+                                type="button"
+                                onClick={() => handleCheckInBooking(b)}
+                                disabled={isLoadingThis}
+                                className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition-all cursor-pointer active:scale-95 disabled:opacity-50 shadow-2xs"
+                              >
+                                {isLoadingThis ? (
+                                  <RefreshCw className="w-3 h-3 animate-spin" />
+                                ) : (
+                                  <LogIn className="w-3 h-3" />
+                                )}
+                                <span>{isRTL ? "تسجيل حضور" : "Check In"}</span>
+                              </button>
+                            )}
+
+                            {isConfirmed && isCheckedIn && (
+                              <span className="text-[11px] text-emerald-700 font-bold px-2 py-1 bg-emerald-50 rounded-md border border-emerald-100">
+                                {isRTL ? "سُجل حضوره" : "Attended"}
+                              </span>
+                            )}
+
+                            {isConfirmed && (
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setCancelModalBooking(b);
+                                  setCancelReason("");
+                                }}
+                                className="px-2.5 py-1.5 rounded-lg border border-rose-200 text-rose-600 hover:bg-rose-50 text-xs font-bold transition-colors cursor-pointer flex items-center gap-1"
+                              >
+                                <XCircle className="w-3.5 h-3.5" />
+                                <span>{isRTL ? "إلغاء" : "Cancel"}</span>
+                              </button>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+
+                {/* ── Desktop Table View (hidden sm:block) ── */}
+                <div className="hidden sm:block overflow-x-auto">
+                  <table className="w-full text-right rtl:text-right ltr:text-left text-xs sm:text-sm">
+                    <thead className="bg-[#f8fafc] text-slate-500 text-[11px] font-bold border-b border-slate-200/80 uppercase">
+                      <tr>
+                        <th className="py-3 px-4 sm:px-5">{isRTL ? "العضو" : "Member"}</th>
+                        <th className="py-3 px-4 sm:px-5">{isRTL ? "الفئة" : "Category"}</th>
+                        <th className="py-3 px-4 sm:px-5">{isRTL ? "الموعد والمدة" : "Schedule"}</th>
+                        <th className="py-3 px-4 sm:px-5">{isRTL ? "الملاحظات" : "Notes"}</th>
+                        <th className="py-3 px-4 sm:px-5">{isRTL ? "الحالة" : "Status"}</th>
+                        <th className="py-3 px-4 sm:px-5 text-center">{isRTL ? "الإجراءات" : "Actions"}</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100">
+                      {filteredBookings.map((b) => {
+                        const user = b.user || {};
+                        const isStudent = (user.member_type || "student") === "student";
+                        const isCheckedIn =
+                          checkedInBookingIds.has(b.id) || checkedInBookingIds.has(String(b.id));
+                        const isConfirmed = b.status === "confirmed";
+                        const isCancelled = b.status === "cancelled";
+                        const isLoadingThis = actionLoadingId === b.id;
+
+                        return (
+                          <tr
+                            key={b.id}
+                            className="hover:bg-slate-50/70 transition-colors group"
+                          >
+                            {/* Member info */}
+                            <td className="py-3.5 px-4 sm:px-5">
+                              <div className="flex items-center gap-2.5">
+                                <div
+                                  className={`w-8 h-8 rounded-xl flex items-center justify-center font-bold text-xs shrink-0 border ${
+                                    isStudent
+                                      ? "bg-emerald-50 text-emerald-800 border-emerald-200"
+                                      : "bg-teal-50 text-teal-800 border-teal-200"
+                                  }`}
                                 >
-                                  {isLoadingThis ? (
-                                    <RefreshCw className="w-3 h-3 animate-spin" />
-                                  ) : (
-                                    <LogIn className="w-3 h-3" />
+                                  {user.name ? user.name.charAt(0) : "ع"}
+                                </div>
+                                <div className="min-w-0">
+                                  <div className="font-bold text-slate-900 truncate flex items-center gap-1.5">
+                                    <span>{user.name || (isRTL ? "عضو مسجل" : "Registered Member")}</span>
+                                    <span className="text-[10px] text-slate-400 font-mono">#{b.id}</span>
+                                  </div>
+                                  {user.phone && (
+                                    <div className="text-[11px] text-slate-400 font-mono flex items-center gap-1">
+                                      <Phone className="w-3 h-3 text-slate-400" />
+                                      <span>{user.phone}</span>
+                                    </div>
                                   )}
-                                  <span>{isRTL ? "تسجيل حضور" : "Check In"}</span>
-                                </button>
-                              )}
+                                </div>
+                              </div>
+                            </td>
 
-                              {isConfirmed && isCheckedIn && (
-                                <span className="text-[11px] text-emerald-700 font-bold px-2 py-1 bg-emerald-50 rounded-md">
-                                  {isRTL ? "سُجل حضوره" : "Attended"}
+                            {/* Member type badge */}
+                            <td className="py-3.5 px-4 sm:px-5 whitespace-nowrap">
+                              {isStudent ? (
+                                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md text-[11px] font-bold bg-emerald-50 text-emerald-800 border border-emerald-200">
+                                  <GraduationCap className="w-3 h-3 text-emerald-600" />
+                                  <span>{isRTL ? "طالب" : "Student"}</span>
+                                </span>
+                              ) : (
+                                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md text-[11px] font-bold bg-teal-50 text-teal-800 border border-teal-200">
+                                  <Briefcase className="w-3 h-3 text-teal-600" />
+                                  <span>{isRTL ? "مستقل" : "Freelancer"}</span>
                                 </span>
                               )}
+                            </td>
 
-                              {isConfirmed && (
-                                <button
-                                  type="button"
-                                  onClick={() => {
-                                    setCancelModalBooking(b);
-                                    setCancelReason("");
-                                  }}
-                                  className="p-1 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-colors cursor-pointer"
-                                  title={isRTL ? "إلغاء هذا الحجز" : "Cancel"}
-                                >
-                                  <XCircle className="w-4 h-4" />
-                                </button>
+                            {/* Time Slot & Duration merged cleanly */}
+                            <td className="py-3.5 px-4 sm:px-5 whitespace-nowrap">
+                              <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-100 border border-slate-200/70 font-mono text-xs font-bold text-slate-800">
+                                <Clock className="w-3 h-3 text-emerald-700" />
+                                <span>{b.start_time} – {b.end_time}</span>
+                                <span className="text-slate-400 text-[10px]">({b.hours_count} س)</span>
+                              </div>
+                            </td>
+
+                            {/* Notes */}
+                            <td className="py-3.5 px-4 sm:px-5 max-w-xs">
+                              <span className="text-xs text-slate-500 line-clamp-1">
+                                {b.notes || (isRTL ? "حجز مقعد دراسة/عمل" : "Standard booking")}
+                              </span>
+                            </td>
+
+                            {/* Status */}
+                            <td className="py-3.5 px-4 sm:px-5 whitespace-nowrap">
+                              {isCancelled ? (
+                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-bold bg-rose-50 text-rose-800 border border-rose-200">
+                                  <XCircle className="w-3 h-3 text-rose-600" />
+                                  <span>{isRTL ? "ملغي" : "Cancelled"}</span>
+                                </span>
+                              ) : isCheckedIn ? (
+                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-bold bg-emerald-50 text-emerald-800 border border-emerald-200">
+                                  <CheckCircle2 className="w-3 h-3 text-emerald-600" />
+                                  <span>{isRTL ? "حاضر بالمساحة" : "Checked In"}</span>
+                                </span>
+                              ) : (
+                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-bold bg-blue-50 text-blue-800 border border-blue-200">
+                                  <Clock className="w-3 h-3 text-blue-600" />
+                                  <span>{isRTL ? "مؤكد" : "Confirmed"}</span>
+                                </span>
                               )}
-                            </div>
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
-              </div>
+                            </td>
+
+                            {/* Actions */}
+                            <td className="py-3.5 px-4 sm:px-5 text-center whitespace-nowrap">
+                              <div className="inline-flex items-center gap-1.5">
+                                {isConfirmed && !isCheckedIn && (
+                                  <button
+                                    type="button"
+                                    onClick={() => handleCheckInBooking(b)}
+                                    disabled={isLoadingThis}
+                                    className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition-all cursor-pointer active:scale-95 disabled:opacity-50"
+                                    title={isRTL ? "تسجيل وصول العضو فوراً" : "Check In"}
+                                  >
+                                    {isLoadingThis ? (
+                                      <RefreshCw className="w-3 h-3 animate-spin" />
+                                    ) : (
+                                      <LogIn className="w-3 h-3" />
+                                    )}
+                                    <span>{isRTL ? "تسجيل حضور" : "Check In"}</span>
+                                  </button>
+                                )}
+
+                                {isConfirmed && isCheckedIn && (
+                                  <span className="text-[11px] text-emerald-700 font-bold px-2 py-1 bg-emerald-50 rounded-md">
+                                    {isRTL ? "سُجل حضوره" : "Attended"}
+                                  </span>
+                                )}
+
+                                {isConfirmed && (
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      setCancelModalBooking(b);
+                                      setCancelReason("");
+                                    }}
+                                    className="p-1 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-colors cursor-pointer"
+                                    title={isRTL ? "إلغاء هذا الحجز" : "Cancel"}
+                                  >
+                                    <XCircle className="w-4 h-4" />
+                                  </button>
+                                )}
+                              </div>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              </>
             )}
           </div>
         </main>
