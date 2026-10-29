@@ -4,7 +4,11 @@ import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useLanguage } from "@/context/LanguageContext";
 import { MembershipApplication } from "./data";
-import { getAdminHeaders } from "@/services/applications";
+import {
+  getAdminHeaders,
+  getAdminToken,
+  normalizeMembershipApplication,
+} from "@/services/applications";
 import {
   X,
   User,
@@ -34,7 +38,7 @@ interface ApplicationDetailModalProps {
 }
 
 export default function ApplicationDetailModal({
-  application,
+  application: initialApplication,
   isOpen,
   onClose,
   onUpdateStatus,
@@ -43,11 +47,34 @@ export default function ApplicationDetailModal({
   const { locale, dir } = useLanguage();
   const isRTL = dir === "rtl" || locale === "ar";
 
+  const [application, setApplication] = useState<MembershipApplication | null>(initialApplication);
   const [message, setMessage] = useState<string>("");
   const [previewPhoto, setPreviewPhoto] = useState<string | null>(null);
   const [createdAccount, setCreatedAccount] = useState<{
     email: string;
   } | null>(null);
+
+  // Sync state when initialApplication changes or modal opens
+  useEffect(() => {
+    setApplication(initialApplication);
+
+    if (isOpen && initialApplication?.id) {
+      // If base64 is not already present, fetch the full application details (which contains base64)
+      if (!initialApplication.chargerPhotoBase64 && !initialApplication.proofFileBase64) {
+        fetch(`/api/proxy/admin/membership-applications/${initialApplication.id}`, {
+          headers: getAdminHeaders(),
+        })
+          .then((r) => (r.ok ? r.json() : null))
+          .then((res) => {
+            if (res?.data) {
+              const fullNormalized = normalizeMembershipApplication(res.data);
+              setApplication((prev) => (prev ? { ...prev, ...fullNormalized } : fullNormalized));
+            }
+          })
+          .catch(() => {});
+      }
+    }
+  }, [isOpen, initialApplication]);
 
   // File loading & download states
   const [isDownloadingProof, setIsDownloadingProof] = useState<boolean>(false);
@@ -87,15 +114,20 @@ export default function ApplicationDetailModal({
       setChargerPhotoError("");
 
       try {
-        const targetUrl =
-          application.chargerPhotoUrl || `/api/proxy/admin/files/charger/${application.id}`;
+        const token = getAdminToken();
+        const tokenQuery = token ? `?token=${encodeURIComponent(token)}` : "";
+        const targetUrl = `/api/proxy/admin/files/charger/${application.id}${tokenQuery}`;
 
         const res = await fetch(targetUrl, {
           headers: getAdminHeaders({ Accept: "image/*,*/*" }),
         });
 
         if (!res.ok) {
-          throw new Error("تعذر تحميل صورة الشاحن من الخادم (رمز الخطأ: " + res.status + ")");
+          throw new Error(
+            isRTL
+              ? `تعذر تحميل صورة الشاحن من الخادم (رمز الخطأ: ${res.status})`
+              : `Failed to load charger photo (Status: ${res.status})`
+          );
         }
 
         const blob = await res.blob();
@@ -106,7 +138,12 @@ export default function ApplicationDetailModal({
       } catch (err: unknown) {
         if (!active) return;
         console.error("Charger photo load error:", err);
-        const msg = err instanceof Error ? err.message : "تعذر جلب صورة الشاحن من الخادم";
+        const msg =
+          err instanceof Error
+            ? err.message
+            : isRTL
+            ? "تعذر جلب صورة الشاحن من الخادم"
+            : "Failed to fetch photo";
         setChargerPhotoError(msg);
       } finally {
         if (active) setIsLoadingChargerPhoto(false);
@@ -118,11 +155,12 @@ export default function ApplicationDetailModal({
     return () => {
       active = false;
     };
-  }, [previewPhoto, application]);
+  }, [previewPhoto, application, isRTL]);
 
   if (!isOpen || !application) return null;
 
   const handleDownloadProof = async () => {
+    if (!application) return;
     setIsDownloadingProof(true);
     setProofDownloadError("");
 
@@ -149,8 +187,9 @@ export default function ApplicationDetailModal({
       }
 
       // 2. Fetch authenticated from proxy endpoint
-      const targetUrl =
-        application.proofFileUrl || `/api/proxy/admin/files/proof/${application.id}`;
+      const token = getAdminToken();
+      const tokenQuery = token ? `?token=${encodeURIComponent(token)}` : "";
+      const targetUrl = `/api/proxy/admin/files/proof/${application.id}${tokenQuery}`;
 
       const res = await fetch(targetUrl, {
         headers: getAdminHeaders({ Accept: "*/*" }),
@@ -176,7 +215,11 @@ export default function ApplicationDetailModal({
     } catch (err: unknown) {
       console.error("Proof download error:", err);
       const msg =
-        err instanceof Error ? err.message : isRTL ? "فشل تنزيل المستند" : "Download failed";
+        err instanceof Error
+          ? err.message
+          : isRTL
+          ? "فشل تنزيل المستند من الخادم"
+          : "Download failed";
       setProofDownloadError(msg);
     } finally {
       setIsDownloadingProof(false);
