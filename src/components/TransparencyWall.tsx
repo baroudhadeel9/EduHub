@@ -15,29 +15,27 @@ import {
   Heart,
   Lightbulb,
   Camera,
-  Maximize2,
   X,
-  BatteryCharging,
-  Sun,
 } from "lucide-react";
 
 interface TransparencyWallProps {
   onOpenDonation: (amount?: number) => void;
 }
 
-interface GalleryItem {
+interface ItemModalDetail {
   id: string;
   title: string;
   category: string;
   description: string;
   image: string;
-  specs?: string;
 }
 
 const itemMeta: Record<
   string,
   {
     icon: React.ElementType;
+    image: string;
+    imageAlt: string;
     colorTheme: {
       arcColor: string;
       softBg: string;
@@ -46,105 +44,99 @@ const itemMeta: Record<
       badge: string;
       iconBg: string;
       barColor: string;
+      lightOverlay: string;
     };
   }
 > = {
   volunteers: {
     icon: Users,
+    image: "/images/team-collaboration.jpg",
+    imageAlt: "فريق الإشراف والمتطوعين في مركز غزة",
     colorTheme: {
       arcColor: "var(--color-chart-emerald)",
       softBg: "bg-emerald-50/40 hover:bg-emerald-50/70",
-      border: "border-emerald-100/90 hover:border-emerald-300",
+      border: "border-emerald-200/90 hover:border-emerald-400",
       activeRing: "ring-2 ring-emerald-500 border-emerald-400 shadow-md",
       badge: "bg-emerald-100 text-emerald-800",
       iconBg: "bg-emerald-100 text-emerald-700",
       barColor: "bg-emerald-500",
+      lightOverlay: "from-white/95 via-white/70 to-emerald-50/30",
     },
   },
   rent: {
     icon: Building2,
+    image: "/images/transparency/space-rent.jpg",
+    imageAlt: "مقر ومساحة مركز غزة التعليمي المجهزة",
     colorTheme: {
       arcColor: "var(--color-chart-sky)",
       softBg: "bg-sky-50/40 hover:bg-sky-50/70",
-      border: "border-sky-100/90 hover:border-sky-300",
+      border: "border-sky-200/90 hover:border-sky-400",
       activeRing: "ring-2 ring-sky-500 border-sky-400 shadow-md",
       badge: "bg-sky-100 text-sky-800",
       iconBg: "bg-sky-100 text-sky-700",
       barColor: "bg-sky-500",
+      lightOverlay: "from-white/95 via-white/70 to-sky-50/30",
     },
   },
   electricity: {
     icon: Zap,
+    image: "/images/transparency/solar-panels.jpg",
+    imageAlt: "مصفوفة ألواح الطاقة الشمسية لمركز غزة",
     colorTheme: {
       arcColor: "var(--color-chart-amber)",
       softBg: "bg-amber-50/40 hover:bg-amber-50/70",
-      border: "border-amber-100/90 hover:border-amber-300",
+      border: "border-amber-200/90 hover:border-amber-400",
       activeRing: "ring-2 ring-amber-500 border-amber-400 shadow-md",
       badge: "bg-amber-100 text-amber-900",
       iconBg: "bg-amber-100 text-amber-800",
       barColor: "bg-amber-500",
+      lightOverlay: "from-white/95 via-white/70 to-amber-50/30",
     },
   },
   repairs: {
     icon: Wrench,
+    image: "/images/transparency/battery-inverter.jpg",
+    imageAlt: "محولات وبطاريات الطاقة والمعدات التقنية",
     colorTheme: {
       arcColor: "var(--color-chart-violet)",
       softBg: "bg-purple-50/40 hover:bg-purple-50/70",
-      border: "border-purple-100/90 hover:border-purple-300",
+      border: "border-purple-200/90 hover:border-purple-400",
       activeRing: "ring-2 ring-purple-500 border-purple-400 shadow-md",
       badge: "bg-purple-100 text-purple-900",
       iconBg: "bg-purple-100 text-purple-800",
       barColor: "bg-purple-500",
+      lightOverlay: "from-white/95 via-white/70 to-purple-50/30",
     },
   },
   internet: {
     icon: Wifi,
+    image: "/images/transparency/internet-litebeam.jpg",
+    imageAlt: "هوائي الإنترنت اللاسلكي فائق السرعة",
     colorTheme: {
       arcColor: "var(--color-chart-cyan)",
       softBg: "bg-cyan-50/40 hover:bg-cyan-50/70",
-      border: "border-cyan-100/90 hover:border-cyan-300",
+      border: "border-cyan-200/90 hover:border-cyan-400",
       activeRing: "ring-2 ring-cyan-500 border-cyan-400 shadow-md",
       badge: "bg-cyan-100 text-cyan-900",
       iconBg: "bg-cyan-100 text-cyan-800",
       barColor: "bg-cyan-500",
+      lightOverlay: "from-white/95 via-white/70 to-cyan-50/30",
     },
   },
   water_cleaning: {
     icon: Droplets,
+    image: "/images/transparency/water-sanitation.jpg",
+    imageAlt: "محطة مياه الشرب النقية ومستلزمات التعقيم",
     colorTheme: {
       arcColor: "var(--color-chart-teal)",
       softBg: "bg-teal-50/40 hover:bg-teal-50/70",
-      border: "border-teal-100/90 hover:border-teal-300",
+      border: "border-teal-200/90 hover:border-teal-400",
       activeRing: "ring-2 ring-teal-400 border-teal-300 shadow-md",
       badge: "bg-teal-100 text-teal-900",
       iconBg: "bg-teal-100 text-teal-800",
       barColor: "bg-teal-500",
+      lightOverlay: "from-white/95 via-white/70 to-teal-50/30",
     },
-  },
-};
-
-const galleryCategoryMeta: Record<
-  string,
-  {
-    icon: React.ElementType;
-    badgeStyle: string;
-  }
-> = {
-  electricity_meter: {
-    icon: Zap,
-    badgeStyle: "bg-amber-500 text-white border-amber-400/60",
-  },
-  internet_litebeam: {
-    icon: Wifi,
-    badgeStyle: "bg-sky-500 text-white border-sky-400/60",
-  },
-  battery_inverter: {
-    icon: BatteryCharging,
-    badgeStyle: "bg-emerald-600 text-white border-emerald-500/60",
-  },
-  solar_panels: {
-    icon: Sun,
-    badgeStyle: "bg-amber-600 text-white border-amber-500/60",
   },
 };
 
@@ -157,7 +149,7 @@ export default function TransparencyWall({ onOpenDonation }: TransparencyWallPro
   const [activeCategoryId, setActiveCategoryId] = useState<string | null>(null);
 
   // Lightbox Modal State for Field Verification Images
-  const [lightboxItem, setLightboxItem] = useState<GalleryItem | null>(null);
+  const [lightboxItem, setLightboxItem] = useState<ItemModalDetail | null>(null);
 
   // Handle escape key and lock body scroll when Lightbox is open
   useEffect(() => {
@@ -174,11 +166,13 @@ export default function TransparencyWall({ onOpenDonation }: TransparencyWallPro
     }
   }, [lightboxItem]);
 
-  // Combine JSON data with UI icons and color styles
+  // Combine JSON data with UI icons, images and color styles
   const rawItems = tw?.items || [];
   const budgetItems = rawItems.map((item) => {
     const meta = itemMeta[item.id] || {
       icon: CheckCircle2,
+      image: "/images/hero-workspace.jpg",
+      imageAlt: item.title,
       colorTheme: {
         arcColor: "var(--color-chart-emerald)",
         softBg: "bg-slate-50",
@@ -187,6 +181,7 @@ export default function TransparencyWall({ onOpenDonation }: TransparencyWallPro
         badge: "bg-slate-100 text-slate-800",
         iconBg: "bg-slate-100 text-slate-700",
         barColor: "bg-slate-500",
+        lightOverlay: "from-white/92 via-white/85 to-slate-50/80",
       },
     };
     return {
@@ -221,8 +216,6 @@ export default function TransparencyWall({ onOpenDonation }: TransparencyWallPro
     return acc;
   }, []);
 
-  const galleryItems: GalleryItem[] = tw?.galleryItems || [];
-
   return (
     <section
       id="transparency"
@@ -230,97 +223,9 @@ export default function TransparencyWall({ onOpenDonation }: TransparencyWallPro
       aria-labelledby="transparency-title"
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-
-        {/* 2. LIVE FIELD VERIFICATION GALLERY (Real Equipment from Gaza) */}
-        {galleryItems.length > 0 && (
-          <div className="mb-20">
-            {/* Gallery Header */}
-            <div className="text-center max-w-2xl mx-auto mb-12">
-              <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-emerald-50 border border-emerald-200/80 text-emerald-900 text-xs font-bold mb-3.5 shadow-2xs">
-                <Camera className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
-                <span>{tw?.galleryBadge || (isRtl ? "شواهد ميدانية حية من غزة" : "Live Field Evidence from Gaza")}</span>
-              </div>
-              <h3 className="text-2xl sm:text-3xl lg:text-4xl font-black text-brand-navy tracking-tight mb-3">
-                {tw?.galleryTitle || (isRtl ? "أين تذهب التبرعات؟ بنيتنا التحتية على أرض الواقع" : "Where Do Donations Go? Our Infrastructure on the Ground")}
-              </h3>
-              <p className="text-sm sm:text-base text-slate-600 font-normal leading-relaxed">
-                {tw?.gallerySubtitle || (isRtl ? "كل مساهمة تتحول فوراً إلى طاقة نظيفة، إنترنت مستقر، ومعدات حقيقية تعمل 24/7 لدعم شبابنا." : "Every contribution powers real equipment operating 24/7 to keep our youth connected.")}
-              </p>
-            </div>
-
-            {/* Gallery Grid (High-end 4:5 Portrait Showcase with Natural Framing) */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-7">
-              {galleryItems.map((item) => {
-                const meta = galleryCategoryMeta[item.id] || {
-                  icon: Sparkles,
-                  badgeStyle: "bg-emerald-600 text-white border-emerald-500/60",
-                };
-                const CategoryIcon = meta.icon;
-
-                return (
-                  <div
-                    key={item.id}
-                    onClick={() => setLightboxItem(item)}
-                    className="group flex flex-col bg-white rounded-3xl border border-slate-200/80 shadow-xs hover:shadow-xl hover:-translate-y-1.5 hover:border-emerald-300 transition-all duration-300 overflow-hidden cursor-pointer"
-                  >
-                    {/* Photo Container with Proper Portrait Aspect (4:5) to showcase equipment without cropping */}
-                    <div className="relative aspect-[4/5] w-full overflow-hidden bg-slate-900/10">
-                      <Image
-                        src={item.image}
-                        alt={item.title}
-                        fill
-                        sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
-                        className="object-cover object-top group-hover:scale-106 transition-transform duration-700 ease-out"
-                      />
-
-                      {/* Smooth Modern Scrim Gradient */}
-                      <div className="absolute inset-0 bg-gradient-to-t from-slate-950/70 via-transparent to-black/25 opacity-70 group-hover:opacity-50 transition-opacity duration-300" />
-
-                      {/* Floating Category Pill Badge with Icon */}
-                      <div className={`absolute top-3.5 start-3.5 flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-black uppercase tracking-wider shadow-md backdrop-blur-md border ${meta.badgeStyle}`}>
-                        <CategoryIcon className="w-3.5 h-3.5 shrink-0" />
-                        <span>{item.category}</span>
-                      </div>
-
-                      {/* Hover Zoom CTA Pill Button */}
-                      <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                        <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/95 text-brand-navy text-xs font-black shadow-xl backdrop-blur-md transform translate-y-3 group-hover:translate-y-0 transition-transform duration-300 border border-white">
-                          <Maximize2 className="w-3.5 h-3.5 text-emerald-600" />
-                          <span>{tw?.galleryExpandPhoto || (isRtl ? "عرض الصورة كاملة" : "Expand Photo")}</span>
-                        </span>
-                      </div>
-                    </div>
-
-                    {/* Card Content with Refined Spacing & Typography */}
-                    <div className="p-5 sm:p-6 flex flex-col justify-between flex-1 bg-white">
-                      <div>
-                        <h4 className="text-base font-black text-brand-navy leading-snug mb-2 group-hover:text-emerald-700 transition-colors">
-                          {item.title}
-                        </h4>
-
-                        <p className="text-xs sm:text-sm text-slate-500 leading-relaxed font-normal">
-                          {item.description}
-                        </p>
-                      </div>
-
-                      {/* Clean Minimalist Action Link */}
-                      <div className="pt-4 mt-5 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-emerald-600 group-hover:text-emerald-700">
-                        <span>{tw?.galleryViewPhoto || (isRtl ? "تكبير واستعراض" : "View Photo")}</span>
-                        <Maximize2 className="w-3.5 h-3.5 group-hover:scale-115 transition-transform" />
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        )}
-
-
         
-        {/* Top Header */}
+        {/* Top Header: Inspiring Title & Subtitle */}
         <div className="text-center max-w-3xl mx-auto mb-12">
-          {/* Inspiring Headline */}
           <h2
             id="transparency-title"
             className="text-3xl sm:text-4xl lg:text-5xl font-black text-brand-navy mb-3 tracking-tight leading-tight"
@@ -333,7 +238,7 @@ export default function TransparencyWall({ onOpenDonation }: TransparencyWallPro
           </p>
         </div>
 
-        {/* 1. The Interactive Sanctuary Ecosystem (Dial + Connected Pillars) */}
+        {/* The Interactive Sanctuary Ecosystem (Dial + Connected Pillars) */}
         <div className="mb-16">
           <div className="bg-slate-50/60 rounded-3xl p-6 sm:p-10 border border-slate-200/80 shadow-xs">
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
@@ -440,7 +345,7 @@ export default function TransparencyWall({ onOpenDonation }: TransparencyWallPro
                 </div>
               </div>
 
-              {/* Right Column: The 6 Connected Sanctuary Modules */}
+              {/* Right Column: The 6 Connected Sanctuary Modules with Real Background Photos */}
               <div className="lg:col-span-7 space-y-3">
                 <div className="flex items-center justify-between pb-2 border-b border-slate-200/80">
                   <h3 className="text-sm font-black uppercase tracking-wider text-slate-700 flex items-center gap-1.5">
@@ -460,7 +365,7 @@ export default function TransparencyWall({ onOpenDonation }: TransparencyWallPro
                 </div>
 
                 <div
-                  className="grid grid-cols-1 sm:grid-cols-2 gap-3"
+                  className="grid grid-cols-1 sm:grid-cols-2 gap-3.5"
                   onMouseLeave={() => setActiveCategoryId(null)}
                 >
                   {budgetItems.map((item) => {
@@ -472,70 +377,113 @@ export default function TransparencyWall({ onOpenDonation }: TransparencyWallPro
                         onMouseEnter={() => setActiveCategoryId(item.id)}
                         onMouseLeave={() => setActiveCategoryId(null)}
                         onClick={() => setActiveCategoryId(isSelected ? null : item.id)}
-                        className={`p-4 rounded-2xl border transition-all duration-300 flex flex-col justify-between cursor-pointer ${
+                        className={`group relative p-4 rounded-2xl border transition-all duration-300 flex flex-col justify-between cursor-pointer overflow-hidden ${
                           isSelected
-                            ? `${item.colorTheme.activeRing} bg-white scale-[1.02]`
-                            : "border-slate-200/80 bg-white/80 hover:bg-white hover:border-slate-300 hover:shadow-xs"
+                            ? `${item.colorTheme.activeRing} scale-[1.02] shadow-md`
+                            : `${item.colorTheme.border} bg-white hover:border-slate-300 hover:shadow-xs`
                         }`}
                       >
-                        <div>
-                          {/* Top Row: Icon + Title + Amount */}
+                        {/* ── Background Photo with Soft Tint Overlay ── */}
+                        {item.image && (
+                          <div className="absolute inset-0 pointer-events-none overflow-hidden">
+                            <Image
+                              src={item.image}
+                              alt={item.imageAlt || item.title}
+                              fill
+                              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 30vw"
+                              className={`object-cover object-center transition-all duration-700 ease-out ${
+                                isSelected
+                                  ? "scale-105 opacity-92"
+                                  : "scale-100 opacity-80 group-hover:opacity-92 group-hover:scale-104"
+                              }`}
+                            />
+                            {/* Light Gradient Overlay: soft bottom gradient allowing the photo to be clearly visible while guaranteeing text contrast */}
+                            <div
+                              className={`absolute inset-0 bg-gradient-to-t ${item.colorTheme.lightOverlay} transition-opacity duration-300 ${
+                                isSelected ? "opacity-85" : "opacity-90 group-hover:opacity-82"
+                              }`}
+                            />
+                          </div>
+                        )}
+
+                        <div className="relative z-10">
+                          {/* Top Row: Icon + Title & Percentage + Photo Preview Button (No duplicate price) */}
                           <div className="flex items-start justify-between gap-2 mb-2">
-                            <div className="flex items-center gap-2.5">
-                              <div className={`w-8 h-8 rounded-xl ${item.colorTheme.iconBg} flex items-center justify-center shrink-0`}>
+                            <div className="flex items-center gap-2.5 min-w-0">
+                              <div
+                                className={`w-8 h-8 rounded-xl ${item.colorTheme.iconBg} flex items-center justify-center shrink-0 shadow-2xs`}
+                              >
                                 <IconComp className="w-4 h-4" />
                               </div>
-                              <div>
-                                <h4 className="text-xs font-black text-brand-navy leading-tight">
+                              <div className="min-w-0">
+                                <h4 className="text-xs sm:text-sm font-black text-brand-navy leading-tight truncate">
                                   {item.title}
                                 </h4>
-                                <span className="text-[10px] font-bold text-slate-400">
+                                <span className="text-[10px] font-bold text-slate-500">
                                   {item.percentage}% {tw?.ofTotal}
                                 </span>
                               </div>
                             </div>
 
-                            <span className="text-base font-black text-brand-navy font-mono">
-                              ${item.amount}
-                            </span>
+                            {item.image && (
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setLightboxItem({
+                                    id: item.id,
+                                    title: item.title,
+                                    category: `${item.percentage}% ${tw?.ofTotal || "من الميزانية"}`,
+                                    description: item.tagline,
+                                    image: item.image,
+                                  });
+                                }}
+                                title={isRtl ? "معاينة الصورة الميدانية بالحجم الكامل" : "View full photo"}
+                                className="p-1 rounded-lg bg-white/70 hover:bg-white text-slate-500 hover:text-emerald-700 border border-slate-200/60 shadow-2xs flex items-center justify-center transition-all cursor-pointer shrink-0"
+                              >
+                                <Camera className="w-3.5 h-3.5" />
+                              </button>
+                            )}
                           </div>
 
                           {/* Dynamic Progress Indicator */}
-                          <div className="w-full bg-slate-100 h-1.5 rounded-full overflow-hidden mb-2.5">
+                          <div className="w-full bg-slate-200/70 h-1.5 rounded-full overflow-hidden mb-2 shadow-inner">
                             <div
                               className={`${item.colorTheme.barColor} h-full rounded-full transition-all duration-500`}
                               style={{ width: `${item.percentage * 2}%` }}
                             />
                           </div>
 
-                          {/* Concise Human Impact Statement */}
-                          <p className="text-[11px] text-slate-600 leading-relaxed font-normal mb-3">
+                          {/* Concise Human Impact Statement (Direct & clean without enclosing white box) */}
+                          <p className="text-[11px] sm:text-xs text-slate-700 leading-relaxed font-semibold mb-3">
                             {item.tagline}
                           </p>
                         </div>
 
                         {/* Sponsor Item Action Button */}
-                        <button
-                          type="button"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            onOpenDonation(item.amount);
-                          }}
-                          aria-label={`${tw?.sponsorBtn || "Sponsor"}: ${item.title} ($${item.amount})`}
-                          className={`w-full py-1.5 px-3 rounded-lg text-xs font-bold transition-all flex items-center justify-between cursor-pointer ${
-                            isSelected
-                              ? "bg-brand-navy text-white shadow-xs"
-                              : "bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-200"
-                          }`}
-                        >
-                          <span className="flex items-center gap-1">
-                            <Heart className="w-3 h-3 text-emerald-500" />
-                            <span>{tw?.sponsorBtn}</span>
-                          </span>
-                          <span className="font-mono font-extrabold text-emerald-600">
-                            ${item.amount}
-                          </span>
-                        </button>
+                        <div className="relative z-10 pt-1">
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              onOpenDonation(item.amount);
+                            }}
+                            aria-label={`${tw?.sponsorBtn || "Sponsor"}: ${item.title} ($${item.amount})`}
+                            className={`w-full py-2 px-3 rounded-xl text-xs font-black transition-all flex items-center justify-between cursor-pointer shadow-xs ${
+                              isSelected
+                                ? "bg-brand-navy text-white shadow-md ring-2 ring-emerald-500/50"
+                                : "bg-white hover:bg-slate-50 text-slate-900 border border-slate-200/90 hover:border-emerald-500"
+                            }`}
+                          >
+                            <span className="flex items-center gap-1.5">
+                              <Heart className="w-3.5 h-3.5 text-emerald-500" />
+                              <span>{tw?.sponsorBtn}</span>
+                            </span>
+                            <span className="font-mono font-black text-emerald-600 text-sm">
+                              ${item.amount}
+                            </span>
+                          </button>
+                        </div>
                       </div>
                     );
                   })}
@@ -546,7 +494,7 @@ export default function TransparencyWall({ onOpenDonation }: TransparencyWallPro
           </div>
         </div>
 
-        {/* 3. Trust Guarantees */}
+        {/* Trust Guarantees */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {(tw?.guarantees || []).map((guarantee, idx) => (
             <div
@@ -589,6 +537,7 @@ export default function TransparencyWall({ onOpenDonation }: TransparencyWallPro
                 <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
                   {lightboxItem.category}
                 </span>
+                <span className="text-white text-sm font-bold">{lightboxItem.title}</span>
               </div>
 
               {/* Close Button */}
