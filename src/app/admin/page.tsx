@@ -75,7 +75,7 @@ export default function AdminOverviewPage() {
       {/* Main Content Area */}
       <div
         className={`min-h-screen transition-all duration-300 ${
-          isRTL ? "lg:mr-64 xl:mr-72" : "lg:ml-64 xl:ml-72"
+          isRTL ? "lg:mr-72" : "lg:ml-72"
         }`}
       >
         <main className="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto space-y-6 sm:space-y-8">

@@ -119,14 +119,21 @@ export default function ApplicationDetailModal({
         const targetUrl = `/api/proxy/admin/files/charger/${application.id}${tokenQuery}`;
 
         const res = await fetch(targetUrl, {
-          headers: getAdminHeaders({ Accept: "image/*,*/*" }),
+          headers: getAdminHeaders({ Accept: "image/*,application/json,*/*" }),
         });
 
         if (!res.ok) {
+          let errorDetail = "";
+          try {
+            const errJson = await res.json();
+            if (errJson?.message) errorDetail = errJson.message;
+          } catch {}
+
           throw new Error(
-            isRTL
-              ? `تعذر تحميل صورة الشاحن من الخادم (رمز الخطأ: ${res.status})`
-              : `Failed to load charger photo (Status: ${res.status})`
+            errorDetail ||
+              (isRTL
+                ? `تعذر تحميل صورة الشاحن من الخادم (رمز الخطأ: ${res.status})`
+                : `Failed to load charger photo (Status: ${res.status})`)
           );
         }
 
@@ -192,14 +199,21 @@ export default function ApplicationDetailModal({
       const targetUrl = `/api/proxy/admin/files/proof/${application.id}${tokenQuery}`;
 
       const res = await fetch(targetUrl, {
-        headers: getAdminHeaders({ Accept: "*/*" }),
+        headers: getAdminHeaders({ Accept: "*/*,application/json" }),
       });
 
       if (!res.ok) {
+        let errorDetail = "";
+        try {
+          const errJson = await res.json();
+          if (errJson?.message) errorDetail = errJson.message;
+        } catch {}
+
         throw new Error(
-          isRTL
-            ? `تعذر تنزيل المستند من الخادم (رمز الحالة: ${res.status}). قد يكون الملف غير محفوظ.`
-            : `Failed to download file from server (Status: ${res.status}).`
+          errorDetail ||
+            (isRTL
+              ? `تعذر تنزيل المستند من الخادم (رمز الحالة: ${res.status}). قد يكون الملف غير محفوظ.`
+              : `Failed to download file from server (Status: ${res.status}).`)
         );
       }
 

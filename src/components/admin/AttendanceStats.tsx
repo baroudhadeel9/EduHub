@@ -2,7 +2,7 @@
 
 import React from "react";
 import { useLanguage } from "@/context/LanguageContext";
-import { Users, DoorOpen, Clock, CheckCircle2 } from "lucide-react";
+import { Users, DoorOpen, Clock } from "lucide-react";
 
 interface AttendanceStatsProps {
   attendedCount: number;

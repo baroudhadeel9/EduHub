@@ -28,10 +28,14 @@ import {
   History,
   FileText,
   ShieldCheck,
-  Check,
+  Menu,
 } from "lucide-react";
 
-export default function DuesTable() {
+interface DuesTableProps {
+  onOpenMobileMenu?: () => void;
+}
+
+export default function DuesTable({ onOpenMobileMenu }: DuesTableProps = {}) {
   const { locale, dir } = useLanguage();
   const isRTL = dir === "rtl" || locale === "ar";
 
@@ -42,7 +46,6 @@ export default function DuesTable() {
   const [historyLoading, setHistoryLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [typeFilter, setTypeFilter] = useState<"all" | "student" | "freelancer">("all");
-  const [onlyDebtors, setOnlyDebtors] = useState(true);
 
   // Settlement modal state
   const [settleModalOpen, setSettleModalOpen] = useState(false);
@@ -59,7 +62,7 @@ export default function DuesTable() {
       const res = await getAdminDuesApi({
         query: searchQuery,
         type: typeFilter,
-        onlyDebtors,
+        onlyDebtors: false,
       });
       setData(res);
     } catch (err: unknown) {
@@ -86,7 +89,7 @@ export default function DuesTable() {
   useEffect(() => {
     fetchDues();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [typeFilter, onlyDebtors]);
+  }, [typeFilter]);
 
   useEffect(() => {
     if (activeTab === "history") {
@@ -112,12 +115,8 @@ export default function DuesTable() {
       list = list.filter((m) => m.type === typeFilter);
     }
 
-    if (onlyDebtors) {
-      list = list.filter((m) => m.due_amount > 0);
-    }
-
     return list;
-  }, [data, searchQuery, typeFilter, onlyDebtors]);
+  }, [data, searchQuery, typeFilter]);
 
   const filteredHistory = useMemo(() => {
     if (!historyList) return [];
@@ -233,8 +232,18 @@ export default function DuesTable() {
       {/* ── Page Header (Non-printable controls) ── */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-6 rounded-2xl border border-slate-200/90 shadow-xs no-print">
         <div>
-          <div className="flex items-center gap-2.5 mb-1.5">
-            <div className="w-10 h-10 rounded-xl bg-amber-50 text-amber-700 flex items-center justify-center border border-amber-200">
+          <div className="flex items-center gap-2.5 mb-1.5 flex-wrap">
+            {onOpenMobileMenu && (
+              <button
+                type="button"
+                onClick={onOpenMobileMenu}
+                className="p-2 sm:p-2.5 rounded-xl border border-slate-200 bg-white text-slate-700 hover:text-slate-900 hover:bg-slate-50 shadow-2xs lg:hidden cursor-pointer shrink-0"
+                aria-label="Open Sidebar Menu"
+              >
+                <Menu className="w-5 h-5" />
+              </button>
+            )}
+            <div className="w-10 h-10 rounded-xl bg-amber-50 text-amber-700 flex items-center justify-center border border-amber-200 shrink-0">
               <CreditCard className="w-5 h-5" />
             </div>
             <h1 className="text-xl sm:text-2xl font-black text-brand-navy">
@@ -444,20 +453,6 @@ export default function DuesTable() {
                     {isRTL ? "مستقلون" : "Freelancers"}
                   </button>
                 </div>
-
-                {/* Only Debtors Toggle */}
-                <button
-                  type="button"
-                  onClick={() => setOnlyDebtors(!onlyDebtors)}
-                  className={`px-3 py-2 rounded-xl text-xs font-bold border transition-all cursor-pointer flex items-center gap-1.5 ${
-                    onlyDebtors
-                      ? "bg-amber-50 text-amber-800 border-amber-300"
-                      : "bg-slate-50 text-slate-600 border-slate-200"
-                  }`}
-                >
-                  <span className={`w-2 h-2 rounded-full ${onlyDebtors ? "bg-amber-600" : "bg-slate-400"}`} />
-                  <span>{isRTL ? "المدينون فقط (> 0 ₪)" : "Debtors Only"}</span>
-                </button>
               </div>
             </div>
 
@@ -472,16 +467,16 @@ export default function DuesTable() {
                 </div>
               ) : filteredMembers.length === 0 ? (
                 <div className="p-12 text-center">
-                  <div className="w-14 h-14 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center mx-auto mb-3 border border-emerald-200">
-                    <CheckCircle2 className="w-7 h-7" />
+                  <div className="w-14 h-14 rounded-2xl bg-slate-50 text-slate-400 flex items-center justify-center mx-auto mb-3 border border-slate-200">
+                    <CheckCircle2 className="w-7 h-7 text-emerald-600" />
                   </div>
                   <h3 className="text-base font-black text-slate-800 mb-1">
-                    {isRTL ? "لا توجد مستحقات مالية معلقة" : "No Outstanding Dues Found"}
+                    {isRTL ? "لا توجد سجلات مطابقة" : "No Matching Records Found"}
                   </h3>
                   <p className="text-xs text-slate-500 max-w-sm mx-auto">
                     {isRTL
-                      ? "جميع الأعضاء ضمن حدود باقاتهم المجانية المعتمدة أو تمت تسوية حساباتهم بالكامل."
-                      : "All members are currently within their plan quota limits or have settled balances."}
+                      ? "لم يتم العثور على أي أعضاء مطابقين لبحثك الحالي في جدول المستحقات."
+                      : "No members found matching your search criteria."}
                   </p>
                 </div>
               ) : (

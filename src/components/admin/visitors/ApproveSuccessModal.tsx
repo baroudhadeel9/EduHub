@@ -2,7 +2,7 @@
 
 import React from "react";
 import { useLanguage } from "@/context/LanguageContext";
-import { Check, X, MessageSquare, Send } from "lucide-react";
+import { Check, X, Send } from "lucide-react";
 import { VisitorRequest } from "./types";
 
 interface ApproveSuccessModalProps {

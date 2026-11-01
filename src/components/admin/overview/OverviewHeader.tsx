@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useMemo } from "react";
 import { useLanguage } from "@/context/LanguageContext";
 import { Calendar, Search, Bell, Menu } from "lucide-react";
 
@@ -19,20 +19,17 @@ export default function OverviewHeader({
   const isRTL = dir === "rtl" || locale === "ar";
   const o = t.admin?.overview;
 
-  const [currentDateStr, setCurrentDateStr] = useState<string>("");
-
-  useEffect(() => {
-    const now = new Date();
+  const currentDateStr = useMemo(() => {
     try {
-      const formatted = now.toLocaleDateString(isRTL ? "ar-EG" : "en-US", {
+      const now = new Date();
+      return now.toLocaleDateString(isRTL ? "ar-EG" : "en-US", {
         weekday: "long",
         day: "numeric",
         month: "long",
         year: "numeric",
       });
-      setCurrentDateStr(formatted);
     } catch {
-      setCurrentDateStr(now.toDateString());
+      return new Date().toDateString();
     }
   }, [isRTL]);
 

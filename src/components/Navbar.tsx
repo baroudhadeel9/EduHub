@@ -12,7 +12,7 @@ interface NavbarProps {
   onOpenDonation?: (amount?: number) => void;
 }
 
-export default function Navbar({ onOpenBooking, onOpenDonation }: NavbarProps) {
+export default function Navbar({ onOpenDonation }: NavbarProps) {
   const { t, locale, setLocale } = useLanguage();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [activeSection, setActiveSection] = useState<string>("hero");

@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { useLanguage } from "@/context/LanguageContext";
-import { X, AlertCircle, MessageSquare, Send, Check } from "lucide-react";
+import { X, AlertCircle, Send } from "lucide-react";
 import { VisitorRequest } from "./types";
 
 interface RejectReasonModalProps {
@@ -30,7 +30,7 @@ export default function RejectReasonModal({
   const reasons = [
     r?.standardReasonDefault ||
       (isRTL
-        ? "عدم توفر مقاعد شاغرة في التوقيت والمدة المطلوبة"
+        ? "عدم توفر مقاعد متاحة في التوقيت والمدة المطلوبة"
         : "No available seats during requested time slot"),
     isRTL
       ? "الوثيقة الرسمية أو إثبات الهوية غير واضحة أو غير مكتملة"

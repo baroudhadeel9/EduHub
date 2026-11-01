@@ -295,11 +295,11 @@ export function normalizeMembershipApplication(
     nationalId: safeStr(raw.nationalId || raw.national_id, "-"),
     birthDate: safeStr(raw.birthDate || raw.birth_date, "-"),
     phone: safeStr(raw.phone, "-"),
-    governorate: (raw.governorate as any) || "مدينة غزة",
+    governorate: (raw.governorate as MembershipApplication["governorate"]) || "مدينة غزة",
     detailedAddress: safeStr(raw.detailedAddress || raw.detailed_address, "-"),
 
     // 2. Academic & Professional
-    category: (raw.category as any) || "طالب/ة",
+    category: (raw.category as MembershipApplication["category"]) || "طالب/ة",
     university: safeStr(raw.university),
     specialty: safeStr(raw.specialty, "-"),
     primaryPurposes: safeArr(raw.primaryPurposes || raw.primary_purposes),
@@ -322,8 +322,8 @@ export function normalizeMembershipApplication(
     weeklyUsage: safeStr(raw.weeklyUsage || raw.weekly_usage, "-"),
 
     // 4. Consents
-    photographyConsent: (raw.photographyConsent || raw.photography_consent || "أوافق") as any,
-    dataAccuracyConsent: (raw.dataAccuracyConsent || raw.data_accuracy_consent || "أقرّ بصحة البيانات المقدمة وأوافق على ما ورد أعلاه.") as any,
+    photographyConsent: (raw.photographyConsent || raw.photography_consent || "أوافق") as MembershipApplication["photographyConsent"],
+    dataAccuracyConsent: (raw.dataAccuracyConsent || raw.data_accuracy_consent || "أقرّ بصحة البيانات المقدمة وأوافق على ما ورد أعلاه.") as MembershipApplication["dataAccuracyConsent"],
   } as MembershipApplication;
 }
 
@@ -408,12 +408,32 @@ export interface MemberBookingItem {
   status: "confirmed" | "cancelled";
   notes?: string;
   canCancel?: boolean;
+  seatNumber?: number;
+  seat_number?: number;
+  seatLabel?: string;
+  seat_label?: string;
+  seatCode?: string;
+  seat_code?: string;
+  roomName?: string;
+  room_name?: string;
+  seat?: {
+    id?: number;
+    seat_number?: number;
+    label?: string;
+    code?: string;
+  };
+  room?: {
+    id?: number;
+    name_ar?: string;
+    room_key?: string;
+  };
 }
 
 export interface MemberData {
   id: string;
   name: string;
   email: string;
+  gender?: "male" | "female";
   phone?: string;
   category: string;
   monthlyLimit: number;
@@ -544,8 +564,11 @@ export async function createMemberBookingApi(
   bookingData: {
     date: string;
     startTime?: string;
+    endTime?: string;
     durationHours?: number;
     notes?: string;
+    seat_id?: number;
+    room_id?: number;
   }
 ) {
   const response = await fetch(`${API_BASE_URL}/member/bookings`, {
@@ -559,9 +582,11 @@ export async function createMemberBookingApi(
       bookingDate: bookingData.date,
       date: bookingData.date,
       startTime: bookingData.startTime || "08:00",
-      endTime: "16:00",
+      endTime: bookingData.endTime || "16:00",
       durationHours: bookingData.durationHours ?? 8,
       notes: bookingData.notes || "",
+      seat_id: bookingData.seat_id,
+      room_id: bookingData.room_id,
     }),
   });
 
@@ -639,7 +664,8 @@ export async function getAdminDuesApi(params?: {
     const debtors = (members as unknown as Array<Record<string, unknown>>)
       .map((m) => {
         const extraHours = Number(m.extra_hours || m.extraHours || 0);
-        const dueAmount = Number(m.due_amount || m.dueAmount || extraHours * 2);
+        const dueAmount = Number(m.due_amount || m.dueAmount || m.extra_amount_due || 0);
+        const hourlyRate = Number(m.hourly_extra_rate || m.hourly_rate || 2);
         return {
           id: m.id as number | string,
           name: String(m.name || ""),
@@ -652,7 +678,7 @@ export async function getAdminDuesApi(params?: {
           hours_used: Number(m.hours_used || m.hoursUsed || 0),
           extra_hours: extraHours,
           due_amount: dueAmount,
-          hourly_rate: 2,
+          hourly_rate: hourlyRate,
           month: new Date().toISOString().slice(0, 7),
           joined_at: (m.joinedDate as string) || null,
         };
@@ -759,7 +785,10 @@ export async function createAdminBookingForMemberApi(data: {
   userId: number | string;
   date: string;
   startTime: string;
-  durationHours: number;
+  endTime?: string;
+  durationHours?: number;
+  seat_id?: number | string;
+  room_id?: number | string;
   notes?: string;
 }) {
   const response = await fetch(`${API_BASE_URL}/bookings`, {
@@ -910,6 +939,58 @@ export async function getAdminMembersApi() {
     console.warn("getAdminMembersApi network error:", err);
     return [];
   }
+}
+
+/**
+ * Fetch complete member profile, bookings history, and registration details
+ */
+export async function getAdminMemberDetailsApi(id: string | number) {
+  try {
+    const response = await fetch(`${API_BASE_URL}/admin/members/${id}`, {
+      method: "GET",
+      headers: getAdminHeaders(),
+      cache: "no-store",
+    });
+
+    const result = await response.json();
+    if (!response.ok) {
+      throw new Error(result.message || "تعذر تحميل تفاصيل العضو.");
+    }
+    return result.data || null;
+  } catch (err) {
+    console.warn("getAdminMemberDetailsApi network error:", err);
+    return null;
+  }
+}
+
+/**
+ * Update member details by Admin (Gender, Student/Freelancer Type, Status, etc.)
+ */
+export async function updateAdminMemberApi(
+  id: string | number,
+  data: {
+    gender?: "male" | "female";
+    member_type?: "student" | "freelancer";
+    type?: "student" | "freelancer";
+    status?: "active" | "inactive" | "suspended";
+    name?: string;
+    phone?: string;
+    specialty?: string;
+  }
+) {
+  const response = await fetch(`${API_BASE_URL}/admin/members/${id}`, {
+    method: "PATCH",
+    headers: getAdminHeaders({
+      "Content-Type": "application/json",
+    }),
+    body: JSON.stringify(data),
+  });
+
+  const result = await safeJsonParse<{ success: boolean; message: string; data?: unknown }>(response);
+  if (!response.ok || !result) {
+    throw new Error(extractErrorMessage(result, response, "فشل تحديث بيانات العضو."));
+  }
+  return result;
 }
 
 /**
@@ -1334,11 +1415,16 @@ export async function getAdminOverviewApi() {
             const endRaw = (b.end_time as string) || (b.endTime as string) || "";
             const timeStr = startRaw && endRaw ? `${startRaw} - ${endRaw}` : "اليوم";
 
+            const seatNum = (b.seat_number as number) || ((b.seat as Record<string, unknown>)?.seat_number as number);
+            const seatLabel = (b.seat_label as string) || ((b.seat as Record<string, unknown>)?.label as string);
+            const seatCode = (b.seat_code as string) || ((b.seat as Record<string, unknown>)?.code as string);
+            const deskDisplay = seatLabel || (seatNum ? `مقعد ${seatNum}${seatCode ? ` (${seatCode})` : ""}` : `حجز #${b.id || idx + 1}`);
+
             return {
               id: (b.id as string | number) || idx + 1,
               name: userName,
               time: timeStr,
-              desk: `مقعد #${b.id || idx + 1}`,
+              desk: deskDisplay,
               type: memberType === "freelancer" ? "عمل حر" : "طالب",
               reason: (b.notes as string) || "حجز مقعد دراسة/عمل",
             };

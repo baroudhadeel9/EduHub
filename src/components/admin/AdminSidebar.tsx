@@ -13,7 +13,6 @@ import {
   UserCheck,
   Users,
   CreditCard,
-  BarChart3,
   X,
   UserPlus,
   LogOut,
@@ -124,13 +123,6 @@ export default function AdminSidebar({
           ? { text: String(realCounts.pendingVisitors), bg: "bg-orange-100 text-orange-800" }
           : null,
       href: "/admin/visitor-requests",
-    },
-    {
-      id: "reports",
-      label: s?.reports || (isRTL ? "التقارير الشهرية" : "Monthly Reports"),
-      icon: BarChart3,
-      badge: null,
-      href: "/admin/reports",
     },
   ];
 

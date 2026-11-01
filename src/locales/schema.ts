@@ -394,6 +394,24 @@ export const translationSchema = z.object({
           tagline: z.string(),
         })
       ),
+      galleryBadge: z.string().optional(),
+      galleryTitle: z.string().optional(),
+      gallerySubtitle: z.string().optional(),
+      galleryExpandPhoto: z.string().optional(),
+      galleryViewPhoto: z.string().optional(),
+      galleryClose: z.string().optional(),
+      galleryItems: z
+        .array(
+          z.object({
+            id: z.string(),
+            title: z.string(),
+            category: z.string(),
+            description: z.string(),
+            image: z.string(),
+            specs: z.string().optional(),
+          })
+        )
+        .optional(),
       guarantees: z.array(
         z.object({
           title: z.string(),

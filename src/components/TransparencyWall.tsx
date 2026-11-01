@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import Image from "next/image";
 import { useLanguage } from "@/context/LanguageContext";
 import {
   ShieldCheck,
@@ -14,10 +15,24 @@ import {
   Sparkles,
   Heart,
   Lightbulb,
+  Camera,
+  Maximize2,
+  X,
+  BatteryCharging,
+  Sun,
 } from "lucide-react";
 
 interface TransparencyWallProps {
   onOpenDonation: (amount?: number) => void;
+}
+
+interface GalleryItem {
+  id: string;
+  title: string;
+  category: string;
+  description: string;
+  image: string;
+  specs?: string;
 }
 
 const itemMeta: Record<
@@ -109,12 +124,56 @@ const itemMeta: Record<
   },
 };
 
+const galleryCategoryMeta: Record<
+  string,
+  {
+    icon: React.ElementType;
+    badgeStyle: string;
+  }
+> = {
+  electricity_meter: {
+    icon: Zap,
+    badgeStyle: "bg-amber-500 text-white border-amber-400/60",
+  },
+  internet_litebeam: {
+    icon: Wifi,
+    badgeStyle: "bg-sky-500 text-white border-sky-400/60",
+  },
+  battery_inverter: {
+    icon: BatteryCharging,
+    badgeStyle: "bg-emerald-600 text-white border-emerald-500/60",
+  },
+  solar_panels: {
+    icon: Sun,
+    badgeStyle: "bg-amber-600 text-white border-amber-500/60",
+  },
+};
+
 export default function TransparencyWall({ onOpenDonation }: TransparencyWallProps) {
-  const { t } = useLanguage();
+  const { t, dir } = useLanguage();
+  const isRtl = dir === "rtl";
   const tw = t.transparencyWall;
 
-  // Selected category to highlight
+  // Selected category to highlight in the radial ecosystem
   const [activeCategoryId, setActiveCategoryId] = useState<string | null>(null);
+
+  // Lightbox Modal State for Field Verification Images
+  const [lightboxItem, setLightboxItem] = useState<GalleryItem | null>(null);
+
+  // Handle escape key and lock body scroll when Lightbox is open
+  useEffect(() => {
+    if (lightboxItem) {
+      document.body.style.overflow = "hidden";
+      const handleKeyDown = (e: KeyboardEvent) => {
+        if (e.key === "Escape") setLightboxItem(null);
+      };
+      window.addEventListener("keydown", handleKeyDown);
+      return () => {
+        document.body.style.overflow = "unset";
+        window.removeEventListener("keydown", handleKeyDown);
+      };
+    }
+  }, [lightboxItem]);
 
   // Combine JSON data with UI icons and color styles
   const rawItems = tw?.items || [];
@@ -141,7 +200,7 @@ export default function TransparencyWall({ onOpenDonation }: TransparencyWallPro
 
   // Pre-calculate SVG arcs for the Donut Chart
   const radius = 110;
-  const circumference = 2 * Math.PI * radius; // 691.15
+  const circumference = 2 * Math.PI * radius; // ~691.15
   const gap = 5; // Gap between segments in px
   const totalGaps = gap * (budgetItems.length || 6); // 30
   const usableCircumference = circumference - totalGaps; // 661.15
@@ -162,6 +221,8 @@ export default function TransparencyWall({ onOpenDonation }: TransparencyWallPro
     });
     return acc;
   }, []);
+
+  const galleryItems: GalleryItem[] = tw?.galleryItems || [];
 
   return (
     <section
@@ -193,9 +254,8 @@ export default function TransparencyWall({ onOpenDonation }: TransparencyWallPro
           </p>
         </div>
 
-        {/* Creative Innovation: The Interactive Sanctuary Ecosystem (Dial + Connected Pillars) */}
-        <div className="mb-14">
-          
+        {/* 1. The Interactive Sanctuary Ecosystem (Dial + Connected Pillars) */}
+        <div className="mb-16">
           <div className="bg-slate-50/60 rounded-3xl p-6 sm:p-10 border border-slate-200/80 shadow-xs">
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
               
@@ -205,7 +265,6 @@ export default function TransparencyWall({ onOpenDonation }: TransparencyWallPro
                   className="relative w-full max-w-[290px] aspect-square flex items-center justify-center"
                   onMouseLeave={() => setActiveCategoryId(null)}
                 >
-                  
                   {/* SVG Donut */}
                   <svg
                     viewBox="0 0 320 320"
@@ -280,7 +339,6 @@ export default function TransparencyWall({ onOpenDonation }: TransparencyWallPro
                       </div>
                     )}
                   </div>
-
                 </div>
 
                 {/* Sub-Dial Prompt / Direct Sponsor Trigger */}
@@ -403,15 +461,98 @@ export default function TransparencyWall({ onOpenDonation }: TransparencyWallPro
                     );
                   })}
                 </div>
-
               </div>
 
             </div>
           </div>
-
         </div>
 
-        {/* 4. Trust Guarantees */}
+        {/* 2. LIVE FIELD VERIFICATION GALLERY (Real Equipment from Gaza) */}
+        {galleryItems.length > 0 && (
+          <div className="mb-20">
+            {/* Gallery Header */}
+            <div className="text-center max-w-2xl mx-auto mb-12">
+              <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-emerald-50 border border-emerald-200/80 text-emerald-900 text-xs font-bold mb-3.5 shadow-2xs">
+                <Camera className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                <span>{tw?.galleryBadge || (isRtl ? "شواهد ميدانية حية من غزة" : "Live Field Evidence from Gaza")}</span>
+              </div>
+              <h3 className="text-2xl sm:text-3xl lg:text-4xl font-black text-brand-navy tracking-tight mb-3">
+                {tw?.galleryTitle || (isRtl ? "أين تذهب التبرعات؟ بنيتنا التحتية على أرض الواقع" : "Where Do Donations Go? Our Infrastructure on the Ground")}
+              </h3>
+              <p className="text-sm sm:text-base text-slate-600 font-normal leading-relaxed">
+                {tw?.gallerySubtitle || (isRtl ? "كل مساهمة تتحول فوراً إلى طاقة نظيفة، إنترنت مستقر، ومعدات حقيقية تعمل 24/7 لدعم شبابنا." : "Every contribution powers real equipment operating 24/7 to keep our youth connected.")}
+              </p>
+            </div>
+
+            {/* Gallery Grid (High-end 4:5 Portrait Showcase with Natural Framing) */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-7">
+              {galleryItems.map((item) => {
+                const meta = galleryCategoryMeta[item.id] || {
+                  icon: Sparkles,
+                  badgeStyle: "bg-emerald-600 text-white border-emerald-500/60",
+                };
+                const CategoryIcon = meta.icon;
+
+                return (
+                  <div
+                    key={item.id}
+                    onClick={() => setLightboxItem(item)}
+                    className="group flex flex-col bg-white rounded-3xl border border-slate-200/80 shadow-xs hover:shadow-xl hover:-translate-y-1.5 hover:border-emerald-300 transition-all duration-300 overflow-hidden cursor-pointer"
+                  >
+                    {/* Photo Container with Proper Portrait Aspect (4:5) to showcase equipment without cropping */}
+                    <div className="relative aspect-[4/5] w-full overflow-hidden bg-slate-900/10">
+                      <Image
+                        src={item.image}
+                        alt={item.title}
+                        fill
+                        sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+                        className="object-cover object-top group-hover:scale-106 transition-transform duration-700 ease-out"
+                      />
+
+                      {/* Smooth Modern Scrim Gradient */}
+                      <div className="absolute inset-0 bg-gradient-to-t from-slate-950/70 via-transparent to-black/25 opacity-70 group-hover:opacity-50 transition-opacity duration-300" />
+
+                      {/* Floating Category Pill Badge with Icon */}
+                      <div className={`absolute top-3.5 start-3.5 flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-black uppercase tracking-wider shadow-md backdrop-blur-md border ${meta.badgeStyle}`}>
+                        <CategoryIcon className="w-3.5 h-3.5 shrink-0" />
+                        <span>{item.category}</span>
+                      </div>
+
+                      {/* Hover Zoom CTA Pill Button */}
+                      <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                        <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/95 text-brand-navy text-xs font-black shadow-xl backdrop-blur-md transform translate-y-3 group-hover:translate-y-0 transition-transform duration-300 border border-white">
+                          <Maximize2 className="w-3.5 h-3.5 text-emerald-600" />
+                          <span>{tw?.galleryExpandPhoto || (isRtl ? "عرض الصورة كاملة" : "Expand Photo")}</span>
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Card Content with Refined Spacing & Typography */}
+                    <div className="p-5 sm:p-6 flex flex-col justify-between flex-1 bg-white">
+                      <div>
+                        <h4 className="text-base font-black text-brand-navy leading-snug mb-2 group-hover:text-emerald-700 transition-colors">
+                          {item.title}
+                        </h4>
+
+                        <p className="text-xs sm:text-sm text-slate-500 leading-relaxed font-normal">
+                          {item.description}
+                        </p>
+                      </div>
+
+                      {/* Clean Minimalist Action Link */}
+                      <div className="pt-4 mt-5 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-emerald-600 group-hover:text-emerald-700">
+                        <span>{tw?.galleryViewPhoto || (isRtl ? "تكبير واستعراض" : "View Photo")}</span>
+                        <Maximize2 className="w-3.5 h-3.5 group-hover:scale-115 transition-transform" />
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        {/* 3. Trust Guarantees */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {(tw?.guarantees || []).map((guarantee, idx) => (
             <div
@@ -434,6 +575,63 @@ export default function TransparencyWall({ onOpenDonation }: TransparencyWallPro
         </div>
 
       </div>
+
+      {/* FULL-SCREEN LIGHTBOX MODAL */}
+      {lightboxItem && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-label={lightboxItem.title}
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-slate-950/85 backdrop-blur-md animate-in fade-in duration-200"
+          onClick={() => setLightboxItem(null)}
+        >
+          <div
+            className="relative max-w-4xl w-full bg-slate-900 rounded-3xl overflow-hidden border border-slate-700/80 shadow-2xl flex flex-col animate-in zoom-in-95 duration-200"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Modal Top Bar */}
+            <div className="flex items-center justify-between px-6 py-4 border-b border-slate-800 bg-slate-900/90">
+              <div className="flex items-center gap-2.5">
+                <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
+                  {lightboxItem.category}
+                </span>
+              </div>
+
+              {/* Close Button */}
+              <button
+                type="button"
+                onClick={() => setLightboxItem(null)}
+                className="w-9 h-9 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white flex items-center justify-center transition-colors cursor-pointer"
+                aria-label={tw?.galleryClose || (isRtl ? "إغلاق" : "Close")}
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* High-Res Image Display */}
+            <div className="relative w-full aspect-[4/3] sm:aspect-[16/10] max-h-[65vh] bg-black flex items-center justify-center">
+              <Image
+                src={lightboxItem.image}
+                alt={lightboxItem.title}
+                fill
+                className="object-contain"
+                sizes="(max-width: 1024px) 100vw, 1024px"
+                priority
+              />
+            </div>
+
+            {/* Modal Caption & Description */}
+            <div className="p-6 bg-slate-900 border-t border-slate-800 text-white">
+              <h3 className="text-lg sm:text-xl font-black text-white mb-1.5">
+                {lightboxItem.title}
+              </h3>
+              <p className="text-xs sm:text-sm text-slate-300 leading-relaxed max-w-2xl">
+                {lightboxItem.description}
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
     </section>
   );
 }

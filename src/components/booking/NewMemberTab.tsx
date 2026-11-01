@@ -124,6 +124,7 @@ export default function NewMemberTab({ onReturnToHub }: NewMemberTabProps) {
   // 1. Personal & Contact Info
   const [email, setEmail] = useState("");
   const [fullName, setFullName] = useState("");
+  const [gender, setGender] = useState<"male" | "female">("male");
   const [nationalId, setNationalId] = useState("");
   const [birthDate, setBirthDate] = useState("");
   const [phone, setPhone] = useState("");
@@ -309,6 +310,7 @@ export default function NewMemberTab({ onReturnToHub }: NewMemberTabProps) {
       const fd = new FormData();
       fd.append("email", email);
       fd.append("fullName", fullName);
+      fd.append("gender", gender);
       fd.append("nationalId", nationalId);
       fd.append("birthDate", birthDate);
       fd.append("phone", phone);
@@ -430,6 +432,7 @@ export default function NewMemberTab({ onReturnToHub }: NewMemberTabProps) {
               )}
             </div>
             <div>• {isRTL ? `الفئة: ${category}` : `Category: ${category}`}</div>
+            <div>• {isRTL ? `الجنس: ${gender === "female" ? "أنثى (صالة الإناث والصبايا)" : "ذكر (صالات الشباب والتدريب)"}` : `Gender: ${gender === "female" ? "Female" : "Male"}`}</div>
             <div>• {isRTL ? `الهاتف: ${phone} | البريد: ${email}` : `Phone: ${phone} | Email: ${email}`}</div>
             <div>• {isRTL ? `المحافظة: ${governorate}` : `Governorate: ${governorate}`}</div>
             <div>• {isRTL ? `حالة الطلب: قيد التدقيق الإداري (Pending Review)` : `Status: Pending Review`}</div>
@@ -563,6 +566,46 @@ export default function NewMemberTab({ onReturnToHub }: NewMemberTabProps) {
                   placeholder={isRTL ? "مثال: أحمد محمد علي النجار" : "e.g., Ahmed Mohammed Ali Al-Najjar"}
                   className="w-full bg-[#f8fafc] border border-slate-200 rounded-xl px-4 py-2.5 text-xs sm:text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-600 transition-all font-medium"
                 />
+              </div>
+
+              {/* Gender Selection: Male / Female for Hall Privacy */}
+              <div className="space-y-1.5">
+                <label className="block text-xs font-bold text-slate-700">
+                  {isRTL ? "الجنس (لتخصيص القاعة المناسبة وضمان الخصوصية التامة)" : "Gender (For Hall Allocation & Privacy)"} <span className="text-rose-500">*</span>
+                </label>
+                <div className="grid grid-cols-2 gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setGender("male")}
+                    className={`p-3 rounded-xl border flex items-center justify-center gap-2.5 transition-all cursor-pointer font-bold text-xs sm:text-sm ${
+                      gender === "male"
+                        ? "bg-sky-50 border-sky-500 text-sky-800 shadow-xs ring-2 ring-sky-500/20"
+                        : "bg-[#f8fafc] border-slate-200 text-slate-600 hover:bg-slate-100"
+                    }`}
+                  >
+                    <span className="text-xl">👨</span>
+                    <div className="text-start">
+                      <div className="font-black">{isRTL ? "ذكر (شاب)" : "Male"}</div>
+                      <div className="text-[10px] text-slate-500 font-normal">{isRTL ? "صالات الشباب والتدريب (40 مقعد)" : "Men's Halls"}</div>
+                    </div>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setGender("female")}
+                    className={`p-3 rounded-xl border flex items-center justify-center gap-2.5 transition-all cursor-pointer font-bold text-xs sm:text-sm ${
+                      gender === "female"
+                        ? "bg-rose-50 border-rose-500 text-rose-800 shadow-xs ring-2 ring-rose-500/20"
+                        : "bg-[#f8fafc] border-slate-200 text-slate-600 hover:bg-slate-100"
+                    }`}
+                  >
+                    <span className="text-xl">👩</span>
+                    <div className="text-start">
+                      <div className="font-black">{isRTL ? "أنثى (صبية)" : "Female"}</div>
+                      <div className="text-[10px] text-slate-500 font-normal">{isRTL ? "صالة الإناث المستقلة (20 مقعد)" : "Women's Hall"}</div>
+                    </div>
+                  </button>
+                </div>
               </div>
 
               {/* National ID & Date of Birth */}

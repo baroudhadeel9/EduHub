@@ -615,7 +615,43 @@
         "title": "Youth-Led Grassroots Impact",
         "desc": "Our Gaza-based team manages operations daily to empower an entire generation of students and freelancers."
       }
-    ]
+    ],
+    "galleryBadge": "Live Field Verification from Gaza",
+    "galleryTitle": "Where Do Donations Go? Our Infrastructure on the Ground",
+    "gallerySubtitle": "Every dollar donated translates into clean power, high-speed connectivity, and real equipment operating 24/7 for our students and youth.",
+    "galleryItems": [
+      {
+        "id": "electricity_meter",
+        "title": "Electricity Meter for External Generator",
+        "category": "Generator & Power",
+        "description": "High-precision digital meters tracking every kilowatt supplied by the external generator to guarantee transparent billing for actual consumption.",
+        "image": "/images/transparency/electricity-meter.jpg"
+      },
+      {
+        "id": "internet_litebeam",
+        "title": "High-Speed Wireless Link (LiteBeam 5AC)",
+        "category": "Internet & Connectivity",
+        "description": "Directional microwave dishes installed across Gaza rooftops, maintaining uninterrupted gigabit connectivity despite infrastructure damage.",
+        "image": "/images/transparency/internet-litebeam.jpg"
+      },
+      {
+        "id": "battery_inverter",
+        "title": "GEL Battery Bank & Smart Inverter (UPS)",
+        "category": "Backup Power",
+        "description": "Heavy-duty GEL deep-cycle battery bank paired with an intelligent inverter, ensuring zero-second power dropouts for students' laptops.",
+        "image": "/images/transparency/battery-inverter.jpg"
+      },
+      {
+        "id": "solar_panels",
+        "title": "Clean Solar Energy Array",
+        "category": "Renewable Solar Energy",
+        "description": "High-efficiency monocrystalline rooftop solar array harvesting daylight energy, drastically reducing generator fuel expenses.",
+        "image": "/images/transparency/solar-panels.jpg"
+      }
+    ],
+    "galleryExpandPhoto": "Expand Photo",
+    "galleryViewPhoto": "View Photo",
+    "galleryClose": "Close"
   },
   "bookingPortal": {
     "badge": "Desk Reservation & Coworking Portal",

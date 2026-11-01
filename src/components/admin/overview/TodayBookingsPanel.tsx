@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import { useLanguage } from "@/context/LanguageContext";
 import { Clock, CalendarDays, Armchair } from "lucide-react";
 import { getAdminOverviewApi, getAdminBookingsApi } from "@/services/applications";
+import { formatHour12 } from "@/utils/dateTime";
 
 interface TodayBookingItem {
   id?: string | number;
@@ -49,14 +50,19 @@ export default function TodayBookingsPanel({ refreshKey = 0 }: TodayBookingsPane
                 (user.name as string) || (b.userName as string) || (b.name as string) || "عضو مسجل";
               const start = (b.start_time as string) || (b.startTime as string) || "";
               const end = (b.end_time as string) || (b.endTime as string) || "";
-              const timeStr = start && end ? `${start} – ${end}` : "اليوم";
+              const timeStr = start && end ? `${formatHour12(start)} – ${formatHour12(end)}` : "اليوم";
               const memberType = (user.member_type as string) || (b.member_type as string);
+
+              const seatNum = (b.seat_number as number) || ((b.seat as Record<string, unknown>)?.seat_number as number);
+              const seatLabel = (b.seat_label as string) || ((b.seat as Record<string, unknown>)?.label as string);
+              const seatCode = (b.seat_code as string) || ((b.seat as Record<string, unknown>)?.code as string);
+              const deskDisplay = seatLabel || (seatNum ? `مقعد ${seatNum}${seatCode ? ` (${seatCode})` : ""}` : `حجز #${b.id || idx + 1}`);
 
               return {
                 id: (b.id as string | number) || idx + 1,
                 name: userName,
                 time: timeStr,
-                desk: `مقعد #${b.id || idx + 1}`,
+                desk: deskDisplay,
                 type: memberType === "freelancer" ? "عمل حر" : "طالب",
                 reason: (b.notes as string) || "حجز مقعد دراسة/عمل",
               };

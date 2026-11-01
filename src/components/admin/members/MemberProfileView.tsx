@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useLanguage } from "@/context/LanguageContext";
 import AdminSidebar from "@/components/admin/AdminSidebar";
 import { MemberRecord } from "@/components/admin/members/data";
-import { getAdminMembersApi } from "@/services/applications";
+import { getAdminMembersApi, getAdminMemberDetailsApi, updateAdminMemberApi } from "@/services/applications";
 import {
   ArrowLeft,
   ArrowRight,
@@ -21,6 +21,7 @@ import {
   Menu,
   Send,
   UserCheck,
+  UserX,
   GraduationCap,
   Briefcase,
   Zap,
@@ -51,20 +52,35 @@ export default function MemberProfileView({ memberId }: MemberProfileViewProps) 
     async function loadMember() {
       setLoading(true);
       try {
-        const list = await getAdminMembersApi();
-        const found = (list as MemberRecord[]).find((m) => String(m.id) === String(memberId));
-        if (found) {
+        const details = await getAdminMemberDetailsApi(memberId);
+        if (details) {
           setMember({
-            ...found,
-            history: found.history || [],
-            hoursUsed: found.hoursUsed || 0,
-            hoursLimit: found.hoursLimit || 35,
-            remainingHours: found.remainingHours ?? Math.max(0, (found.hoursLimit || 35) - (found.hoursUsed || 0)),
-            dueAmount: found.dueAmount || 0,
-            lastBooking: found.lastBooking || "اليوم",
+            ...details,
+            history: details.history || [],
+            hoursUsed: details.hoursUsed || 0,
+            hoursLimit: details.hoursLimit || 35,
+            remainingHours: details.remainingHours ?? Math.max(0, (details.hoursLimit || 35) - (details.hoursUsed || 0)),
+            dueAmount: details.dueAmount || 0,
+            lastBooking: details.lastBooking || (isRTL ? "لا يوجد حجز بعد" : "No bookings yet"),
+            registration: details.registration || undefined,
           });
         } else {
-          setMember(null);
+          // Fallback to list search if details endpoint was unreachable
+          const list = await getAdminMembersApi();
+          const found = (list as MemberRecord[]).find((m) => String(m.id) === String(memberId));
+          if (found) {
+            setMember({
+              ...found,
+              history: found.history || [],
+              hoursUsed: found.hoursUsed || 0,
+              hoursLimit: found.hoursLimit || 35,
+              remainingHours: found.remainingHours ?? Math.max(0, (found.hoursLimit || 35) - (found.hoursUsed || 0)),
+              dueAmount: found.dueAmount || 0,
+              lastBooking: found.lastBooking || (isRTL ? "لا يوجد حجز بعد" : "No bookings yet"),
+            });
+          } else {
+            setMember(null);
+          }
         }
       } catch (err) {
         console.error("Failed to load member:", err);
@@ -74,12 +90,13 @@ export default function MemberProfileView({ memberId }: MemberProfileViewProps) 
       }
     }
     loadMember();
-  }, [memberId]);
+  }, [memberId, isRTL]);
 
   // Active view tab: "bookings" | "dues" | "registration"
   const [activeTab, setActiveTab] = useState<"bookings" | "dues" | "registration">("bookings");
   const [dueSettled, setDueSettled] = useState(false);
   const [notificationSent, setNotificationSent] = useState(false);
+  const [toggleLoading, setToggleLoading] = useState(false);
 
   if (loading) {
     return (
@@ -121,6 +138,26 @@ export default function MemberProfileView({ memberId }: MemberProfileViewProps) 
     Math.round((member.hoursUsed / member.hoursLimit) * 100)
   );
 
+  const handleToggleStatus = async () => {
+    if (!member) return;
+    const newStatus = member.status === "suspended" ? "active" : "suspended";
+    setToggleLoading(true);
+    try {
+      await updateAdminMemberApi(member.id, { status: newStatus });
+      setMember((prev) => (prev ? { ...prev, status: newStatus } : prev));
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "";
+      alert(
+        msg ||
+          (isRTL
+            ? "فشل تحديث حالة العضوية على السيرفر."
+            : "Failed to update member status on server.")
+      );
+    } finally {
+      setToggleLoading(false);
+    }
+  };
+
   const handleSettleDues = () => {
     setDueSettled(true);
     setMember((prev) => (prev ? { ...prev, dueAmount: 0, extraHours: 0 } : prev));
@@ -146,7 +183,7 @@ export default function MemberProfileView({ memberId }: MemberProfileViewProps) 
       {/* Main Content Area */}
       <div
         className={`min-h-screen transition-all duration-300 ${
-          isRTL ? "lg:mr-64 xl:mr-72" : "lg:ml-64 xl:ml-72"
+          isRTL ? "lg:mr-72" : "lg:ml-72"
         }`}
       >
         <main className="p-4 sm:p-6 lg:p-8 max-w-6xl mx-auto space-y-6">
@@ -246,8 +283,8 @@ export default function MemberProfileView({ memberId }: MemberProfileViewProps) 
                       </span>
                     )}
                     {member.status === "suspended" && (
-                      <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-slate-100 text-slate-700 border border-slate-300">
-                        {isRTL ? "عضوية معلقة" : "Suspended"}
+                      <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-rose-50 text-rose-700 border border-rose-200">
+                        {isRTL ? "عضوية موقوفة 🚫" : "Suspended"}
                       </span>
                     )}
                   </div>
@@ -300,6 +337,29 @@ export default function MemberProfileView({ memberId }: MemberProfileViewProps) 
 
               {/* Action Buttons */}
               <div className="flex sm:flex-col gap-2 shrink-0 self-start md:self-center">
+                <button
+                  type="button"
+                  disabled={toggleLoading}
+                  onClick={handleToggleStatus}
+                  className={`flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl border text-xs font-bold transition-all shadow-2xs active:scale-98 cursor-pointer ${
+                    member.status === "suspended"
+                      ? "bg-emerald-50 text-emerald-800 border-emerald-300 hover:bg-emerald-100"
+                      : "bg-rose-50 text-rose-700 border-rose-200 hover:bg-rose-100"
+                  } ${toggleLoading ? "opacity-60 cursor-not-allowed" : ""}`}
+                >
+                  {toggleLoading ? (
+                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                  ) : member.status === "suspended" ? (
+                    <UserCheck className="w-3.5 h-3.5 text-emerald-600" />
+                  ) : (
+                    <UserX className="w-3.5 h-3.5 text-rose-600" />
+                  )}
+                  <span>
+                    {member.status === "suspended"
+                      ? isRTL ? "تنشيط العضوية ✅" : "Activate Membership"
+                      : isRTL ? "توقيف العضوية 🚫" : "Suspend Membership"}
+                  </span>
+                </button>
                 <button
                   type="button"
                   onClick={handleSendNotification}
@@ -836,7 +896,7 @@ export default function MemberProfileView({ memberId }: MemberProfileViewProps) 
                       {member.history.map((h) => (
                         <tr key={h.id} className="hover:bg-slate-50/60 transition-colors">
                           <td className="py-3.5 px-5">
-                            <div className="font-bold text-[#0c2340]">{h.date}</div>
+                            <div className="font-bold text-[#0c2340]">{String(h.date || "").split("T")[0]}</div>
                             <div className="text-[11px] text-slate-500 font-medium">{h.duration}</div>
                           </td>
                           <td className="py-3.5 px-5 text-slate-700 font-medium">

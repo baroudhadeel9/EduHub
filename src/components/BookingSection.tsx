@@ -11,10 +11,7 @@ import {
   ArrowRight,
   ArrowLeft,
   Sparkles,
-  Zap,
-  Wifi,
   LogIn,
-  Clock,
   ShieldCheck,
 } from "lucide-react";
 

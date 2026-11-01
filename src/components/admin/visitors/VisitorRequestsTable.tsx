@@ -11,6 +11,7 @@ import {
   Eye,
   ChevronLeft,
   ChevronRight,
+  Menu,
 } from "lucide-react";
 import { VisitorRequest } from "./types";
 import RejectReasonModal from "./RejectReasonModal";
@@ -36,7 +37,11 @@ interface RawVisitorRequest {
   status?: string;
 }
 
-export default function VisitorRequestsTable() {
+interface VisitorRequestsTableProps {
+  onOpenMobileMenu?: () => void;
+}
+
+export default function VisitorRequestsTable({ onOpenMobileMenu }: VisitorRequestsTableProps = {}) {
   const { t, locale, dir } = useLanguage();
   const isRTL = dir === "rtl" || locale === "ar";
   const vr = t.admin?.visitorRequests;
@@ -205,7 +210,7 @@ export default function VisitorRequestsTable() {
           ? "970" + cleanPhone
           : cleanPhone;
 
-        const reasonText = reason || "عدم توفر مقاعد شاغرة في التوقيت والمدة المطلوبة";
+        const reasonText = reason || "عدم توفر مقاعد متاحة في التوقيت والمدة المطلوبة";
         const msg = `مرحباً ${targetReq.name}،\nنعتذر عن عدم قبول طلب تصريح الزيارة الخاص بك لمساحة EduHub لموعد (${targetReq.visitDate}).\nالسبب: ${reasonText}.${notes ? `\nملاحظات: ${notes}` : ""}\nشكراً لتفهمك ونتمنى لك التوفيق.`;
         const waUrl = `https://wa.me/${formattedPhone}?text=${encodeURIComponent(msg)}`;
         window.open(waUrl, "_blank");
@@ -231,16 +236,28 @@ export default function VisitorRequestsTable() {
   return (
     <div className="space-y-5">
       {/* ── Page Header ── */}
-      <div className="space-y-1">
-        <h1 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">
-          {vr?.title || (isRTL ? "طلبات الزوار" : "Visitor Requests")}
-        </h1>
-        <p className="text-xs sm:text-sm text-slate-500">
-          {vr?.subtitle ||
-            (isRTL
-              ? "مراجعة وتدقيق تصاريح الزيارة اليومية النشطة لمساحة العمل."
-              : "Review and manage daily visitor pass requests.")}
-        </p>
+      <div className="flex items-center gap-3">
+        {onOpenMobileMenu && (
+          <button
+            type="button"
+            onClick={onOpenMobileMenu}
+            className="p-2 sm:p-2.5 rounded-xl border border-slate-200 bg-white text-slate-700 hover:text-slate-900 hover:bg-slate-50 shadow-2xs lg:hidden cursor-pointer shrink-0"
+            aria-label="Open Sidebar Menu"
+          >
+            <Menu className="w-5 h-5" />
+          </button>
+        )}
+        <div className="space-y-1">
+          <h1 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">
+            {vr?.title || (isRTL ? "طلبات الزوار" : "Visitor Requests")}
+          </h1>
+          <p className="text-xs sm:text-sm text-slate-500">
+            {vr?.subtitle ||
+              (isRTL
+                ? "مراجعة وتدقيق تصاريح الزيارة اليومية النشطة لمساحة العمل."
+                : "Review and manage daily visitor pass requests.")}
+          </p>
+        </div>
       </div>
 
       {/* ── Search and Filters Bar (Clean & Calm) ── */}

@@ -49,6 +49,8 @@ async function handleProxy(
       cache: "no-store",
     });
 
+    const resData = await upstreamRes.arrayBuffer();
+
     const resHeaders = new Headers();
     const upContentType = upstreamRes.headers.get("content-type");
     if (upContentType) {
@@ -58,16 +60,11 @@ async function handleProxy(
     if (upContentDisposition) {
       resHeaders.set("Content-Disposition", upContentDisposition);
     }
-    const upContentLength = upstreamRes.headers.get("content-length");
-    if (upContentLength) {
-      resHeaders.set("Content-Length", upContentLength);
-    }
+    resHeaders.set("Content-Length", String(resData.byteLength));
 
     resHeaders.set("Access-Control-Allow-Origin", "*");
     resHeaders.set("Access-Control-Allow-Methods", "GET, POST, PUT, PATCH, DELETE, OPTIONS");
     resHeaders.set("Access-Control-Allow-Headers", "*");
-
-    const resData = await upstreamRes.arrayBuffer();
 
     return new NextResponse(resData, {
       status: upstreamRes.status,

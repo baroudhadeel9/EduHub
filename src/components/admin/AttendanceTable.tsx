@@ -9,7 +9,6 @@ import {
   LogOut,
   Info,
   CheckCircle2,
-  Calendar,
   User,
 } from "lucide-react";
 import { AttendanceRecord, FilterOption } from "./types";
@@ -201,7 +200,6 @@ export default function AttendanceTable({
                 filteredRecords.map((row) => {
                   const isStudent = row.type === "student";
                   const isFreelancer = row.type === "freelancer";
-                  const isVisitor = row.type === "visitor";
 
                   const rolePill = isStudent
                     ? { label: isRTL ? "طالب/ة" : "Student", cls: "bg-emerald-50 text-emerald-800 border-emerald-200" }

@@ -20,6 +20,7 @@ interface MemberDetailDrawerProps {
   isOpen: boolean;
   onClose: () => void;
   onToggleStatus?: (id: string) => void;
+  onMemberUpdated?: () => void;
 }
 
 export default function MemberDetailDrawer({
@@ -281,7 +282,7 @@ export default function MemberDetailDrawer({
                   {member.history.slice(0, 3).map((item) => (
                     <div key={item.id} className="p-3 text-xs flex items-center justify-between gap-3">
                       <div>
-                        <div className="font-bold text-slate-800">{item.date}</div>
+                        <div className="font-bold text-slate-800">{String(item.date || "").split("T")[0]}</div>
                         <div className="text-[11px] text-slate-400">{item.purpose}</div>
                       </div>
                       <div className="text-end shrink-0">
@@ -310,15 +311,15 @@ export default function MemberDetailDrawer({
               <button
                 type="button"
                 onClick={() => onToggleStatus(member.id)}
-                className={`py-2.5 px-4 rounded-xl border text-xs sm:text-sm font-semibold transition-all cursor-pointer ${
+                className={`py-2.5 px-4 rounded-xl border text-xs sm:text-sm font-bold transition-all cursor-pointer ${
                   member.status === "suspended"
-                    ? "border-emerald-300 text-emerald-800 bg-emerald-50 hover:bg-emerald-100"
-                    : "border-slate-200 text-slate-600 hover:bg-slate-50"
+                    ? "border-emerald-300 text-emerald-800 bg-emerald-50 hover:bg-emerald-100 shadow-2xs"
+                    : "border-rose-200 text-rose-700 bg-rose-50/50 hover:bg-rose-100"
                 }`}
               >
                 {member.status === "suspended"
-                  ? isRTL ? "تنشيط العضوية" : "Activate"
-                  : isRTL ? "إيقاف العضوية" : "Suspend"}
+                  ? isRTL ? "تنشيط العضوية ✅" : "Activate"
+                  : isRTL ? "توقيف العضوية 🚫" : "Suspend"}
               </button>
             )}
           </div>

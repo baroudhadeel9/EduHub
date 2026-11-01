@@ -9,11 +9,8 @@ import AttendanceTable from "@/components/admin/AttendanceTable";
 import CheckInModal from "@/components/admin/CheckInModal";
 import { AttendanceRecord } from "@/components/admin/types";
 import {
-  Calendar,
   CalendarDays,
   RefreshCw,
-  Clock,
-  Sparkles,
 } from "lucide-react";
 import {
   getAdminAttendanceApi,
@@ -22,16 +19,7 @@ import {
   checkOutAttendanceApi,
   createManualAttendanceApi,
 } from "@/services/applications";
-
-// Helper to get local date string YYYY-MM-DD
-function getLocalDateString(offsetDays: number = 0): string {
-  const d = new Date();
-  d.setDate(d.getDate() + offsetDays);
-  const year = d.getFullYear();
-  const month = String(d.getMonth() + 1).padStart(2, "0");
-  const day = String(d.getDate()).padStart(2, "0");
-  return `${year}-${month}-${day}`;
-}
+import { getLocalDateString, getAllowedWeekDates } from "@/utils/dateTime";
 
 export default function AdminAttendancePage() {
   const { locale, dir } = useLanguage();
@@ -43,17 +31,21 @@ export default function AdminAttendancePage() {
   const [records, setRecords] = useState<AttendanceRecord[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // Date selection state
+  // Allowed Week Dates Calculation (Saturday to Thursday, Friday closed)
+  const weekInfo = useMemo(() => getAllowedWeekDates(), []);
   const todayStr = useMemo(() => getLocalDateString(0), []);
-  const tomorrowStr = useMemo(() => getLocalDateString(1), []);
-  const yesterdayStr = useMemo(() => getLocalDateString(-1), []);
 
-  const [selectedDate, setSelectedDate] = useState<string>(todayStr);
+  const [selectedDate, setSelectedDate] = useState<string>(() => {
+    // If today is in allowed dates (Sat-Thu), start with today, otherwise use defaultDate
+    const isTodayAllowed = weekInfo.allAllowed.some((d) => d.date === todayStr);
+    return isTodayAllowed ? todayStr : weekInfo.defaultDate;
+  });
 
   const isToday = selectedDate === todayStr;
-  const isTomorrow = selectedDate === tomorrowStr;
-  const isYesterday = selectedDate === yesterdayStr;
-  const isFuture = selectedDate > todayStr;
+  const selectedDateObj = useMemo(() => {
+    return weekInfo.allAllowed.find((d) => d.date === selectedDate) || null;
+  }, [weekInfo.allAllowed, selectedDate]);
+  const isFuture = selectedDateObj ? selectedDateObj.isFuture : selectedDate > todayStr;
 
   const mapRecords = useCallback((data: Record<string, unknown>[]): AttendanceRecord[] => {
     return (data || []).map((r: Record<string, unknown>) => {
@@ -144,7 +136,15 @@ export default function AdminAttendancePage() {
   }, [selectedDate, mapRecords, isRTL]);
 
   useEffect(() => {
-    loadAttendance(selectedDate);
+    let isMounted = true;
+    Promise.resolve().then(() => {
+      if (isMounted) {
+        loadAttendance(selectedDate);
+      }
+    });
+    return () => {
+      isMounted = false;
+    };
   }, [selectedDate, loadAttendance]);
 
   const handleSelectDate = (newDate: string) => {
@@ -268,7 +268,7 @@ export default function AdminAttendancePage() {
       {/* Main Content Area */}
       <div
         className={`min-h-screen transition-all duration-300 ${
-          isRTL ? "lg:mr-64 xl:mr-72" : "lg:ml-64 xl:ml-72"
+          isRTL ? "lg:mr-72" : "lg:ml-72"
         }`}
       >
         <main className="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto space-y-6">
@@ -282,68 +282,120 @@ export default function AdminAttendancePage() {
           {/* ── Date Navigator & Filter Bar ── */}
           <div className="bg-white rounded-2xl border border-slate-200/80 p-3.5 sm:p-4 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4">
             
-            {/* Quick Day Shortcut Buttons */}
-            <div className="flex items-center gap-2 overflow-x-auto pb-1 md:pb-0">
-              <button
-                type="button"
-                onClick={() => handleSelectDate(todayStr)}
-                className={`px-3.5 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer flex items-center gap-1.5 whitespace-nowrap ${
-                  isToday
-                    ? "bg-gradient-to-r from-emerald-600 to-teal-700 text-white shadow-xs"
-                    : "bg-slate-100 text-slate-700 hover:bg-slate-200/80"
-                }`}
-              >
-                <Calendar className="w-4 h-4 text-emerald-200" />
-                <span>{isRTL ? "اليوم" : "Today"}</span>
-              </button>
+            {/* Quick Allowed Days Shortcut Buttons (Saturday to Thursday) */}
+            <div className="flex items-center gap-1.5 overflow-x-auto pb-1 md:pb-0 scrollbar-none">
+              {weekInfo.currentWeek.map((dayItem) => {
+                const isSelected = selectedDate === dayItem.date;
+                return (
+                  <button
+                    key={dayItem.date}
+                    type="button"
+                    onClick={() => handleSelectDate(dayItem.date)}
+                    className={`px-3 py-2 rounded-xl text-xs sm:text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 whitespace-nowrap ${
+                      isSelected
+                        ? "bg-gradient-to-r from-emerald-600 to-teal-700 text-white shadow-xs scale-[1.02]"
+                        : "bg-slate-100 text-slate-700 hover:bg-slate-200/80"
+                    }`}
+                  >
+                    <span>{isRTL ? dayItem.dayNameAr : dayItem.dayNameEn}</span>
+                    <span
+                      className={`text-[11px] font-mono ${
+                        isSelected ? "text-emerald-100" : "text-slate-400"
+                      }`}
+                    >
+                      {dayItem.formattedShort}
+                    </span>
+                    {dayItem.isToday && (
+                      <span
+                        className={`w-1.5 h-1.5 rounded-full ${
+                          isSelected ? "bg-white" : "bg-emerald-600 animate-pulse"
+                        }`}
+                      />
+                    )}
+                  </button>
+                );
+              })}
 
-              <button
-                type="button"
-                onClick={() => handleSelectDate(tomorrowStr)}
-                className={`px-3.5 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer flex items-center gap-1.5 whitespace-nowrap ${
-                  isTomorrow
-                    ? "bg-[#0c2340] text-white shadow-xs"
-                    : "bg-slate-100 text-slate-600 hover:bg-slate-200"
-                }`}
-              >
-                <Sparkles className="w-3.5 h-3.5 text-amber-500" />
-                <span>{isRTL ? "غداً (الزيارات القادمة)" : "Tomorrow (Upcoming)"}</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => handleSelectDate(yesterdayStr)}
-                className={`px-3.5 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer flex items-center gap-1.5 whitespace-nowrap ${
-                  isYesterday
-                    ? "bg-[#0c2340] text-white shadow-xs"
-                    : "bg-slate-100 text-slate-600 hover:bg-slate-200"
-                }`}
-              >
-                <Clock className="w-3.5 h-3.5 text-slate-400" />
-                <span>{isRTL ? "أمس" : "Yesterday"}</span>
-              </button>
+              {weekInfo.nextWeek.length > 0 && (
+                <>
+                  <span className="text-slate-300 px-0.5">|</span>
+                  {weekInfo.nextWeek.map((dayItem) => {
+                    const isSelected = selectedDate === dayItem.date;
+                    return (
+                      <button
+                        key={dayItem.date}
+                        type="button"
+                        onClick={() => handleSelectDate(dayItem.date)}
+                        className={`px-3 py-2 rounded-xl text-xs sm:text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 whitespace-nowrap ${
+                          isSelected
+                            ? "bg-[#0c2340] text-white shadow-xs scale-[1.02]"
+                            : "bg-indigo-50 text-indigo-700 hover:bg-indigo-100"
+                        }`}
+                        title={isRTL ? "الأسبوع القادم (مفتوح)" : "Next Week"}
+                      >
+                        <span>{isRTL ? dayItem.dayNameAr : dayItem.dayNameEn}</span>
+                        <span
+                          className={`text-[11px] font-mono ${
+                            isSelected ? "text-indigo-200" : "text-indigo-400"
+                          }`}
+                        >
+                          {dayItem.formattedShort}
+                        </span>
+                      </button>
+                    );
+                  })}
+                </>
+              )}
             </div>
 
-            {/* Date Picker Input & Status Tag */}
+            {/* Date Select Dropdown & Status Tag */}
             <div className="flex items-center gap-2.5 flex-wrap sm:flex-nowrap">
-              <div className="flex items-center gap-2 bg-[#f8fafc] border border-slate-200 rounded-xl px-3 py-1.5">
+              {/* قائمة التاريخ المحددة بأيام الأسبوع المسموح بها فقط */}
+              <div className="flex items-center gap-2 bg-[#f8fafc] border border-slate-200 rounded-xl px-3 py-1.5 hover:border-emerald-500/40 transition-colors shadow-2xs">
                 <CalendarDays className="w-4 h-4 text-emerald-700 shrink-0" />
-                <span className="text-xs font-semibold text-slate-500 whitespace-nowrap">
-                  {isRTL ? "التاريخ:" : "Date:"}
-                </span>
-                <input
-                  type="date"
+                <label htmlFor="attendance-date-select" className="text-xs font-bold text-slate-600 whitespace-nowrap">
+                  {isRTL ? "قائمة التاريخ:" : "Date:"}
+                </label>
+                <select
+                  id="attendance-date-select"
                   value={selectedDate}
                   onChange={(e) => handleSelectDate(e.target.value)}
                   className="text-xs sm:text-sm font-bold text-slate-800 bg-transparent focus:outline-none cursor-pointer"
-                />
+                >
+                  {weekInfo.nextWeek.length > 0 ? (
+                    <>
+                      <optgroup label={isRTL ? "الأسبوع الحالي (السبت – الخميس)" : "Current Week (Sat – Thu)"}>
+                        {weekInfo.currentWeek.map((item) => (
+                          <option key={item.date} value={item.date}>
+                            {isRTL ? item.fullLabelAr : item.fullLabelEn}{" "}
+                            {item.isToday ? (isRTL ? "— (اليوم)" : "— (Today)") : ""}
+                          </option>
+                        ))}
+                      </optgroup>
+                      <optgroup label={isRTL ? "الأسبوع القادم (مفتوح للتسجيل)" : "Next Week (Open for Registration)"}>
+                        {weekInfo.nextWeek.map((item) => (
+                          <option key={item.date} value={item.date}>
+                            {isRTL ? item.fullLabelAr : item.fullLabelEn}
+                          </option>
+                        ))}
+                      </optgroup>
+                    </>
+                  ) : (
+                    weekInfo.currentWeek.map((item) => (
+                      <option key={item.date} value={item.date}>
+                        {isRTL ? item.fullLabelAr : item.fullLabelEn}{" "}
+                        {item.isToday ? (isRTL ? "— (اليوم)" : "— (Today)") : ""}
+                      </option>
+                    ))
+                  )}
+                </select>
               </div>
 
               {/* Status Badge */}
               {isToday ? (
                 <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-50 text-emerald-800 text-xs font-bold border border-emerald-200 shrink-0">
                   <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                  <span>{isRTL ? "مباشر الآن" : "Live Today"}</span>
+                  <span>{isRTL ? "مباشر اليوم" : "Live Today"}</span>
                 </span>
               ) : isFuture ? (
                 <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-blue-50 text-blue-700 text-xs font-bold border border-blue-200 shrink-0">
@@ -351,7 +403,7 @@ export default function AdminAttendancePage() {
                 </span>
               ) : (
                 <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 text-slate-600 text-xs font-bold border border-slate-200 shrink-0">
-                  <span>{isRTL ? "أرشيف سابق" : "Past Log"}</span>
+                  <span>{isRTL ? "سجل سابق" : "Past Log"}</span>
                 </span>
               )}
 

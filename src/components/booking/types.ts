@@ -9,4 +9,8 @@ export interface MemberBooking {
   status: "confirmed" | "cancelled";
   notes?: string;
   canCancel: boolean;
+  seatNumber?: number;
+  seatLabel?: string;
+  seatCode?: string;
+  roomName?: string;
 }

@@ -98,7 +98,7 @@ export default function VisitorPassTab() {
           </h3>
           <p className="text-sm sm:text-base text-slate-700 leading-relaxed font-normal">
             {isRTL
-              ? "شكراً لتواصلك. ستقوم إدارة المركز بمراجعة طلب الزيارة والتأكد من توفر مقعد شاغر في الموعد المحدد، وسيصلك إشعار بالنتيجة عبر الواتساب أو الإيميل."
+              ? "شكراً لتواصلك. ستقوم إدارة المركز بمراجعة طلب الزيارة والتأكد من توفر مقعد متاح في الموعد المحدد، وسيصلك إشعار بالنتيجة عبر الواتساب أو الإيميل."
               : "Thank you. The management will review desk availability and notify you with the confirmation."}
           </p>
           <div className="pt-4">

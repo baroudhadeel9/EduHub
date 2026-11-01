@@ -48,6 +48,7 @@ export interface MemberRecord {
   name: string;
   email: string;
   phone: string;
+  gender?: "male" | "female";
   nationalId?: string;
   avatarLetter: string;
   avatarColor: string;

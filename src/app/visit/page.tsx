@@ -3,15 +3,10 @@
 import React from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { useRouter } from "next/navigation";
 import { useLanguage } from "@/context/LanguageContext";
 import {
   ArrowRight,
   ArrowLeft,
-  Compass,
-  Zap,
-  Wifi,
-  Clock,
   HelpCircle,
   Mail,
   Home,
@@ -20,7 +15,6 @@ import {
 import VisitorPassTab from "@/components/booking/VisitorPassTab";
 
 export default function VisitorPassPage() {
-  const router = useRouter();
   const { locale, setLocale, dir } = useLanguage();
   const isRTL = dir === "rtl" || locale === "ar";
   const BackArrow = isRTL ? ArrowRight : ArrowLeft;

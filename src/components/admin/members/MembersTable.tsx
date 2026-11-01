@@ -7,39 +7,25 @@ import {
   ArrowUpDown,
   ChevronLeft,
   ChevronRight,
+  ChevronDown,
   Eye,
   Users,
   GraduationCap,
   Briefcase,
   CheckCircle2,
+  Menu,
 } from "lucide-react";
 import { MemberRecord, MemberType, MemberStatus } from "./data";
 import MemberDetailDrawer from "./MemberDetailDrawer";
-import { getAdminMembersApi } from "@/services/applications";
+import { getAdminMembersApi, updateAdminMemberApi } from "@/services/applications";
 
 type SortOption = "most_active" | "least_active" | "students_first" | "freelancers_first" | "newest";
 
-interface RawMemberData {
-  id: string | number;
-  name: string;
-  email: string;
-  phone?: string;
-  nationalId?: string;
-  avatarLetter?: string;
-  avatarColor?: string;
-  type?: MemberType;
-  specialty?: string;
-  joinedDate?: string;
-  hoursUsed?: number;
-  hoursLimit?: number;
-  extraHours?: number;
-  dueAmount?: number;
-  lastBooking?: string;
-  status?: MemberStatus;
-  history?: MemberRecord["history"];
+interface MembersTableProps {
+  onOpenMobileMenu?: () => void;
 }
 
-export default function MembersTable() {
+export default function MembersTable({ onOpenMobileMenu }: MembersTableProps = {}) {
   const { t, locale, dir } = useLanguage();
   const isRTL = dir === "rtl" || locale === "ar";
   const m = t.admin?.members;
@@ -47,59 +33,61 @@ export default function MembersTable() {
 
   const [members, setMembers] = useState<MemberRecord[]>([]);
 
-  useEffect(() => {
-    async function loadMembers() {
-      try {
-        const data = await getAdminMembersApi();
-        if (data && data.length > 0) {
-          const backendMembers: MemberRecord[] = (data as Record<string, unknown>[]).map((d) => {
-            const name = String(d.name || d.full_name || "عضو جديد");
-            const rawType = String(d.type || d.member_type || "student");
-            const memberType: MemberType = rawType.includes("free") || rawType.includes("مستقل") ? "freelancer" : "student";
-            const quota = (d.current_quota || {}) as Record<string, number>;
-            const hoursLimit = Number(d.hoursLimit ?? d.hours_limit ?? quota.allocated_hours ?? (memberType === "student" ? 25 : 35));
-            const hoursUsed = Number(d.hoursUsed ?? d.hours_used ?? quota.used_hours ?? 0);
-            const extraHours = Number(d.extraHours ?? d.extra_hours ?? quota.extra_hours ?? 0);
-            const remainingHours = Math.max(0, hoursLimit - hoursUsed);
-            const dueAmount = Number(d.dueAmount ?? d.due_amount ?? quota.extra_amount_due ?? 0);
-            const joinedDate = String(d.joinedDate || d.created_at || "").split("T")[0];
+  const loadMembers = React.useCallback(async () => {
+    try {
+      const data = await getAdminMembersApi();
+      if (data && data.length > 0) {
+        const backendMembers: MemberRecord[] = (data as Record<string, unknown>[]).map((d) => {
+          const name = String(d.name || d.full_name || "عضو جديد");
+          const rawType = String(d.type || d.member_type || "student");
+          const memberType: MemberType = rawType.includes("free") || rawType.includes("مستقل") ? "freelancer" : "student";
+          const quota = (d.current_quota || {}) as Record<string, number>;
+          const hoursLimit = Number(d.hoursLimit ?? d.hours_limit ?? quota.allocated_hours ?? (memberType === "student" ? 25 : 35));
+          const hoursUsed = Number(d.hoursUsed ?? d.hours_used ?? quota.used_hours ?? 0);
+          const extraHours = Number(d.extraHours ?? d.extra_hours ?? quota.extra_hours ?? 0);
+          const remainingHours = Math.max(0, hoursLimit - hoursUsed);
+          const dueAmount = Number(d.dueAmount ?? d.due_amount ?? quota.extra_amount_due ?? 0);
+          const joinedDate = String(d.joinedDate || d.created_at || "").split("T")[0];
 
-            return {
-              id: String(d.id),
-              name,
-              email: String(d.email || ""),
-              phone: String(d.phone || ""),
-              nationalId: String(d.nationalId || d.national_id || ""),
-              avatarLetter: String(d.avatarLetter || name.charAt(0) || "م"),
-              avatarColor:
-                String(d.avatarColor ||
-                (memberType === "student"
-                  ? "bg-emerald-100 text-emerald-800 border-emerald-200"
-                  : "bg-teal-100 text-teal-800 border-teal-200")),
-              type: memberType,
-              specialty: String(d.specialty || (memberType === "student" ? "طالب جامعي" : "مستقل")),
-              joinedDate,
-              hoursUsed,
-              hoursLimit,
-              extraHours,
-              remainingHours,
-              dueAmount,
-              lastBooking: d.lastBooking && d.lastBooking !== "اليوم" ? String(d.lastBooking) : (isRTL ? "لا يوجد حجز بعد" : "No bookings yet"),
-              status: (d.status as MemberStatus) || "active",
-              history: (d.history as MemberRecord["history"]) || [],
-            };
-          });
+          return {
+            id: String(d.id),
+            name,
+            email: String(d.email || ""),
+            phone: String(d.phone || ""),
+            gender: (d.gender as "male" | "female") || "male",
+            nationalId: String(d.nationalId || d.national_id || ""),
+            avatarLetter: String(d.avatarLetter || name.charAt(0) || "م"),
+            avatarColor:
+              String(d.avatarColor ||
+              (memberType === "student"
+                ? "bg-emerald-100 text-emerald-800 border-emerald-200"
+                : "bg-teal-100 text-teal-800 border-teal-200")),
+            type: memberType,
+            specialty: String(d.specialty || (memberType === "student" ? "طالب جامعي" : "مستقل")),
+            joinedDate,
+            hoursUsed,
+            hoursLimit,
+            extraHours,
+            remainingHours,
+            dueAmount,
+            lastBooking: d.lastBooking && d.lastBooking !== "اليوم" ? String(d.lastBooking) : (isRTL ? "لا يوجد حجز بعد" : "No bookings yet"),
+            status: (d.status as MemberStatus) || "active",
+            history: (d.history as MemberRecord["history"]) || [],
+          };
+        });
 
-          setMembers(backendMembers);
-        } else {
-          setMembers([]);
-        }
-      } catch (err) {
-        console.error("Failed to load members from backend", err);
+        setMembers(backendMembers);
+      } else {
+        setMembers([]);
       }
+    } catch (err) {
+      console.error("Failed to load members from backend", err);
     }
-    loadMembers();
   }, [isRTL]);
+
+  useEffect(() => {
+    loadMembers();
+  }, [loadMembers]);
   const [activeFilter, setActiveFilter] = useState<string>("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [sortBy, setSortBy] = useState<SortOption>("most_active");
@@ -125,14 +113,87 @@ export default function MembersTable() {
     { id: "suspended", label: m?.filterSuspended || (isRTL ? "موقوف" : "Suspended") },
   ];
 
-  const handleToggleStatus = (id: string) => {
+  const [updatingMemberId, setUpdatingMemberId] = useState<string | null>(null);
+
+  const handleChangeCategoryAndGender = async (id: string, compositeValue: string) => {
+    let newType: MemberType = "student";
+    let newGender: "male" | "female" = "male";
+
+    if (compositeValue === "student_female") {
+      newType = "student";
+      newGender = "female";
+    } else if (compositeValue === "student_male") {
+      newType = "student";
+      newGender = "male";
+    } else if (compositeValue === "freelancer_female") {
+      newType = "freelancer";
+      newGender = "female";
+    } else if (compositeValue === "freelancer_male") {
+      newType = "freelancer";
+      newGender = "male";
+    }
+
+    const limit = newType === "student" ? 25 : 35;
+    const avatarColor =
+      newType === "student"
+        ? "bg-emerald-50 text-emerald-800 border-emerald-200"
+        : "bg-purple-50 text-purple-800 border-purple-200";
+
+    setUpdatingMemberId(id);
+    const prevMembers = [...members];
     setMembers((prev) =>
-      prev.map((mem) => {
-        if (mem.id !== id) return mem;
-        const newStatus = mem.status === "suspended" ? "active" : "suspended";
-        return { ...mem, status: newStatus };
-      })
+      prev.map((m) =>
+        m.id === id
+          ? {
+              ...m,
+              type: newType,
+              gender: newGender,
+              hoursLimit: limit,
+              remainingHours: Math.max(0, limit - m.hoursUsed),
+              avatarColor,
+            }
+          : m
+      )
     );
+
+    try {
+      await updateAdminMemberApi(id, {
+        member_type: newType,
+        type: newType,
+        gender: newGender,
+      });
+    } catch (err: unknown) {
+      setMembers(prevMembers);
+      const msg = err instanceof Error ? err.message : "";
+      alert(msg || (isRTL ? "فشل تعديل الفئة على السيرفر." : "Failed to update category."));
+    } finally {
+      setUpdatingMemberId(null);
+    }
+  };
+
+  const handleChangeStatus = async (id: string, newStatus: "active" | "suspended") => {
+    setUpdatingMemberId(id);
+    const prevMembers = [...members];
+    setMembers((prev) =>
+      prev.map((m) => (m.id === id ? { ...m, status: newStatus } : m))
+    );
+
+    try {
+      await updateAdminMemberApi(id, { status: newStatus });
+    } catch (err: unknown) {
+      setMembers(prevMembers);
+      const msg = err instanceof Error ? err.message : "";
+      alert(msg || (isRTL ? "فشل تعديل حالة العضوية على السيرفر." : "Failed to update status."));
+    } finally {
+      setUpdatingMemberId(null);
+    }
+  };
+
+  const handleToggleStatus = (id: string) => {
+    const mem = members.find((m) => m.id === id);
+    if (!mem) return;
+    const newStatus = mem.status === "suspended" ? "active" : "suspended";
+    handleChangeStatus(id, newStatus);
   };
 
   const filteredAndSortedMembers = useMemo(() => {
@@ -180,15 +241,27 @@ export default function MembersTable() {
   return (
     <div className="space-y-5">
       {/* ── Page Header ── */}
-      <div className="space-y-1">
-        <h1 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">
-          {m?.title || (isRTL ? "دليل الأعضاء المشتركين" : "Members Directory")}
-        </h1>
-        <p className="text-xs sm:text-sm text-slate-500">
-          {isRTL
-            ? "إدارة وتتبع الأعضاء المعتمدين، الحصص الشهرية، وسجلات الحضور والحجوزات."
-            : "Manage registered members, monthly quotas, and booking records."}
-        </p>
+      <div className="flex items-center gap-3">
+        {onOpenMobileMenu && (
+          <button
+            type="button"
+            onClick={onOpenMobileMenu}
+            className="p-2 sm:p-2.5 rounded-xl border border-slate-200 bg-white text-slate-700 hover:text-slate-900 hover:bg-slate-50 shadow-2xs lg:hidden cursor-pointer shrink-0"
+            aria-label="Open Sidebar Menu"
+          >
+            <Menu className="w-5 h-5" />
+          </button>
+        )}
+        <div className="space-y-1">
+          <h1 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">
+            {m?.title || (isRTL ? "دليل الأعضاء المشتركين" : "Members Directory")}
+          </h1>
+          <p className="text-xs sm:text-sm text-slate-500">
+            {isRTL
+              ? "إدارة وتتبع الأعضاء المعتمدين، الحصص الشهرية، وسجلات الحضور والحجوزات."
+              : "Manage registered members, monthly quotas, and booking records."}
+          </p>
+        </div>
       </div>
 
       {/* ── 4 Summary Stat Cards (Clean & Quiet) ── */}
@@ -299,13 +372,13 @@ export default function MembersTable() {
                   {isRTL ? "العضو" : "Member"}
                 </th>
                 <th className="py-3.5 px-4 text-center font-bold">
-                  {m?.colType || (isRTL ? "الفئة" : "Category")}
+                  {isRTL ? "الفئة" : "Category"}
                 </th>
-                <th className="py-3.5 px-4 text-start font-bold min-w-[180px]">
+                <th className="py-3.5 px-4 text-start font-bold min-w-[170px]">
                   {isRTL ? "استهلاك الرصيد الشهري" : "Monthly Usage"}
                 </th>
                 <th className="py-3.5 px-4 text-center font-bold">
-                  {m?.colStatus || (isRTL ? "الحالة" : "Status")}
+                  {isRTL ? "حالة الحساب" : "Account Status"}
                 </th>
                 <th className="py-3.5 px-4 text-center font-bold">
                   {isRTL ? "الملف" : "Profile"}
@@ -344,17 +417,29 @@ export default function MembersTable() {
                       </div>
                     </td>
 
-                    {/* Member Category Badge */}
+                    {/* Member Category & Gender Direct Select Box */}
                     <td className="py-3.5 px-4 text-center whitespace-nowrap">
-                      {member.type === "freelancer" ? (
-                        <span className="inline-block px-2.5 py-0.5 rounded-full text-xs font-semibold bg-teal-50 text-teal-800 border border-teal-200">
-                          {m?.freelancer || (isRTL ? "فريلانسر" : "Freelancer")}
-                        </span>
-                      ) : (
-                        <span className="inline-block px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-800 border border-emerald-200">
-                          {m?.student || (isRTL ? "طالب" : "Student")}
-                        </span>
-                      )}
+                      <div className="relative inline-flex items-center">
+                        <select
+                          value={`${member.type}_${member.gender || "male"}`}
+                          disabled={updatingMemberId === member.id}
+                          onClick={(e) => e.stopPropagation()}
+                          onChange={(e) => {
+                            e.stopPropagation();
+                            handleChangeCategoryAndGender(member.id, e.target.value);
+                          }}
+                          title={isRTL ? "تعديل الفئة" : "Change category"}
+                          className={`appearance-none bg-white hover:bg-slate-50/80 border border-slate-200 hover:border-slate-300 text-slate-800 text-xs font-semibold rounded-xl py-1.5 pe-7 ps-3.5 transition-all outline-none focus:border-slate-400 focus:ring-1 focus:ring-slate-200 shadow-2xs cursor-pointer ${
+                            updatingMemberId === member.id ? "opacity-60 cursor-not-allowed" : ""
+                          }`}
+                        >
+                          <option value="student_male">{isRTL ? "طالب" : "Student"}</option>
+                          <option value="student_female">{isRTL ? "طالبة" : "Student (F)"}</option>
+                          <option value="freelancer_male">{isRTL ? "فريلانسر" : "Freelancer"}</option>
+                          <option value="freelancer_female">{isRTL ? "فريلانسر (أنثى)" : "Freelancer (F)"}</option>
+                        </select>
+                        <ChevronDown className="w-3.5 h-3.5 text-slate-400 absolute end-2 pointer-events-none" />
+                      </div>
                     </td>
 
                     {/* Progress Bar & Hours */}
@@ -391,54 +476,65 @@ export default function MembersTable() {
                       </div>
                     </td>
 
-                    {/* Status Badge */}
+                    {/* 3. Account Status Direct Select Box */}
                     <td className="py-3.5 px-4 text-center whitespace-nowrap">
-                      {member.status === "extra_hours" && (
-                        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-rose-50 text-rose-700 border border-rose-200">
-                          <span className="w-1.5 h-1.5 rounded-full bg-rose-600" />
-                          <span>{m?.statusExtraHours || (isRTL ? "ساعات إضافية" : "Extra Hours")}</span>
-                        </span>
-                      )}
-                      {member.status === "near_limit" && (
-                        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-50 text-amber-700 border border-amber-200">
-                          <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />
-                          <span>{m?.statusNearLimit || (isRTL ? "قارب على النهاية" : "Near Limit")}</span>
-                        </span>
-                      )}
-                      {member.status === "active" && (
-                        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
-                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-600" />
-                          <span>{m?.statusActive || (isRTL ? "نشط" : "Active")}</span>
-                        </span>
-                      )}
-                      {member.status === "no_booking" && (
-                        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-slate-100 text-slate-600 border border-slate-200">
-                          <span className="w-1.5 h-1.5 rounded-full bg-slate-400" />
-                          <span>{m?.statusNoBooking || (isRTL ? "لم يحجز هذا الشهر" : "No Booking")}</span>
-                        </span>
-                      )}
-                      {member.status === "suspended" && (
-                        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-slate-100 text-slate-500 border border-slate-200">
-                          <span className="w-1.5 h-1.5 rounded-full bg-slate-400" />
-                          <span>{m?.statusSuspended || (isRTL ? "موقوف" : "Suspended")}</span>
-                        </span>
-                      )}
+                      <div className="inline-flex flex-col items-center gap-1">
+                        <div className="relative inline-flex items-center">
+                          <select
+                            value={member.status === "suspended" ? "suspended" : "active"}
+                            disabled={updatingMemberId === member.id}
+                            onClick={(e) => e.stopPropagation()}
+                            onChange={(e) => {
+                              e.stopPropagation();
+                              handleChangeStatus(member.id, e.target.value as "active" | "suspended");
+                            }}
+                            title={isRTL ? "تعديل حالة الحساب" : "Change status"}
+                            className={`appearance-none text-xs font-semibold rounded-xl py-1.5 pe-7 ps-3 border transition-all cursor-pointer outline-none shadow-2xs ${
+                              member.status === "suspended"
+                                ? "bg-rose-50/70 text-rose-700 border-rose-200 hover:border-rose-300 focus:border-rose-400 focus:ring-1 focus:ring-rose-200 font-bold"
+                                : "bg-white hover:bg-slate-50/80 text-slate-800 border-slate-200 hover:border-slate-300 focus:border-slate-400 focus:ring-1 focus:ring-slate-200"
+                            } ${updatingMemberId === member.id ? "opacity-60 cursor-not-allowed" : ""}`}
+                          >
+                            <option value="active">{isRTL ? "نشط" : "Active"}</option>
+                            <option value="suspended">{isRTL ? "موقوف" : "Suspended"}</option>
+                          </select>
+                          <ChevronDown
+                            className={`w-3.5 h-3.5 absolute end-2 pointer-events-none ${
+                              member.status === "suspended" ? "text-rose-400" : "text-slate-400"
+                            }`}
+                          />
+                        </div>
+
+                        {/* Extra indicators if near limit or extra hours while active */}
+                        {member.status === "extra_hours" && (
+                          <span className="text-[10px] font-bold text-rose-600">
+                            {isRTL ? "ساعات إضافية" : "Extra Hours"}
+                          </span>
+                        )}
+                        {member.status === "near_limit" && (
+                          <span className="text-[10px] font-bold text-amber-600">
+                            {isRTL ? "قارب على النهاية" : "Near Limit"}
+                          </span>
+                        )}
+                      </div>
                     </td>
 
-                    {/* Action: Open Member Profile Drawer */}
+                    {/* Action: Open Member Profile Drawer & Full Details */}
                     <td className="py-3.5 px-4 text-center whitespace-nowrap">
-                      <button
-                        type="button"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setSelectedMemberId(member.id);
-                        }}
-                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-slate-200 text-xs font-semibold text-slate-700 hover:text-emerald-700 hover:border-emerald-300 hover:bg-emerald-50/50 transition-colors cursor-pointer"
-                      >
-                        <Eye className="w-3.5 h-3.5" />
-                        <span>{isRTL ? "عرض الملف" : "Profile"}</span>
-                        <ChevronIcon className="w-3 h-3 text-slate-400" />
-                      </button>
+                      <div className="flex items-center justify-center">
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setSelectedMemberId(member.id);
+                          }}
+                          className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl border border-slate-200 text-xs font-semibold text-slate-700 hover:text-emerald-700 hover:border-emerald-300 hover:bg-emerald-50/50 transition-colors cursor-pointer shadow-2xs"
+                        >
+                          <Eye className="w-3.5 h-3.5" />
+                          <span>{isRTL ? "عرض الملف" : "Profile"}</span>
+                          <ChevronIcon className="w-3 h-3 text-slate-400" />
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 );
@@ -462,6 +558,7 @@ export default function MembersTable() {
         isOpen={Boolean(selectedMember)}
         onClose={() => setSelectedMemberId(null)}
         onToggleStatus={handleToggleStatus}
+        onMemberUpdated={loadMembers}
       />
     </div>
   );

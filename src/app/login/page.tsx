@@ -3,11 +3,13 @@
 import React from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useLanguage } from "@/context/LanguageContext";
 import { Home } from "lucide-react";
 import MemberBookingTab from "@/components/booking/MemberBookingTab";
 
 export default function LoginPage() {
+  const router = useRouter();
   const { locale, setLocale } = useLanguage();
   const isRTL = locale === "ar";
 
@@ -80,7 +82,7 @@ export default function LoginPage() {
         <div className="bg-white rounded-2xl sm:rounded-3xl border border-slate-200/90 shadow-lg sm:shadow-xl overflow-hidden p-4 sm:p-8 md:p-10">
           <MemberBookingTab
             onApplyNewMember={() => {
-              window.location.href = "/join";
+              router.push("/join");
             }}
           />
         </div>
