@@ -50,7 +50,7 @@ const itemMeta: Record<
 > = {
   volunteers: {
     icon: Users,
-    image: "/images/team-collaboration.jpg",
+    image: "/images/transparency/team-volunteers.jpg",
     imageAlt: "فريق الإشراف والمتطوعين في مركز غزة",
     colorTheme: {
       arcColor: "var(--color-chart-emerald)",
