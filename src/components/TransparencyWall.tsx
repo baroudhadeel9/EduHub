@@ -231,6 +231,93 @@ export default function TransparencyWall({ onOpenDonation }: TransparencyWallPro
       aria-labelledby="transparency-title"
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+
+        {/* 2. LIVE FIELD VERIFICATION GALLERY (Real Equipment from Gaza) */}
+        {galleryItems.length > 0 && (
+          <div className="mb-20">
+            {/* Gallery Header */}
+            <div className="text-center max-w-2xl mx-auto mb-12">
+              <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-emerald-50 border border-emerald-200/80 text-emerald-900 text-xs font-bold mb-3.5 shadow-2xs">
+                <Camera className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                <span>{tw?.galleryBadge || (isRtl ? "شواهد ميدانية حية من غزة" : "Live Field Evidence from Gaza")}</span>
+              </div>
+              <h3 className="text-2xl sm:text-3xl lg:text-4xl font-black text-brand-navy tracking-tight mb-3">
+                {tw?.galleryTitle || (isRtl ? "أين تذهب التبرعات؟ بنيتنا التحتية على أرض الواقع" : "Where Do Donations Go? Our Infrastructure on the Ground")}
+              </h3>
+              <p className="text-sm sm:text-base text-slate-600 font-normal leading-relaxed">
+                {tw?.gallerySubtitle || (isRtl ? "كل مساهمة تتحول فوراً إلى طاقة نظيفة، إنترنت مستقر، ومعدات حقيقية تعمل 24/7 لدعم شبابنا." : "Every contribution powers real equipment operating 24/7 to keep our youth connected.")}
+              </p>
+            </div>
+
+            {/* Gallery Grid (High-end 4:5 Portrait Showcase with Natural Framing) */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-7">
+              {galleryItems.map((item) => {
+                const meta = galleryCategoryMeta[item.id] || {
+                  icon: Sparkles,
+                  badgeStyle: "bg-emerald-600 text-white border-emerald-500/60",
+                };
+                const CategoryIcon = meta.icon;
+
+                return (
+                  <div
+                    key={item.id}
+                    onClick={() => setLightboxItem(item)}
+                    className="group flex flex-col bg-white rounded-3xl border border-slate-200/80 shadow-xs hover:shadow-xl hover:-translate-y-1.5 hover:border-emerald-300 transition-all duration-300 overflow-hidden cursor-pointer"
+                  >
+                    {/* Photo Container with Proper Portrait Aspect (4:5) to showcase equipment without cropping */}
+                    <div className="relative aspect-[4/5] w-full overflow-hidden bg-slate-900/10">
+                      <Image
+                        src={item.image}
+                        alt={item.title}
+                        fill
+                        sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+                        className="object-cover object-top group-hover:scale-106 transition-transform duration-700 ease-out"
+                      />
+
+                      {/* Smooth Modern Scrim Gradient */}
+                      <div className="absolute inset-0 bg-gradient-to-t from-slate-950/70 via-transparent to-black/25 opacity-70 group-hover:opacity-50 transition-opacity duration-300" />
+
+                      {/* Floating Category Pill Badge with Icon */}
+                      <div className={`absolute top-3.5 start-3.5 flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-black uppercase tracking-wider shadow-md backdrop-blur-md border ${meta.badgeStyle}`}>
+                        <CategoryIcon className="w-3.5 h-3.5 shrink-0" />
+                        <span>{item.category}</span>
+                      </div>
+
+                      {/* Hover Zoom CTA Pill Button */}
+                      <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                        <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/95 text-brand-navy text-xs font-black shadow-xl backdrop-blur-md transform translate-y-3 group-hover:translate-y-0 transition-transform duration-300 border border-white">
+                          <Maximize2 className="w-3.5 h-3.5 text-emerald-600" />
+                          <span>{tw?.galleryExpandPhoto || (isRtl ? "عرض الصورة كاملة" : "Expand Photo")}</span>
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Card Content with Refined Spacing & Typography */}
+                    <div className="p-5 sm:p-6 flex flex-col justify-between flex-1 bg-white">
+                      <div>
+                        <h4 className="text-base font-black text-brand-navy leading-snug mb-2 group-hover:text-emerald-700 transition-colors">
+                          {item.title}
+                        </h4>
+
+                        <p className="text-xs sm:text-sm text-slate-500 leading-relaxed font-normal">
+                          {item.description}
+                        </p>
+                      </div>
+
+                      {/* Clean Minimalist Action Link */}
+                      <div className="pt-4 mt-5 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-emerald-600 group-hover:text-emerald-700">
+                        <span>{tw?.galleryViewPhoto || (isRtl ? "تكبير واستعراض" : "View Photo")}</span>
+                        <Maximize2 className="w-3.5 h-3.5 group-hover:scale-115 transition-transform" />
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+
         
         {/* Top Header */}
         <div className="text-center max-w-3xl mx-auto mb-12">
@@ -466,91 +553,6 @@ export default function TransparencyWall({ onOpenDonation }: TransparencyWallPro
             </div>
           </div>
         </div>
-
-        {/* 2. LIVE FIELD VERIFICATION GALLERY (Real Equipment from Gaza) */}
-        {galleryItems.length > 0 && (
-          <div className="mb-20">
-            {/* Gallery Header */}
-            <div className="text-center max-w-2xl mx-auto mb-12">
-              <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-emerald-50 border border-emerald-200/80 text-emerald-900 text-xs font-bold mb-3.5 shadow-2xs">
-                <Camera className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
-                <span>{tw?.galleryBadge || (isRtl ? "شواهد ميدانية حية من غزة" : "Live Field Evidence from Gaza")}</span>
-              </div>
-              <h3 className="text-2xl sm:text-3xl lg:text-4xl font-black text-brand-navy tracking-tight mb-3">
-                {tw?.galleryTitle || (isRtl ? "أين تذهب التبرعات؟ بنيتنا التحتية على أرض الواقع" : "Where Do Donations Go? Our Infrastructure on the Ground")}
-              </h3>
-              <p className="text-sm sm:text-base text-slate-600 font-normal leading-relaxed">
-                {tw?.gallerySubtitle || (isRtl ? "كل مساهمة تتحول فوراً إلى طاقة نظيفة، إنترنت مستقر، ومعدات حقيقية تعمل 24/7 لدعم شبابنا." : "Every contribution powers real equipment operating 24/7 to keep our youth connected.")}
-              </p>
-            </div>
-
-            {/* Gallery Grid (High-end 4:5 Portrait Showcase with Natural Framing) */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-7">
-              {galleryItems.map((item) => {
-                const meta = galleryCategoryMeta[item.id] || {
-                  icon: Sparkles,
-                  badgeStyle: "bg-emerald-600 text-white border-emerald-500/60",
-                };
-                const CategoryIcon = meta.icon;
-
-                return (
-                  <div
-                    key={item.id}
-                    onClick={() => setLightboxItem(item)}
-                    className="group flex flex-col bg-white rounded-3xl border border-slate-200/80 shadow-xs hover:shadow-xl hover:-translate-y-1.5 hover:border-emerald-300 transition-all duration-300 overflow-hidden cursor-pointer"
-                  >
-                    {/* Photo Container with Proper Portrait Aspect (4:5) to showcase equipment without cropping */}
-                    <div className="relative aspect-[4/5] w-full overflow-hidden bg-slate-900/10">
-                      <Image
-                        src={item.image}
-                        alt={item.title}
-                        fill
-                        sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
-                        className="object-cover object-top group-hover:scale-106 transition-transform duration-700 ease-out"
-                      />
-
-                      {/* Smooth Modern Scrim Gradient */}
-                      <div className="absolute inset-0 bg-gradient-to-t from-slate-950/70 via-transparent to-black/25 opacity-70 group-hover:opacity-50 transition-opacity duration-300" />
-
-                      {/* Floating Category Pill Badge with Icon */}
-                      <div className={`absolute top-3.5 start-3.5 flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-black uppercase tracking-wider shadow-md backdrop-blur-md border ${meta.badgeStyle}`}>
-                        <CategoryIcon className="w-3.5 h-3.5 shrink-0" />
-                        <span>{item.category}</span>
-                      </div>
-
-                      {/* Hover Zoom CTA Pill Button */}
-                      <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                        <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/95 text-brand-navy text-xs font-black shadow-xl backdrop-blur-md transform translate-y-3 group-hover:translate-y-0 transition-transform duration-300 border border-white">
-                          <Maximize2 className="w-3.5 h-3.5 text-emerald-600" />
-                          <span>{tw?.galleryExpandPhoto || (isRtl ? "عرض الصورة كاملة" : "Expand Photo")}</span>
-                        </span>
-                      </div>
-                    </div>
-
-                    {/* Card Content with Refined Spacing & Typography */}
-                    <div className="p-5 sm:p-6 flex flex-col justify-between flex-1 bg-white">
-                      <div>
-                        <h4 className="text-base font-black text-brand-navy leading-snug mb-2 group-hover:text-emerald-700 transition-colors">
-                          {item.title}
-                        </h4>
-
-                        <p className="text-xs sm:text-sm text-slate-500 leading-relaxed font-normal">
-                          {item.description}
-                        </p>
-                      </div>
-
-                      {/* Clean Minimalist Action Link */}
-                      <div className="pt-4 mt-5 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-emerald-600 group-hover:text-emerald-700">
-                        <span>{tw?.galleryViewPhoto || (isRtl ? "تكبير واستعراض" : "View Photo")}</span>
-                        <Maximize2 className="w-3.5 h-3.5 group-hover:scale-115 transition-transform" />
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        )}
 
         {/* 3. Trust Guarantees */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
