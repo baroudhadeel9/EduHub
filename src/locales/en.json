@@ -101,9 +101,9 @@
       "percentage": 100
     },
     "internetStatus": {
-      "title": "Satellite Internet",
+      "title": "High-Speed Wireless Internet",
       "value": "100 Mbps",
-      "desc": "Direct low-earth orbit satellite link (LEO)",
+      "desc": "High-speed wireless point-to-point (PTP) link",
       "percentage": 88
     },
     "seatsStatus": {
@@ -122,7 +122,7 @@
     "powerTitle": "Solar Power",
     "internetTitle": "High-Speed Internet (100 Mbps)",
     "seatsTitle": "Equipped Study Desks",
-    "beneficiariesTitle": "Monthly Active Learners"
+    "beneficiariesTitle": "Youth Beneficiaries Since August 2024"
   },
   "pillars": {
     "badge": "Community Pillars",
@@ -137,7 +137,7 @@
       },
       {
         "id": "internet",
-        "title": "High-Speed Satellite Internet",
+        "title": "High-Speed Wireless Internet",
         "description": "Optimized for attending Zoom university lectures, client remote interviews, downloading academic resources and software libraries.",
         "tag": "Dedicated bandwidth per terminal"
       },

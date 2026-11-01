@@ -1708,7 +1708,9 @@ export async function getHubPublicStatsApi(): Promise<HubPublicStats> {
         availableSeats:
           typeof d.available_seats === "number" ? d.available_seats : defaultStats.availableSeats,
         activeLearnersCount:
-          typeof d.active_learners === "number" ? d.active_learners : defaultStats.activeLearnersCount,
+          typeof d.active_learners === "number" && d.active_learners >= 1500
+            ? d.active_learners
+            : 1500,
         isLive: true,
       };
     }
