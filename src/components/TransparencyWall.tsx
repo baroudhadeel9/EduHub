@@ -4,7 +4,6 @@ import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import { useLanguage } from "@/context/LanguageContext";
 import {
-  ShieldCheck,
   Zap,
   Wifi,
   Users,
@@ -321,13 +320,6 @@ export default function TransparencyWall({ onOpenDonation }: TransparencyWallPro
         
         {/* Top Header */}
         <div className="text-center max-w-3xl mx-auto mb-12">
-          {/* Soft Pill Badge */}
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-emerald-50/90 border border-emerald-200/80 text-emerald-900 text-xs sm:text-sm font-bold mb-4 shadow-2xs backdrop-blur-xs">
-            <span className="flex h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
-            <ShieldCheck className="w-4 h-4 text-emerald-600 shrink-0" />
-            <span>{tw?.badge}</span>
-          </div>
-
           {/* Inspiring Headline */}
           <h2
             id="transparency-title"
