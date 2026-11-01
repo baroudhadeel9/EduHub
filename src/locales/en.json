@@ -26,17 +26,17 @@
   },
   "hero": {
     "liveStatusBadge": "The center is open now for students and professionals (until 07:00 PM)",
-    "titlePart1": "A Lifeline of Hope & Learning",
+    "titlePart1": "A Lifeline for Education and Work",
     "titleHighlight": "in the Heart of Gaza",
-    "description": "A non-profit coworking and education hub providing stable solar power, high-speed satellite internet, and equipped study workstations empowering university students and freelancers to continue their education and remote careers despite all challenges.",
+    "description": "A non-profit community initiative empowering young people to continue learning, develop their skills, and access digital work opportunities through sustainable energy, reliable internet, and equipped learning environments, addressing the challenges of power outages, damaged infrastructure, and limited educational and employment opportunities",
     "bookSeatFreeCta": "Book a Free Seat",
     "supportZeffyCta": "Support via Zeffy",
     "trustBadge": "100% Free for Students | Funded Entirely by Community Giving",
     "highlights": {
-      "solarPower": "Continuous Solar Power",
-      "satelliteInternet": "Ultra-Fast Satellite Internet",
-      "quietAcEnv": "Quiet & Air-Conditioned Environment",
-      "mentorship": "Tech Mentorship & Workshops"
+      "solarPower": "Sustainable Multi-Source Electric Power",
+      "satelliteInternet": "High-Speed Internet",
+      "quietAcEnv": "Supportive Interactive Environment",
+      "mentorship": "Courses, Workshops & Tech Mentorship"
     },
     "slides": [
       {

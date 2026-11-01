@@ -19,7 +19,7 @@ export const DEFAULT_HERO_SLIDES: HeroSlide[] = [
   {
     src: "/images/hero-workspace.jpg",
     alt: "Gaza Educational Hub Workspace",
-    caption: "طاقة شمسية مستمرة وإنترنت فضائي دون انقطاع لشباب غزة",
+    caption: "طاقة كهربائية من عدة مصادر مستدامة وإنترنت فائق السرعة لشباب غزة",
   },
   {
     src: "/images/hero-focus.jpg",
