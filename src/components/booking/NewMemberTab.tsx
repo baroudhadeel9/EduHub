@@ -432,7 +432,7 @@ export default function NewMemberTab({ onReturnToHub }: NewMemberTabProps) {
               )}
             </div>
             <div>• {isRTL ? `الفئة: ${category}` : `Category: ${category}`}</div>
-            <div>• {isRTL ? `الجنس: ${gender === "female" ? "أنثى (صالة الإناث والصبايا)" : "ذكر (صالات الشباب والتدريب)"}` : `Gender: ${gender === "female" ? "Female" : "Male"}`}</div>
+            <div>• {isRTL ? `الجنس: ${gender === "female" ? "أنثى" : "ذكر"}` : `Gender: ${gender === "female" ? "Female" : "Male"}`}</div>
             <div>• {isRTL ? `الهاتف: ${phone} | البريد: ${email}` : `Phone: ${phone} | Email: ${email}`}</div>
             <div>• {isRTL ? `المحافظة: ${governorate}` : `Governorate: ${governorate}`}</div>
             <div>• {isRTL ? `حالة الطلب: قيد التدقيق الإداري (Pending Review)` : `Status: Pending Review`}</div>
@@ -568,10 +568,10 @@ export default function NewMemberTab({ onReturnToHub }: NewMemberTabProps) {
                 />
               </div>
 
-              {/* Gender Selection: Male / Female for Hall Privacy */}
+              {/* Gender Selection: Male / Female */}
               <div className="space-y-1.5">
                 <label className="block text-xs font-bold text-slate-700">
-                  {isRTL ? "الجنس (لتخصيص القاعة المناسبة وضمان الخصوصية التامة)" : "Gender (For Hall Allocation & Privacy)"} <span className="text-rose-500">*</span>
+                  {isRTL ? "الجنس" : "Gender"} <span className="text-rose-500">*</span>
                 </label>
                 <div className="grid grid-cols-2 gap-3">
                   <button
@@ -584,10 +584,7 @@ export default function NewMemberTab({ onReturnToHub }: NewMemberTabProps) {
                     }`}
                   >
                     <span className="text-xl">👨</span>
-                    <div className="text-start">
-                      <div className="font-black">{isRTL ? "ذكر (شاب)" : "Male"}</div>
-                      <div className="text-[10px] text-slate-500 font-normal">{isRTL ? "صالات الشباب والتدريب (40 مقعد)" : "Men's Halls"}</div>
-                    </div>
+                    <div className="font-black text-sm">{isRTL ? "ذكر" : "Male"}</div>
                   </button>
 
                   <button
@@ -600,10 +597,7 @@ export default function NewMemberTab({ onReturnToHub }: NewMemberTabProps) {
                     }`}
                   >
                     <span className="text-xl">👩</span>
-                    <div className="text-start">
-                      <div className="font-black">{isRTL ? "أنثى (صبية)" : "Female"}</div>
-                      <div className="text-[10px] text-slate-500 font-normal">{isRTL ? "صالة الإناث المستقلة (20 مقعد)" : "Women's Hall"}</div>
-                    </div>
+                    <div className="font-black text-sm">{isRTL ? "أنثى" : "Female"}</div>
                   </button>
                 </div>
               </div>

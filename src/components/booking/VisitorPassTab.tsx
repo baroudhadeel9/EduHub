@@ -20,12 +20,32 @@ export default function VisitorPassTab() {
   const [visPhone, setVisPhone] = useState("");
   const [visEmail, setVisEmail] = useState("");
   const [visDate, setVisDate] = useState("");
-  const [visHours, setVisHours] = useState(2);
+  const [visTime, setVisTime] = useState("09:00 ص");
   const [visReason, setVisReason] = useState("");
   const [visSubmitted, setVisSubmitted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [todayStr, setTodayStr] = useState("");
+
+  const timeSlots = [
+    { value: "08:00", labelAr: "08:00 صباحاً", labelEn: "08:00 AM" },
+    { value: "08:30", labelAr: "08:30 صباحاً", labelEn: "08:30 AM" },
+    { value: "09:00", labelAr: "09:00 صباحاً", labelEn: "09:00 AM" },
+    { value: "09:30", labelAr: "09:30 صباحاً", labelEn: "09:30 AM" },
+    { value: "10:00", labelAr: "10:00 صباحاً", labelEn: "10:00 AM" },
+    { value: "10:30", labelAr: "10:30 صباحاً", labelEn: "10:30 AM" },
+    { value: "11:00", labelAr: "11:00 صباحاً", labelEn: "11:00 AM" },
+    { value: "11:30", labelAr: "11:30 صباحاً", labelEn: "11:30 AM" },
+    { value: "12:00", labelAr: "12:00 ظهراً", labelEn: "12:00 PM" },
+    { value: "12:30", labelAr: "12:30 بعد الظهر", labelEn: "12:30 PM" },
+    { value: "13:00", labelAr: "01:00 بعد الظهر", labelEn: "01:00 PM" },
+    { value: "13:30", labelAr: "01:30 بعد الظهر", labelEn: "01:30 PM" },
+    { value: "14:00", labelAr: "02:00 بعد الظهر", labelEn: "02:00 PM" },
+    { value: "14:30", labelAr: "02:30 بعد الظهر", labelEn: "02:30 PM" },
+    { value: "15:00", labelAr: "03:00 عصراً", labelEn: "03:00 PM" },
+    { value: "15:30", labelAr: "03:30 عصراً", labelEn: "03:30 PM" },
+    { value: "16:00", labelAr: "04:00 عصراً", labelEn: "04:00 PM" },
+  ];
 
   useEffect(() => {
     let isMounted = true;
@@ -59,7 +79,7 @@ export default function VisitorPassTab() {
       !visPhone.trim() ||
       !visEmail.trim() ||
       !visDate ||
-      !visHours ||
+      !visTime ||
       !visReason.trim()
     ) {
       return;
@@ -72,8 +92,8 @@ export default function VisitorPassTab() {
         phone: visPhone.trim(),
         email: visEmail.trim(),
         visitDate: visDate,
-        durationHours: visHours,
-        visitTime: `${visHours} ساعات`,
+        durationHours: 2,
+        visitTime: visTime,
         purpose: visReason.trim(),
       });
       setVisSubmitted(true);
@@ -181,22 +201,26 @@ export default function VisitorPassTab() {
               />
             </div>
 
-            {/* Expected Hours (1 to 4) */}
+            {/* Preferred Visit Time (8 to 4) */}
             <div>
-              <label htmlFor="visitor-hours" className="block text-xs font-semibold text-slate-600 mb-1">
-                {isRTL ? "عدد الساعات (1 إلى 4)" : "Hours (1 to 4)"} *
+              <label htmlFor="visitor-time" className="block text-xs font-semibold text-slate-600 mb-1">
+                {isRTL ? "وقت الزيارة (من 8:00 ص إلى 4:00 م)" : "Visit Time (8:00 AM to 4:00 PM)"} *
               </label>
               <select
-                id="visitor-hours"
-                value={visHours}
-                onChange={(e) => setVisHours(Number(e.target.value))}
-                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm outline-none focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition-all bg-white font-mono"
+                id="visitor-time"
+                value={visTime}
+                onChange={(e) => setVisTime(e.target.value)}
+                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm outline-none focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition-all bg-white"
                 required
               >
-                <option value={1}>1 {isRTL ? "ساعة" : "hour"}</option>
-                <option value={2}>2 {isRTL ? "ساعتان" : "hours"}</option>
-                <option value={3}>3 {isRTL ? "ساعات" : "hours"}</option>
-                <option value={4}>4 {isRTL ? "ساعات" : "hours"}</option>
+                {timeSlots.map((slot) => {
+                  const val = isRTL ? slot.labelAr : slot.labelEn;
+                  return (
+                    <option key={slot.value} value={val}>
+                      {val}
+                    </option>
+                  );
+                })}
               </select>
             </div>
           </div>

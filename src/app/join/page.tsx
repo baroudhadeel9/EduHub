@@ -9,9 +9,6 @@ import {
   ArrowRight,
   ArrowLeft,
   Sparkles,
-  Zap,
-  ShieldCheck,
-  Clock,
   HelpCircle,
   Mail,
   Home,
@@ -115,51 +112,6 @@ export default function JoinPage() {
                 ? "نوفر للطلاب والرياديين والفريلانسرز في قطاع غزة بيئة دراسة وعمل مجهزة بالكهرباء المستقرة، إنترنت عالي السرعة (100 ميجا)، ومساحات عمل هادئة مجاناً 100% وفق معايير العدالة والاستحقاق."
                 : "Providing Gaza students and freelancers with a free, stable work sanctuary powered by solar energy and high-speed 100 Mbps internet."}
             </p>
-          </div>
-
-          {/* Quick Value Cards */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-8">
-            <div className="bg-white p-3.5 rounded-2xl border border-slate-200/80 shadow-2xs flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-700 flex items-center justify-center shrink-0">
-                <Zap className="w-5 h-5 text-emerald-600" />
-              </div>
-              <div>
-                <h4 className="text-xs font-bold text-slate-900">
-                  {isRTL ? "طاقة وإنترنت مجاناً 100%" : "100% Free Power & Net"}
-                </h4>
-                <p className="text-[11px] text-slate-500">
-                  {isRTL ? "ألواح شمسية وإنترنت 100 ميجا" : "Solar panels & 100 Mbps net"}
-                </p>
-              </div>
-            </div>
-
-            <div className="bg-white p-3.5 rounded-2xl border border-slate-200/80 shadow-2xs flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-700 flex items-center justify-center shrink-0">
-                <Clock className="w-5 h-5 text-indigo-600" />
-              </div>
-              <div>
-                <h4 className="text-xs font-bold text-slate-900">
-                  {isRTL ? "مراجعة سريعة للطلب" : "Fast Application Review"}
-                </h4>
-                <p className="text-[11px] text-slate-500">
-                  {isRTL ? "خلال 24 إلى 48 ساعة كحد أقصى" : "Within 24 to 48 hours"}
-                </p>
-              </div>
-            </div>
-
-            <div className="bg-white p-3.5 rounded-2xl border border-slate-200/80 shadow-2xs flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-teal-50 text-teal-700 flex items-center justify-center shrink-0">
-                <ShieldCheck className="w-5 h-5 text-teal-600" />
-              </div>
-              <div>
-                <h4 className="text-xs font-bold text-slate-900">
-                  {isRTL ? "إشعار رسمي برسالة SMS" : "Official SMS Notification"}
-                </h4>
-                <p className="text-[11px] text-slate-500">
-                  {isRTL ? "على رقم جوالك فور الاعتماد" : "To your phone once verified"}
-                </p>
-              </div>
-            </div>
           </div>
 
           {/* ─── The Official 4-Step Registration Form Card ─── */}

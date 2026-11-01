@@ -1001,7 +1001,7 @@ export async function submitVisitorRequestApi(data: {
   phone: string;
   email: string;
   visitDate: string;
-  durationHours: number;
+  durationHours?: number;
   visitTime?: string;
   purpose: string;
 }) {
@@ -1017,7 +1017,9 @@ export async function submitVisitorRequestApi(data: {
       email: data.email,
       visitDate: data.visitDate,
       purpose: data.purpose,
-      notes: data.durationHours ? `المدة: ${data.durationHours} ساعات` : undefined,
+      visitTime: data.visitTime,
+      visit_time: data.visitTime,
+      notes: data.visitTime ? `وقت الزيارة: ${data.visitTime}` : (data.durationHours ? `المدة: ${data.durationHours} ساعات` : undefined),
     }),
   });
 
