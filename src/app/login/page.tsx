@@ -77,15 +77,13 @@ export default function LoginPage() {
         </div>
       </header>
 
-      {/* ── Main Content: Clean Centered Card ── */}
-      <main className="flex-1 max-w-3xl w-full mx-auto px-3.5 sm:px-6 lg:px-8 py-5 sm:py-12 flex flex-col justify-center">
-        <div className="bg-white rounded-2xl sm:rounded-3xl border border-slate-200/90 shadow-lg sm:shadow-xl overflow-hidden p-4 sm:p-8 md:p-10">
-          <MemberBookingTab
-            onApplyNewMember={() => {
-              router.push("/join");
-            }}
-          />
-        </div>
+      {/* ── Main Content: Clean Centered Layout (Single Card) ── */}
+      <main className="flex-1 w-full mx-auto px-3.5 sm:px-6 lg:px-8 py-6 sm:py-12 flex flex-col justify-center items-center">
+        <MemberBookingTab
+          onApplyNewMember={() => {
+            router.push("/join");
+          }}
+        />
       </main>
 
       {/* ── Footer note ── */}

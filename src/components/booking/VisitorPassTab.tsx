@@ -7,6 +7,7 @@ import {
   Compass,
   Loader2,
   AlertCircle,
+  Clock,
 } from "lucide-react";
 import { submitVisitorRequestApi } from "@/services/applications";
 
@@ -20,32 +21,47 @@ export default function VisitorPassTab() {
   const [visPhone, setVisPhone] = useState("");
   const [visEmail, setVisEmail] = useState("");
   const [visDate, setVisDate] = useState("");
-  const [visTime, setVisTime] = useState("09:00 ص");
+  const [startHour, setStartHour] = useState(9); // 09:00 AM
+  const [endHour, setEndHour] = useState(12); // 12:00 PM
   const [visReason, setVisReason] = useState("");
   const [visSubmitted, setVisSubmitted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [todayStr, setTodayStr] = useState("");
 
-  const timeSlots = [
-    { value: "08:00", labelAr: "08:00 صباحاً", labelEn: "08:00 AM" },
-    { value: "08:30", labelAr: "08:30 صباحاً", labelEn: "08:30 AM" },
-    { value: "09:00", labelAr: "09:00 صباحاً", labelEn: "09:00 AM" },
-    { value: "09:30", labelAr: "09:30 صباحاً", labelEn: "09:30 AM" },
-    { value: "10:00", labelAr: "10:00 صباحاً", labelEn: "10:00 AM" },
-    { value: "10:30", labelAr: "10:30 صباحاً", labelEn: "10:30 AM" },
-    { value: "11:00", labelAr: "11:00 صباحاً", labelEn: "11:00 AM" },
-    { value: "11:30", labelAr: "11:30 صباحاً", labelEn: "11:30 AM" },
-    { value: "12:00", labelAr: "12:00 ظهراً", labelEn: "12:00 PM" },
-    { value: "12:30", labelAr: "12:30 بعد الظهر", labelEn: "12:30 PM" },
-    { value: "13:00", labelAr: "01:00 بعد الظهر", labelEn: "01:00 PM" },
-    { value: "13:30", labelAr: "01:30 بعد الظهر", labelEn: "01:30 PM" },
-    { value: "14:00", labelAr: "02:00 بعد الظهر", labelEn: "02:00 PM" },
-    { value: "14:30", labelAr: "02:30 بعد الظهر", labelEn: "02:30 PM" },
-    { value: "15:00", labelAr: "03:00 عصراً", labelEn: "03:00 PM" },
-    { value: "15:30", labelAr: "03:30 عصراً", labelEn: "03:30 PM" },
-    { value: "16:00", labelAr: "04:00 عصراً", labelEn: "04:00 PM" },
+  const allSlots = [
+    { hour24: 8, labelAr: "08:00 صباحاً", labelEn: "08:00 AM" },
+    { hour24: 8.5, labelAr: "08:30 صباحاً", labelEn: "08:30 AM" },
+    { hour24: 9, labelAr: "09:00 صباحاً", labelEn: "09:00 AM" },
+    { hour24: 9.5, labelAr: "09:30 صباحاً", labelEn: "09:30 AM" },
+    { hour24: 10, labelAr: "10:00 صباحاً", labelEn: "10:00 AM" },
+    { hour24: 10.5, labelAr: "10:30 صباحاً", labelEn: "10:30 AM" },
+    { hour24: 11, labelAr: "11:00 صباحاً", labelEn: "11:00 AM" },
+    { hour24: 11.5, labelAr: "11:30 صباحاً", labelEn: "11:30 AM" },
+    { hour24: 12, labelAr: "12:00 ظهراً", labelEn: "12:00 PM" },
+    { hour24: 12.5, labelAr: "12:30 بعد الظهر", labelEn: "12:30 PM" },
+    { hour24: 13, labelAr: "01:00 بعد الظهر", labelEn: "01:00 PM" },
+    { hour24: 13.5, labelAr: "01:30 بعد الظهر", labelEn: "01:30 PM" },
+    { hour24: 14, labelAr: "02:00 بعد الظهر", labelEn: "02:00 PM" },
+    { hour24: 14.5, labelAr: "02:30 بعد الظهر", labelEn: "02:30 PM" },
+    { hour24: 15, labelAr: "03:00 عصراً", labelEn: "03:00 PM" },
+    { hour24: 15.5, labelAr: "03:30 عصراً", labelEn: "03:30 PM" },
+    { hour24: 16, labelAr: "04:00 عصراً (موعد الإغلاق)", labelEn: "04:00 PM (Closing)" },
   ];
+
+  // Arrival slots: strictly before 4:00 PM (8:00 AM to 3:30 PM)
+  const arrivalSlots = allSlots.filter((s) => s.hour24 < 16);
+
+  // Departure slots: strictly after the selected arrival time up to 4:00 PM
+  const departureSlots = allSlots.filter((s) => s.hour24 > startHour);
+
+  const handleStartChange = (newStart: number) => {
+    setStartHour(newStart);
+    if (newStart >= endHour) {
+      const nextEnd = Math.min(16, newStart + 2 > 16 ? 16 : newStart + 1);
+      setEndHour(nextEnd);
+    }
+  };
 
   useEffect(() => {
     let isMounted = true;
@@ -79,11 +95,26 @@ export default function VisitorPassTab() {
       !visPhone.trim() ||
       !visEmail.trim() ||
       !visDate ||
-      !visTime ||
       !visReason.trim()
     ) {
       return;
     }
+
+    if (endHour <= startHour) {
+      setSubmitError(
+        isRTL
+          ? "يجب أن يكون وقت المغادرة بعد وقت الحضور."
+          : "Departure time must be after arrival time."
+      );
+      return;
+    }
+
+    const startSlot = allSlots.find((s) => s.hour24 === startHour);
+    const endSlot = allSlots.find((s) => s.hour24 === endHour);
+    const duration = Math.max(0.5, endHour - startHour);
+    const formattedVisitTime = isRTL
+      ? `من ${startSlot?.labelAr} إلى ${endSlot?.labelAr}`
+      : `From ${startSlot?.labelEn} to ${endSlot?.labelEn}`;
 
     setSubmitting(true);
     try {
@@ -92,8 +123,8 @@ export default function VisitorPassTab() {
         phone: visPhone.trim(),
         email: visEmail.trim(),
         visitDate: visDate,
-        durationHours: 2,
-        visitTime: visTime,
+        durationHours: Math.round(duration),
+        visitTime: formattedVisitTime,
         purpose: visReason.trim(),
       });
       setVisSubmitted(true);
@@ -168,7 +199,7 @@ export default function VisitorPassTab() {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {/* Email (Required) */}
             <div>
               <label htmlFor="visitor-email" className="block text-xs font-semibold text-slate-600 mb-1">
@@ -200,28 +231,62 @@ export default function VisitorPassTab() {
                 required
               />
             </div>
+          </div>
 
-            {/* Preferred Visit Time (8 to 4) */}
-            <div>
-              <label htmlFor="visitor-time" className="block text-xs font-semibold text-slate-600 mb-1">
-                {isRTL ? "وقت الزيارة (من 8:00 ص إلى 4:00 م)" : "Visit Time (8:00 AM to 4:00 PM)"} *
-              </label>
-              <select
-                id="visitor-time"
-                value={visTime}
-                onChange={(e) => setVisTime(e.target.value)}
-                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm outline-none focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition-all bg-white"
-                required
-              >
-                {timeSlots.map((slot) => {
-                  const val = isRTL ? slot.labelAr : slot.labelEn;
-                  return (
-                    <option key={slot.value} value={val}>
-                      {val}
+          {/* Visit Hours Range: Arrival and Departure (8am to 4pm) */}
+          <div className="p-4 rounded-2xl bg-slate-50/90 border border-slate-200/90 space-y-3">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-bold text-slate-800 flex items-center gap-1.5">
+                <Clock className="w-3.5 h-3.5 text-emerald-600" />
+                <span>{isRTL ? "وقت الزيارة (الحضور والمغادرة • من 08:00 ص إلى 04:00 م)" : "Visit Hours (Arrival & Departure • 08:00 AM to 04:00 PM)"}</span>
+              </span>
+              <span className="text-[11px] font-bold text-emerald-700 bg-emerald-100/80 px-2.5 py-0.5 rounded-md font-mono">
+                {isRTL
+                  ? `المدة: ${endHour - startHour} ${endHour - startHour === 1 ? "ساعة" : endHour - startHour === 2 ? "ساعتان" : "ساعات"}`
+                  : `Duration: ${endHour - startHour} hrs`}
+              </span>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {/* Arrival Time */}
+              <div>
+                <label htmlFor="visitor-arrival" className="block text-xs font-semibold text-slate-600 mb-1">
+                  {isRTL ? "وقت الحضور المتوقع" : "Arrival Time"} *
+                </label>
+                <select
+                  id="visitor-arrival"
+                  value={startHour}
+                  onChange={(e) => handleStartChange(Number(e.target.value))}
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm outline-none focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition-all bg-white"
+                  required
+                >
+                  {arrivalSlots.map((slot) => (
+                    <option key={slot.hour24} value={slot.hour24}>
+                      {isRTL ? slot.labelAr : slot.labelEn}
                     </option>
-                  );
-                })}
-              </select>
+                  ))}
+                </select>
+              </div>
+
+              {/* Departure Time */}
+              <div>
+                <label htmlFor="visitor-departure" className="block text-xs font-semibold text-slate-600 mb-1">
+                  {isRTL ? "وقت المغادرة المتوقع" : "Departure Time"} *
+                </label>
+                <select
+                  id="visitor-departure"
+                  value={endHour}
+                  onChange={(e) => setEndHour(Number(e.target.value))}
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm outline-none focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition-all bg-white"
+                  required
+                >
+                  {departureSlots.map((slot) => (
+                    <option key={slot.hour24} value={slot.hour24}>
+                      {isRTL ? slot.labelAr : slot.labelEn}
+                    </option>
+                  ))}
+                </select>
+              </div>
             </div>
           </div>
 

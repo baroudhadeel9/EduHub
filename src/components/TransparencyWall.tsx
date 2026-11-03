@@ -55,12 +55,12 @@ const itemMeta: Record<
     colorTheme: {
       arcColor: "var(--color-chart-emerald)",
       softBg: "bg-emerald-50/40 hover:bg-emerald-50/70",
-      border: "border-emerald-200/90 hover:border-emerald-400",
+      border: "border-emerald-300 hover:border-emerald-500",
       activeRing: "ring-2 ring-emerald-500 border-emerald-400 shadow-md",
       badge: "bg-emerald-100 text-emerald-800",
-      iconBg: "bg-emerald-100 text-emerald-700",
-      barColor: "bg-emerald-500",
-      lightOverlay: "from-white/95 via-white/70 to-emerald-50/30",
+      iconBg: "bg-emerald-100 text-emerald-800",
+      barColor: "bg-emerald-600",
+      lightOverlay: "from-white/88 via-white/50 to-emerald-50/10",
     },
   },
   rent: {
@@ -70,12 +70,12 @@ const itemMeta: Record<
     colorTheme: {
       arcColor: "var(--color-chart-sky)",
       softBg: "bg-sky-50/40 hover:bg-sky-50/70",
-      border: "border-sky-200/90 hover:border-sky-400",
+      border: "border-sky-300 hover:border-sky-500",
       activeRing: "ring-2 ring-sky-500 border-sky-400 shadow-md",
       badge: "bg-sky-100 text-sky-800",
-      iconBg: "bg-sky-100 text-sky-700",
-      barColor: "bg-sky-500",
-      lightOverlay: "from-white/95 via-white/70 to-sky-50/30",
+      iconBg: "bg-sky-100 text-sky-800",
+      barColor: "bg-sky-600",
+      lightOverlay: "from-white/88 via-white/50 to-sky-50/10",
     },
   },
   electricity: {
@@ -85,12 +85,12 @@ const itemMeta: Record<
     colorTheme: {
       arcColor: "var(--color-chart-amber)",
       softBg: "bg-amber-50/40 hover:bg-amber-50/70",
-      border: "border-amber-200/90 hover:border-amber-400",
+      border: "border-amber-300 hover:border-amber-500",
       activeRing: "ring-2 ring-amber-500 border-amber-400 shadow-md",
       badge: "bg-amber-100 text-amber-900",
-      iconBg: "bg-amber-100 text-amber-800",
-      barColor: "bg-amber-500",
-      lightOverlay: "from-white/95 via-white/70 to-amber-50/30",
+      iconBg: "bg-amber-100 text-amber-900",
+      barColor: "bg-amber-600",
+      lightOverlay: "from-white/88 via-white/50 to-amber-50/10",
     },
   },
   repairs: {
@@ -100,12 +100,12 @@ const itemMeta: Record<
     colorTheme: {
       arcColor: "var(--color-chart-violet)",
       softBg: "bg-purple-50/40 hover:bg-purple-50/70",
-      border: "border-purple-200/90 hover:border-purple-400",
+      border: "border-purple-300 hover:border-purple-500",
       activeRing: "ring-2 ring-purple-500 border-purple-400 shadow-md",
       badge: "bg-purple-100 text-purple-900",
-      iconBg: "bg-purple-100 text-purple-800",
-      barColor: "bg-purple-500",
-      lightOverlay: "from-white/95 via-white/70 to-purple-50/30",
+      iconBg: "bg-purple-100 text-purple-900",
+      barColor: "bg-purple-600",
+      lightOverlay: "from-white/88 via-white/50 to-purple-50/10",
     },
   },
   internet: {
@@ -115,12 +115,12 @@ const itemMeta: Record<
     colorTheme: {
       arcColor: "var(--color-chart-cyan)",
       softBg: "bg-cyan-50/40 hover:bg-cyan-50/70",
-      border: "border-cyan-200/90 hover:border-cyan-400",
+      border: "border-cyan-300 hover:border-cyan-500",
       activeRing: "ring-2 ring-cyan-500 border-cyan-400 shadow-md",
       badge: "bg-cyan-100 text-cyan-900",
-      iconBg: "bg-cyan-100 text-cyan-800",
-      barColor: "bg-cyan-500",
-      lightOverlay: "from-white/95 via-white/70 to-cyan-50/30",
+      iconBg: "bg-cyan-100 text-cyan-900",
+      barColor: "bg-cyan-600",
+      lightOverlay: "from-white/88 via-white/50 to-cyan-50/10",
     },
   },
   water_cleaning: {
@@ -130,12 +130,12 @@ const itemMeta: Record<
     colorTheme: {
       arcColor: "var(--color-chart-teal)",
       softBg: "bg-teal-50/40 hover:bg-teal-50/70",
-      border: "border-teal-200/90 hover:border-teal-400",
-      activeRing: "ring-2 ring-teal-400 border-teal-300 shadow-md",
+      border: "border-teal-300 hover:border-teal-500",
+      activeRing: "ring-2 ring-teal-500 border-teal-400 shadow-md",
       badge: "bg-teal-100 text-teal-900",
-      iconBg: "bg-teal-100 text-teal-800",
-      barColor: "bg-teal-500",
-      lightOverlay: "from-white/95 via-white/70 to-teal-50/30",
+      iconBg: "bg-teal-100 text-teal-900",
+      barColor: "bg-teal-600",
+      lightOverlay: "from-white/88 via-white/50 to-teal-50/10",
     },
   },
 };
@@ -228,12 +228,12 @@ export default function TransparencyWall({ onOpenDonation }: TransparencyWallPro
         <div className="text-center max-w-3xl mx-auto mb-12">
           <h2
             id="transparency-title"
-            className="text-3xl sm:text-4xl lg:text-5xl font-black text-brand-navy mb-3 tracking-tight leading-tight"
+            className="text-3xl sm:text-4xl lg:text-5xl font-black text-slate-950 mb-3 tracking-tight leading-tight"
           >
             {tw?.title}
           </h2>
 
-          <p className="text-base sm:text-lg text-slate-600 font-medium max-w-2xl mx-auto">
+          <p className="text-base sm:text-lg text-slate-800 font-bold max-w-2xl mx-auto leading-relaxed">
             {tw?.subtitle}
           </p>
         </div>
@@ -299,25 +299,25 @@ export default function TransparencyWall({ onOpenDonation }: TransparencyWallPro
                   <div className="absolute inset-0 flex flex-col items-center justify-center p-6 text-center pointer-events-none">
                     {activeItem ? (
                       <div className="space-y-1 animate-in fade-in zoom-in-95 duration-200">
-                        <span className="text-[11px] font-extrabold uppercase tracking-wider text-slate-500">
+                        <span className="text-xs font-black uppercase tracking-wider text-slate-800">
                           {activeItem.title}
                         </span>
-                        <div className="text-3xl sm:text-4xl font-black text-brand-navy font-mono tracking-tight">
+                        <div className="text-3xl sm:text-4xl font-black text-slate-950 font-mono tracking-tight">
                           ${activeItem.amount}
                         </div>
-                        <span className="inline-block text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-slate-200/80 text-slate-800">
+                        <span className="inline-block text-xs font-black px-2.5 py-0.5 rounded-full bg-slate-900 text-white shadow-2xs">
                           {activeItem.percentage}% {tw?.ofBudget}
                         </span>
                       </div>
                     ) : (
                       <div className="space-y-1">
-                        <span className="text-[11px] font-extrabold uppercase tracking-wider text-slate-500">
+                        <span className="text-xs font-black uppercase tracking-wider text-slate-800">
                           {tw?.monthlyTotal}
                         </span>
-                        <div className="text-3xl sm:text-4xl font-black text-emerald-800 font-mono tracking-tight">
+                        <div className="text-3xl sm:text-4xl font-black text-emerald-950 font-mono tracking-tight">
                           $2,500
                         </div>
-                        <span className="inline-block text-[11px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800">
+                        <span className="inline-block text-xs font-black px-2.5 py-0.5 rounded-full bg-emerald-800 text-white shadow-2xs">
                           {tw?.pillarsCount}
                         </span>
                       </div>
@@ -383,7 +383,7 @@ export default function TransparencyWall({ onOpenDonation }: TransparencyWallPro
                             : `${item.colorTheme.border} bg-white hover:border-slate-300 hover:shadow-xs`
                         }`}
                       >
-                        {/* ── Background Photo with Soft Tint Overlay ── */}
+                        {/* ── Background Photo with Soft Faded Tint Overlay (Single Card) ── */}
                         {item.image && (
                           <div className="absolute inset-0 pointer-events-none overflow-hidden">
                             <Image
@@ -393,21 +393,21 @@ export default function TransparencyWall({ onOpenDonation }: TransparencyWallPro
                               sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 30vw"
                               className={`object-cover object-center transition-all duration-700 ease-out ${
                                 isSelected
-                                  ? "scale-105 opacity-92"
-                                  : "scale-100 opacity-80 group-hover:opacity-92 group-hover:scale-104"
+                                  ? "scale-105 opacity-100"
+                                  : "scale-100 opacity-92 group-hover:opacity-100 group-hover:scale-104"
                               }`}
                             />
-                            {/* Light Gradient Overlay: soft bottom gradient allowing the photo to be clearly visible while guaranteeing text contrast */}
+                            {/* Light Gradient Overlay: soft bottom gradient allowing the photo to be visible as a faded background */}
                             <div
                               className={`absolute inset-0 bg-gradient-to-t ${item.colorTheme.lightOverlay} transition-opacity duration-300 ${
-                                isSelected ? "opacity-85" : "opacity-90 group-hover:opacity-82"
+                                isSelected ? "opacity-68" : "opacity-72 group-hover:opacity-60"
                               }`}
                             />
                           </div>
                         )}
 
                         <div className="relative z-10">
-                          {/* Top Row: Icon + Title & Percentage + Photo Preview Button (No duplicate price) */}
+                          {/* Top Row: Icon + Title & Percentage + Photo Preview Button */}
                           <div className="flex items-start justify-between gap-2 mb-2">
                             <div className="flex items-center gap-2.5 min-w-0">
                               <div
@@ -416,10 +416,10 @@ export default function TransparencyWall({ onOpenDonation }: TransparencyWallPro
                                 <IconComp className="w-4 h-4" />
                               </div>
                               <div className="min-w-0">
-                                <h4 className="text-xs sm:text-sm font-black text-brand-navy leading-tight truncate">
+                                <h4 className="text-xs sm:text-sm font-black text-slate-950 leading-tight truncate drop-shadow-[0_1px_1px_rgba(255,255,255,0.95)]">
                                   {item.title}
                                 </h4>
-                                <span className="text-[10px] font-bold text-slate-500">
+                                <span className="text-[10px] font-black text-slate-700 drop-shadow-[0_1px_1px_rgba(255,255,255,0.9)]">
                                   {item.percentage}% {tw?.ofTotal}
                                 </span>
                               </div>
@@ -439,7 +439,7 @@ export default function TransparencyWall({ onOpenDonation }: TransparencyWallPro
                                   });
                                 }}
                                 title={isRtl ? "معاينة الصورة الميدانية بالحجم الكامل" : "View full photo"}
-                                className="p-1 rounded-lg bg-white/70 hover:bg-white text-slate-500 hover:text-emerald-700 border border-slate-200/60 shadow-2xs flex items-center justify-center transition-all cursor-pointer shrink-0"
+                                className="p-1 rounded-lg bg-white/85 hover:bg-white text-slate-700 hover:text-emerald-700 border border-slate-200/80 shadow-2xs flex items-center justify-center transition-all cursor-pointer shrink-0"
                               >
                                 <Camera className="w-3.5 h-3.5" />
                               </button>
@@ -447,15 +447,15 @@ export default function TransparencyWall({ onOpenDonation }: TransparencyWallPro
                           </div>
 
                           {/* Dynamic Progress Indicator */}
-                          <div className="w-full bg-slate-200/70 h-1.5 rounded-full overflow-hidden mb-2 shadow-inner">
+                          <div className="w-full bg-slate-200/80 h-1.5 rounded-full overflow-hidden mb-2 shadow-inner">
                             <div
                               className={`${item.colorTheme.barColor} h-full rounded-full transition-all duration-500`}
                               style={{ width: `${item.percentage * 2}%` }}
                             />
                           </div>
 
-                          {/* Concise Human Impact Statement (Direct & clean without enclosing white box) */}
-                          <p className="text-[11px] sm:text-xs text-slate-700 leading-relaxed font-semibold mb-3">
+                          {/* Concise Human Impact Statement (Clear, crisp, readable font) */}
+                          <p className="text-[11px] sm:text-xs text-slate-950 leading-relaxed font-black mb-3 drop-shadow-[0_1px_2px_rgba(255,255,255,0.95)]">
                             {item.tagline}
                           </p>
                         </div>
@@ -471,8 +471,8 @@ export default function TransparencyWall({ onOpenDonation }: TransparencyWallPro
                             aria-label={`${tw?.sponsorBtn || "Sponsor"}: ${item.title} ($${item.amount})`}
                             className={`w-full py-2 px-3 rounded-xl text-xs font-black transition-all flex items-center justify-between cursor-pointer shadow-xs ${
                               isSelected
-                                ? "bg-brand-navy text-white shadow-md ring-2 ring-emerald-500/50"
-                                : "bg-white hover:bg-slate-50 text-slate-900 border border-slate-200/90 hover:border-emerald-500"
+                                ? "bg-slate-950 text-white shadow-md ring-2 ring-emerald-500/50"
+                                : "bg-white/95 hover:bg-white text-slate-950 border border-slate-300/90 hover:border-emerald-500"
                             }`}
                           >
                             <span className="flex items-center gap-1.5">
@@ -505,10 +505,10 @@ export default function TransparencyWall({ onOpenDonation }: TransparencyWallPro
                 <CheckCircle2 className="w-5 h-5" />
               </div>
               <div className="space-y-1">
-                <h4 className="font-bold text-base text-brand-navy">
+                <h4 className="font-black text-base text-slate-950">
                   {guarantee.title}
                 </h4>
-                <p className="text-sm text-slate-600 leading-relaxed">
+                <p className="text-sm text-slate-800 font-bold leading-relaxed">
                   {guarantee.desc}
                 </p>
               </div>

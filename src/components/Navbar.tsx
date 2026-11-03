@@ -12,14 +12,14 @@ interface NavbarProps {
   onOpenDonation?: (amount?: number) => void;
 }
 
-export default function Navbar({ onOpenDonation }: NavbarProps) {
+export default function Navbar({ onOpenBooking, onOpenDonation }: NavbarProps) {
   const { t, locale, setLocale } = useLanguage();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [activeSection, setActiveSection] = useState<string>("hero");
 
   // ScrollSpy: highlight the currently viewed section in the navigation
   useEffect(() => {
-    const sectionIds = ["hero", "dashboard", "transparency", "gallery", "faq"];
+    const sectionIds = ["hero", "dashboard", "transparency", "booking-section", "gallery", "faq"];
 
     const handleScroll = () => {
       const scrollPosition = window.scrollY + 140;
@@ -56,6 +56,7 @@ export default function Navbar({ onOpenDonation }: NavbarProps) {
     { id: "hero", label: t.nav.home },
     { id: "dashboard", label: t.nav.impact },
     { id: "transparency", label: t.nav.transparency },
+    { id: "booking-section", label: t.nav.bookSeat },
     { id: "gallery", label: t.nav.stories },
     { id: "faq", label: t.nav.faq },
   ];
@@ -96,7 +97,13 @@ export default function Navbar({ onOpenDonation }: NavbarProps) {
                 <a
                   key={link.id}
                   href={`#${link.id}`}
-                  onClick={() => setActiveSection(link.id)}
+                  onClick={(e) => {
+                    setActiveSection(link.id);
+                    if (link.id === "booking-section" && onOpenBooking) {
+                      e.preventDefault();
+                      onOpenBooking();
+                    }
+                  }}
                   className={`px-2.5 xl:px-3 py-1.5 rounded-lg transition-all whitespace-nowrap focus-visible:ring-2 focus-visible:ring-emerald-600 ${
                     isActive
                       ? "text-emerald-700 bg-emerald-50/90 font-bold shadow-2xs"

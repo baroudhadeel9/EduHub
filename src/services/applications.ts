@@ -5,7 +5,9 @@ const REMOTE_API_URL = "https://eduhub-api-uz1z.onrender.com/api";
 const API_BASE_URL =
   typeof window !== "undefined"
     ? "/api/proxy"
-    : process.env.NEXT_PUBLIC_API_BASE_URL || REMOTE_API_URL;
+    : process.env.BACKEND_API_URL ||
+      process.env.NEXT_PUBLIC_API_BASE_URL ||
+      REMOTE_API_URL;
 
 const ADMIN_STORAGE_KEY = "eduhub_admin_auth";
 export const ADMIN_COOKIE_NAME = "eduhub_admin_token";

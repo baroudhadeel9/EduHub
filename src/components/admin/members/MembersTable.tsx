@@ -32,6 +32,10 @@ export default function MembersTable({ onOpenMobileMenu }: MembersTableProps = {
   const ChevronIcon = isRTL ? ChevronLeft : ChevronRight;
 
   const [members, setMembers] = useState<MemberRecord[]>([]);
+  const [activeFilter, setActiveFilter] = useState<string>("all");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [sortBy, setSortBy] = useState<SortOption>("most_active");
+  const [selectedMemberId, setSelectedMemberId] = useState<string | null>(null);
 
   const loadMembers = React.useCallback(async () => {
     try {
@@ -88,10 +92,6 @@ export default function MembersTable({ onOpenMobileMenu }: MembersTableProps = {
   useEffect(() => {
     loadMembers();
   }, [loadMembers]);
-  const [activeFilter, setActiveFilter] = useState<string>("all");
-  const [searchQuery, setSearchQuery] = useState("");
-  const [sortBy, setSortBy] = useState<SortOption>("most_active");
-  const [selectedMemberId, setSelectedMemberId] = useState<string | null>(null);
 
   const selectedMember = useMemo(() => {
     if (!selectedMemberId) return null;

@@ -2,25 +2,33 @@
 
 import React from "react";
 import { useLanguage } from "@/context/LanguageContext";
-import { Users, DoorOpen, Clock } from "lucide-react";
+import { Users, DoorOpen, Clock, UserX } from "lucide-react";
 
 interface AttendanceStatsProps {
   attendedCount: number;
   insideCount: number;
   awaitingCount: number;
+  unattendedCount?: number;
 }
 
 export default function AttendanceStats({
   attendedCount,
   insideCount,
   awaitingCount,
+  unattendedCount = 0,
 }: AttendanceStatsProps) {
   const { t, locale, dir } = useLanguage();
   const isRTL = dir === "rtl" || locale === "ar";
   const st = t.admin?.stats;
 
+  const showUnattendedCard = unattendedCount > 0;
+
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-5 mb-6">
+    <div
+      className={`grid grid-cols-1 sm:grid-cols-2 ${
+        showUnattendedCard ? "lg:grid-cols-4" : "lg:grid-cols-3"
+      } gap-4 sm:gap-5 mb-6`}
+    >
       
       {/* ── Card 1: Attended Today (EduHub Navy) ── */}
       <div className="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-xs hover:border-slate-300 transition-all flex items-center justify-between group">
@@ -94,6 +102,32 @@ export default function AttendanceStats({
           <Clock className="w-5 h-5" />
         </div>
       </div>
+
+      {/* ── Card 4: Unattended / No-Show (Rose/Amber) ── */}
+      {showUnattendedCard && (
+        <div className="bg-white rounded-2xl p-5 border border-rose-200/80 shadow-xs hover:border-rose-300 transition-all flex items-center justify-between group">
+          <div className="space-y-1">
+            <span className="text-xs font-bold text-rose-800">
+              {isRTL ? "لم يلتزم بالحضور (تغيّب)" : "Unattended / No-Show"}
+            </span>
+            <div className="flex items-baseline gap-2">
+              <span className="text-3xl font-black text-rose-700 tracking-tight">
+                {unattendedCount}
+              </span>
+              <span className="text-xs font-semibold text-rose-600/80">
+                {isRTL ? "مستفيد متغيّب" : "no-shows"}
+              </span>
+            </div>
+            <p className="text-[11px] text-rose-600/70">
+              {isRTL ? "انقضى موعد حجزهم دون حضور" : "Missed their scheduled slot"}
+            </p>
+          </div>
+
+          <div className="w-12 h-12 rounded-2xl bg-rose-50 text-rose-700 flex items-center justify-center shrink-0 border border-rose-200/70 group-hover:scale-105 transition-transform">
+            <UserX className="w-5 h-5" />
+          </div>
+        </div>
+      )}
 
     </div>
   );

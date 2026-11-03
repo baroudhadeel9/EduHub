@@ -1,4 +1,4 @@
-export type AttendanceStatus = "inside" | "waiting" | "left";
+export type AttendanceStatus = "inside" | "waiting" | "left" | "unattended";
 export type MemberType = "student" | "freelancer" | "visitor";
 
 export interface AttendanceRecord {
@@ -20,4 +20,4 @@ export interface AttendanceRecord {
   nationalId?: string;
 }
 
-export type FilterOption = "all" | "inside" | "waiting" | "left";
+export type FilterOption = "all" | "inside" | "waiting" | "left" | "unattended";

@@ -1,6 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 
-const BACKEND_TARGET = "https://eduhub-api-uz1z.onrender.com/api";
+const BACKEND_TARGET =
+  process.env.BACKEND_API_URL ||
+  (process.env.NODE_ENV === "development"
+    ? "http://127.0.0.1:8000/api"
+    : "https://eduhub-api-uz1z.onrender.com/api");
 
 async function handleProxy(
   req: NextRequest,

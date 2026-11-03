@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState, useEffect, useMemo } from "react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useLanguage } from "@/context/LanguageContext";
 import {
@@ -9,22 +8,21 @@ import {
   Clock,
   CheckCircle2,
   AlertCircle,
-  LogIn,
-  LogOut,
   CalendarCheck,
   Loader2,
-  KeyRound,
-  X,
   Armchair,
   Zap,
 } from "lucide-react";
 import { MemberBooking } from "./types";
 import { getRoomsOverviewApi, RoomItem, SeatItem } from "@/services/roomSeats";
+import ChangePasswordModal from "./member/ChangePasswordModal";
+import MemberBookingsList from "./member/MemberBookingsList";
+import MemberLoginForm from "./member/MemberLoginForm";
+import MemberQuotaHeader from "./member/MemberQuotaHeader";
 import {
   memberLoginApi,
   createMemberBookingApi,
   cancelMemberBookingApi,
-  changeMemberPasswordApi,
   MemberData,
   setMemberAuthSession,
   getMemberAuthSession,
@@ -85,8 +83,6 @@ export default function MemberBookingTab({ onApplyNewMember }: MemberBookingTabP
   // 1. MEMBER STATE (Active Member Login, Balance & Direct Booking)
   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
   const [memberEmail, setMemberEmail] = useState("");
-  const [memberPassword, setMemberPassword] = useState("");
-  const [forgotSent, setForgotSent] = useState(false);
   const [loginLoading, setLoginLoading] = useState(false);
   const [loginError, setLoginError] = useState<string | null>(null);
 
@@ -132,12 +128,6 @@ export default function MemberBookingTab({ onApplyNewMember }: MemberBookingTabP
 
   // Change password modal state
   const [changePassOpen, setChangePassOpen] = useState(false);
-  const [currentPass, setCurrentPass] = useState("");
-  const [newPass, setNewPass] = useState("");
-  const [confirmPass, setConfirmPass] = useState("");
-  const [changePassLoading, setChangePassLoading] = useState(false);
-  const [changePassError, setChangePassError] = useState<string | null>(null);
-  const [changePassSuccess, setChangePassSuccess] = useState<string | null>(null);
 
   useEffect(() => {
     let isMounted = true;
@@ -285,76 +275,22 @@ export default function MemberBookingTab({ onApplyNewMember }: MemberBookingTabP
     };
   }, [bookingDate, bookingStartTime, bookingEndTime, isLoggedIn, memberData?.gender, authToken, isRTL]);
 
-  const handleChangePassword = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setChangePassError(null);
-    setChangePassSuccess(null);
-
-    if (!currentPass.trim()) {
-      setChangePassError(
-        isRTL ? "يرجى إدخال كلمة المرور الحالية." : "Please enter your current password."
-      );
-      return;
-    }
-    if (newPass.length < 6) {
-      setChangePassError(
-        isRTL
-          ? "يجب أن لا تقل كلمة المرور الجديدة عن 6 خانات."
-          : "New password must be at least 6 characters."
-      );
-      return;
-    }
-    if (newPass !== confirmPass) {
-      setChangePassError(
-        isRTL ? "كلمتا المرور الجديدتان غير متطابقتين." : "Passwords do not match."
-      );
-      return;
-    }
-
-    setChangePassLoading(true);
-    try {
-      const res = await changeMemberPasswordApi(authToken, currentPass, newPass, confirmPass);
-      setChangePassSuccess(
-        res.message || (isRTL ? "تم تغيير كلمة المرور بنجاح!" : "Password changed successfully!")
-      );
-      setCurrentPass("");
-      setNewPass("");
-      setConfirmPass("");
-      setTimeout(() => {
-        setChangePassOpen(false);
-        setChangePassSuccess(null);
-      }, 1500);
-    } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : "";
-      setChangePassError(
-        msg ||
-          (isRTL
-            ? "تعذر تغيير كلمة المرور. تأكد من كلمة المرور الحالية."
-            : "Failed to change password.")
-      );
-    } finally {
-      setChangePassLoading(false);
-    }
-  };
-
-
   // Handle member login
-  const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleLogin = async (emailInput: string, passwordInput: string) => {
     setLoginError(null);
 
-    if (!memberEmail.trim() || !memberPassword.trim()) {
+    if (!emailInput.trim() || !passwordInput.trim()) {
       setLoginError(
         isRTL
-          ? "يرجى إدخال البريد الإلكتروني وكلمة المرور."
-          : "Please enter your email and password."
+          ? "يرجى إدخال البريد الإلكتروني أو رقم الهاتف وكلمة المرور."
+          : "Please enter your email or phone and password."
       );
       return;
     }
 
     setLoginLoading(true);
     try {
-      const res = await memberLoginApi(memberEmail.trim(), memberPassword);
+      const res = await memberLoginApi(emailInput.trim(), passwordInput);
 
       // ── Single Unified Login: If authenticated user is Admin, redirect to /admin ──
       const userRole = res.user?.role || (res.member as unknown as { role?: string })?.role;
@@ -427,7 +363,6 @@ export default function MemberBookingTab({ onApplyNewMember }: MemberBookingTabP
     setIsLoggedIn(false);
     setAuthToken("");
     setMemberData(null);
-    setMemberPassword("");
     setBookings([]);
     setBookingError(null);
     setBookingSuccess(null);
@@ -561,232 +496,30 @@ export default function MemberBookingTab({ onApplyNewMember }: MemberBookingTabP
   return (
     <div>
       {!isLoggedIn ? (
-        /* Login Screen if not logged in */
-        <div className="max-w-md mx-auto py-6">
-          <div className="text-center mb-6">
-            <div className="w-12 h-12 rounded-2xl bg-emerald-100 text-emerald-700 flex items-center justify-center mx-auto mb-3">
-              <LogIn className="w-6 h-6" />
-            </div>
-            <h3 className="text-2xl font-black text-brand-navy">
-              {bp?.loginTitle || (isRTL ? "تسجيل دخول الأعضاء" : "Member Login")}
-            </h3>
-            <p className="text-xs sm:text-sm text-slate-500 mt-1">
-              {isRTL
-                ? "سجّل دخولك لحجز ساعاتك الأكاديمية والمهنية مباشرة"
-                : "Sign in to reserve your study hours directly"}
-            </p>
-          </div>
-
-          <form onSubmit={handleLogin} className="space-y-4">
-            {loginError && (
-              <div className="p-3.5 rounded-xl bg-red-50 border border-red-200 text-xs font-bold text-red-700 flex items-center gap-2 animate-in fade-in">
-                <AlertCircle className="w-4 h-4 shrink-0" />
-                <span>{loginError}</span>
-              </div>
-            )}
-
-            <div>
-              <label htmlFor="member-login-email" className="block text-xs font-bold text-slate-700 mb-1">
-                {bp?.emailLabel || (isRTL ? "البريد الإلكتروني أو اسم المستخدم" : "Email Address or Username")}
-              </label>
-              <input
-                id="member-login-email"
-                type="text"
-                autoComplete="username"
-                required
-                value={memberEmail}
-                onChange={(e) => setMemberEmail(e.target.value)}
-                placeholder={isRTL ? "example@domain.com أو admin" : "example@domain.com or admin"}
-                className="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-sm outline-none focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition-all text-start"
-              />
-            </div>
-
-            <div>
-              <div className="flex items-center justify-between mb-1">
-                <label htmlFor="member-login-password" className="block text-xs font-bold text-slate-700">
-                  {bp?.passwordLabel || (isRTL ? "كلمة المرور" : "Password")}
-                </label>
-                <button
-                  type="button"
-                  onClick={() => setForgotSent(true)}
-                  className="text-xs font-semibold text-emerald-600 hover:underline cursor-pointer"
-                >
-                  {bp?.forgotPassword || (isRTL ? "نسيت كلمة المرور؟" : "Forgot Password?")}
-                </button>
-              </div>
-              <input
-                id="member-login-password"
-                type="password"
-                required
-                value={memberPassword}
-                onChange={(e) => setMemberPassword(e.target.value)}
-                placeholder="••••••••"
-                className="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-sm outline-none focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition-all font-mono"
-              />
-              {forgotSent && (
-                <p className="mt-1.5 text-xs font-semibold text-emerald-600 flex items-center gap-1 animate-in fade-in">
-                  <CheckCircle2 className="w-3.5 h-3.5" />
-                  <span>
-                    {bp?.forgotPasswordAlert ||
-                      (isRTL
-                        ? "سيصلك رابط إعادة التعيين عبر الإيميل المسجل."
-                        : "Reset link sent to registered email.")}
-                  </span>
-                </p>
-              )}
-            </div>
-
-            <button
-              type="submit"
-              disabled={loginLoading}
-              className="w-full py-3 rounded-xl font-bold text-white bg-emerald-600 hover:bg-emerald-700 shadow-md transition-all cursor-pointer text-base active:scale-[0.99] flex items-center justify-center gap-2 disabled:bg-emerald-400"
-            >
-              {loginLoading ? (
-                <>
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                  <span>{isRTL ? "جاري التحقق وتسجيل الدخول..." : "Signing in..."}</span>
-                </>
-              ) : (
-                <span>{bp?.signInBtn || (isRTL ? "تسجيل الدخول ومتابعة الحجز" : "Sign In to Book")}</span>
-              )}
-            </button>
-
-            <div className="text-center pt-2">
-              <Link
-                href="/join"
-                onClick={onApplyNewMember}
-                className="text-xs text-slate-500 hover:text-emerald-700 font-semibold cursor-pointer transition-colors inline-flex items-center gap-1"
-              >
-                <span>{bp?.noAccountApply || (isRTL ? "ليس لديك حساب عضوية؟ قدّم طلب جديد" : "Don't have an account? Apply for membership")}</span>
-                <span>↗</span>
-              </Link>
-            </div>
-          </form>
-        </div>
+        <MemberLoginForm
+          email={memberEmail}
+          onEmailChange={setMemberEmail}
+          onLogin={handleLogin}
+          loading={loginLoading}
+          error={loginError}
+          onApplyNewMember={onApplyNewMember}
+        />
       ) : (
-        /* Member Hub: Hours Balance Bar, Booking Form & My Bookings */
-        <div className="space-y-6">
-          
-          {/* Member Top Bar: Identity & Quota */}
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4 p-3.5 sm:p-4.5 rounded-2xl bg-slate-50/80 border border-slate-200/80">
-            <div className="flex items-center gap-3">
-              <div className="w-11 h-11 rounded-2xl bg-gradient-to-br from-brand-navy to-slate-800 text-emerald-400 flex items-center justify-center font-black text-base shadow-2xs ring-1 ring-emerald-500/20 shrink-0">
-                {(memberData?.name || "M").charAt(0).toUpperCase()}
-              </div>
-              <div className="min-w-0">
-                <h4 className="font-extrabold text-slate-900 text-sm sm:text-base truncate">
-                  {memberData?.name || (isRTL ? "عضو مسجل" : "Registered Member")}
-                </h4>
-                <p className="text-xs text-slate-500 font-mono mt-0.5 truncate">
-                  {memberData?.email || memberEmail}
-                </p>
-              </div>
-            </div>
-
-            <div className="w-full sm:w-auto flex items-center justify-end gap-2 pt-2 sm:pt-0 border-t sm:border-t-0 border-slate-200/60">
-              {/* Change Password Button */}
-              <button
-                type="button"
-                onClick={() => {
-                  setChangePassOpen(true);
-                  setChangePassError(null);
-                  setChangePassSuccess(null);
-                  setCurrentPass("");
-                  setNewPass("");
-                  setConfirmPass("");
-                }}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-slate-200/90 bg-white hover:bg-emerald-50 text-slate-700 hover:text-emerald-700 text-xs font-bold transition-all cursor-pointer shadow-2xs active:scale-95"
-                title={isRTL ? "تغيير كلمة المرور الخاصة بك" : "Change your password"}
-              >
-                <KeyRound className="w-3.5 h-3.5 text-emerald-600" />
-                <span>{isRTL ? "تغيير كلمة المرور" : "Change Password"}</span>
-              </button>
-
-              {/* Logout Button */}
-              <button
-                type="button"
-                onClick={handleLogout}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-slate-200/90 bg-white hover:bg-red-50 text-slate-600 hover:text-red-600 text-xs font-bold transition-all cursor-pointer shadow-2xs active:scale-95"
-                title={bp?.logoutTitle || (isRTL ? "تسجيل الخروج والعودة لشاشة الدخول" : "Log out")}
-              >
-                <LogOut className="w-3.5 h-3.5" />
-                <span>{bp?.logout || (isRTL ? "تسجيل خروج" : "Log out")}</span>
-              </button>
-            </div>
-          </div>
-
-          {/* ── Monthly Quota Balance Bar ── */}
-          <div className="p-4 sm:p-5 rounded-2xl bg-gradient-to-br from-emerald-50/70 via-teal-50/40 to-white border border-emerald-100/90 shadow-2xs">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-2.5">
-              <div className="flex items-center gap-2">
-                <Clock className="w-4 h-4 text-emerald-700 shrink-0" />
-                <span className="text-xs sm:text-sm font-extrabold text-brand-navy">
-                  {isRTL
-                    ? `استخدمت ${hoursUsed} من ${monthlyLimit} ساعة هذا الشهر`
-                    : `Used ${hoursUsed} of ${monthlyLimit} hours this month`}
-                </span>
-              </div>
-              <span className="text-xs sm:text-sm font-bold text-emerald-800 bg-white/95 px-3 py-1 rounded-full border border-emerald-200/80 shadow-2xs self-start sm:self-auto">
-                {isRTL
-                  ? `الرصيد المتبقي: ${hoursRemaining} ${hoursRemaining >= 3 && hoursRemaining <= 10 ? "ساعات" : "ساعة"}`
-                  : `Remaining: ${hoursRemaining} hours`}
-              </span>
-            </div>
-
-            {/* Progress Bar */}
-            <div className="w-full bg-emerald-100/80 h-2 rounded-full overflow-hidden">
-              <div
-                className="bg-gradient-to-r from-emerald-600 to-teal-500 h-full rounded-full transition-all duration-500"
-                style={{ width: `${Math.min(100, (hoursUsed / monthlyLimit) * 100)}%` }}
-              />
-            </div>
-
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 text-[11px] text-slate-500 mt-2.5 font-medium">
-              <span>
-                {isRTL
-                  ? `الحد اليومي المسموح: حتى ${dailyLimit} ساعات يومياً`
-                  : `Daily limit: up to ${dailyLimit}h/day`}
-              </span>
-              <span>
-                {isRTL
-                  ? "ساعات العمل: 08:00 صباحاً – 04:00 مساءً"
-                  : "Working hours: 08:00 – 16:00"}
-              </span>
-            </div>
-          </div>
-
-          {/* Sub-Tabs: Direct Booking Form vs My Bookings */}
-          <div className="p-1 bg-slate-100/80 rounded-2xl border border-slate-200/70 flex items-center gap-1">
-            <button
-              type="button"
-              onClick={() => setMemberSubView("book")}
-              className={`flex-1 sm:flex-initial px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
-                memberSubView === "book"
-                  ? "bg-brand-navy text-white shadow-xs"
-                  : "text-slate-600 hover:text-slate-900 hover:bg-white/60"
-              }`}
-            >
-              <span>{bp?.bookNewDesk || (isRTL ? "حجز موعد مقعد جديد" : "Book a New Desk")}</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => setMemberSubView("my_bookings")}
-              className={`flex-1 sm:flex-initial px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
-                memberSubView === "my_bookings"
-                  ? "bg-brand-navy text-white shadow-xs"
-                  : "text-slate-600 hover:text-slate-900 hover:bg-white/60"
-              }`}
-            >
-              <span>{bp?.myBookings || (isRTL ? "حجوزاتي" : "My Bookings")}</span>
-              <span className={`w-5 h-5 rounded-full text-[10px] flex items-center justify-center font-bold ${
-                memberSubView === "my_bookings"
-                  ? "bg-emerald-500 text-white"
-                  : "bg-emerald-100 text-emerald-800"
-              }`}>
-                {bookings.filter((b) => b.status === "confirmed").length}
-              </span>
-            </button>
-          </div>
+        /* Member Hub: Hours Balance Bar, Booking Form & My Bookings (Single Unified Card) */
+        <div className="max-w-4xl w-full mx-auto bg-white rounded-3xl border border-slate-200/90 shadow-xl p-5 sm:p-8 md:p-10 space-y-6 animate-in fade-in">
+          <MemberQuotaHeader
+            memberName={memberData?.name || ""}
+            memberEmail={memberData?.email || memberEmail}
+            hoursUsed={hoursUsed}
+            monthlyLimit={monthlyLimit}
+            hoursRemaining={hoursRemaining}
+            dailyLimit={dailyLimit}
+            memberSubView={memberSubView}
+            confirmedBookingsCount={bookings.filter((b) => b.status === "confirmed").length}
+            onSelectSubView={setMemberSubView}
+            onOpenChangePassword={() => setChangePassOpen(true)}
+            onLogout={handleLogout}
+          />
 
           {/* ── Sub-View 1: Member Booking Form ── */}
           {memberSubView === "book" && (
@@ -813,37 +546,6 @@ export default function MemberBookingTab({ onApplyNewMember }: MemberBookingTabP
               )}
 
               <div className="space-y-4">
-                {/* Gender-based Assigned Hall Information */}
-                {memberData?.gender === "female" ? (
-                  <div className="p-3.5 rounded-2xl bg-rose-50/80 border border-rose-200/90 text-rose-950 flex items-center justify-between gap-3">
-                    <div className="flex items-center gap-2.5">
-                      <div className="w-9 h-9 rounded-xl bg-rose-200/80 text-rose-800 flex items-center justify-center text-lg font-bold shrink-0">
-                        👩
-                      </div>
-                      <div className="text-xs sm:text-sm font-bold text-rose-900">
-                        {isRTL ? "الصالة المخصصة لكِ: صالة الإناث" : "Assigned Hall: Women's Hall"}
-                      </div>
-                    </div>
-                    <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-white text-rose-800 border border-rose-200 shadow-2xs shrink-0">
-                      {isRTL ? "خاص بالإناث" : "Females Only"}
-                    </span>
-                  </div>
-                ) : (
-                  <div className="p-3.5 rounded-2xl bg-sky-50/80 border border-sky-200/90 text-sky-950 flex items-center justify-between gap-3">
-                    <div className="flex items-center gap-2.5">
-                      <div className="w-9 h-9 rounded-xl bg-sky-200/80 text-sky-800 flex items-center justify-center text-lg font-bold shrink-0">
-                        🚹
-                      </div>
-                      <div className="text-xs sm:text-sm font-bold text-sky-900">
-                        {isRTL ? "الصالة المخصصة لك: صالة الشباب" : "Assigned Hall: Youth Hall"}
-                      </div>
-                    </div>
-                    <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-white text-sky-800 border border-sky-200 shadow-2xs shrink-0">
-                      {isRTL ? "خاص بالشباب" : "Males Only"}
-                    </span>
-                  </div>
-                )}
-
                 {/* Important Attendance Rule Notice */}
                 <div className="p-3 sm:p-3.5 rounded-2xl bg-amber-50/90 border border-amber-200/90 flex items-start gap-2.5 text-amber-950 text-xs">
                   <AlertCircle className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
@@ -1083,21 +785,44 @@ export default function MemberBookingTab({ onApplyNewMember }: MemberBookingTabP
                     return (
                       <div className="space-y-3">
                         {/* Administrative Room Closure Notice */}
-                        {activeRoom.is_closed && (
+                        {(activeRoom.has_full_day_closure || (activeRoom.is_closed && !activeRoom.has_partial_closure)) ? (
                           <div className="p-3.5 rounded-xl bg-amber-50 border border-amber-200 text-xs text-amber-900 space-y-1 animate-in fade-in">
                             <div className="flex items-center gap-2 font-bold text-amber-950">
                               <AlertCircle className="w-4 h-4 text-amber-600 shrink-0" />
                               <span>
                                 {isRTL
-                                  ? `عذراً، ${getFormattedRoomName(activeRoom.name_ar, activeRoom.room_key)} مغلقة في هذا اليوم ومنع الحجز بها.`
-                                  : `Notice: This room is closed on this date.`}
+                                  ? `عذراً، ${getFormattedRoomName(activeRoom.name_ar, activeRoom.room_key)} مغلقة طوال هذا اليوم ومنع الحجز بها.`
+                                  : `Notice: This room is closed for the entire day.`}
                               </span>
                             </div>
                             <p className="text-[11px] text-amber-800 pr-6">
                               {isRTL ? `سبب الإغلاق: ${activeRoom.closure_reason || "أمر إداري طارئ"}` : `Reason: ${activeRoom.closure_reason}`}
                             </p>
                           </div>
-                        )}
+                        ) : activeRoom.has_partial_closure ? (
+                          <div className="p-3.5 rounded-xl bg-amber-50/80 border border-amber-200 text-xs text-amber-950 space-y-2 animate-in fade-in">
+                            <div className="flex items-start gap-2.5">
+                              <Clock className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+                              <div className="space-y-1 flex-1">
+                                <div className="flex items-center gap-2 flex-wrap">
+                                  <span className="font-extrabold text-amber-950">
+                                    {isRTL
+                                      ? `إغلاق جزئي مؤقت في ${getFormattedRoomName(activeRoom.name_ar, activeRoom.room_key)}:`
+                                      : `Partial Closure in ${getFormattedRoomName(activeRoom.name_ar, activeRoom.room_key)}:`}
+                                  </span>
+                                  {activeRoom.closure_start_time && activeRoom.closure_end_time && (
+                                    <span dir="ltr" className="font-mono bg-amber-200/90 text-amber-950 px-2 py-0.5 rounded-md font-bold text-[11px]">
+                                      {activeRoom.closure_start_time} – {activeRoom.closure_end_time}
+                                    </span>
+                                  )}
+                                </div>
+                                <p className="text-[11px] text-amber-900 leading-relaxed">
+                                  {activeRoom.closure_reason}
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+                        ) : null}
 
                         {/* Status Key Indicator */}
                         <div className="flex flex-wrap items-center justify-end gap-3 text-[10.5px] text-slate-500 font-semibold px-1">
@@ -1119,15 +844,16 @@ export default function MemberBookingTab({ onApplyNewMember }: MemberBookingTabP
                         <div className="grid grid-cols-4 sm:grid-cols-5 md:grid-cols-5 gap-2">
                           {activeRoom.seats.map((seat) => {
                             const isSelected = selectedSeat?.id === seat.id;
-                            const isLocked = seat.is_locked || seat.status === "locked" || activeRoom.is_closed;
-                            const isFullyBooked = seat.status === "fully_booked" || activeRoom.is_closed;
+                            const isFullClosure = Boolean(activeRoom.has_full_day_closure || (activeRoom.is_closed && !activeRoom.has_partial_closure));
+                            const isLocked = seat.is_locked || seat.status === "locked" || isFullClosure;
+                            const isFullyBooked = seat.status === "fully_booked" || isFullClosure;
                             const isPartiallyBooked = seat.status === "partially_booked" && !isLocked && !isFullyBooked;
-                            const isAvailableForCurrentShift = Boolean(seat.is_available) && !activeRoom.is_closed && !isLocked && !isFullyBooked;
+                            const isAvailableForCurrentShift = Boolean(seat.is_available) && !isFullClosure && !isLocked && !isFullyBooked;
                             const canSelect = !isLocked && !isFullyBooked && (isAvailableForCurrentShift || Boolean(seat.can_book_remaining) || (isPartiallyBooked && seat.free_intervals && seat.free_intervals.length > 0));
 
                             const statusLabel = isSelected
                               ? (isRTL ? "محدد" : "Selected")
-                              : activeRoom.is_closed
+                              : isFullClosure
                               ? (isRTL ? "غير متاح" : "Unavailable")
                               : (seat.availability_label || (isAvailableForCurrentShift ? (isRTL ? "متاح بالكامل" : "Fully Available") : (isRTL ? "غير متاح" : "Unavailable")));
 
@@ -1146,7 +872,7 @@ export default function MemberBookingTab({ onApplyNewMember }: MemberBookingTabP
                                   }
                                 }}
                                 title={
-                                  activeRoom.is_closed
+                                  isFullClosure
                                     ? `الصالة مغلقة: ${activeRoom.closure_reason}`
                                     : isPartiallyBooked
                                     ? `${seat.booked_hours_text || "محجوز جزئياً"} • ${seat.available_hours_text || "متاح في الساعات الشاغرة"}`
@@ -1302,213 +1028,21 @@ export default function MemberBookingTab({ onApplyNewMember }: MemberBookingTabP
 
           {/* ── Sub-View 2: Member Bookings & Cancellation ── */}
           {memberSubView === "my_bookings" && (
-            <div className="space-y-4 pt-2">
-              <div className="flex items-center justify-between text-xs text-slate-500 px-1">
-                <span>
-                  {isRTL
-                    ? "سياسة الإلغاء: مسموح بإلغاء حجز المقعد في أي وقت قبل تسجيل الدخول الفعلي أو قبل انتهاء يوم العمل (16:00)."
-                    : "Cancellation policy: You can cancel your desk reservation anytime before check-in or before 16:00."}
-                </span>
-              </div>
-
-              {bookings.length === 0 ? (
-                <div className="text-center py-10 bg-slate-50 rounded-2xl border border-slate-200">
-                  <Calendar className="w-8 h-8 text-slate-400 mx-auto mb-2" />
-                  <p className="text-sm font-bold text-slate-600">
-                    {bp?.noBookings || (isRTL ? "لا توجد حجوزات مسجلة حالياً" : "No bookings recorded yet")}
-                  </p>
-                </div>
-              ) : (
-                <div className="space-y-3">
-                  {bookings.map((booking) => {
-                    const isConfirmed = booking.status === "confirmed";
-                    return (
-                      <div
-                        key={booking.id}
-                        className={`p-4 rounded-2xl border transition-all flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 ${
-                          isConfirmed
-                            ? "bg-white border-slate-200 shadow-xs"
-                            : "bg-slate-50 border-slate-200 opacity-60"
-                        }`}
-                      >
-                        <div className="space-y-1">
-                          <div className="flex flex-wrap items-center gap-2">
-                            <span className="font-bold text-xs text-emerald-800 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-lg flex items-center gap-1">
-                              <Armchair className="w-3.5 h-3.5 text-emerald-600" />
-                              <span>{booking.seatLabel || (booking.seatNumber ? `مقعد ${booking.seatNumber}` : "مقعد")}</span>
-                              {booking.seatCode && <span className="font-mono text-[10px] text-slate-500">({booking.seatCode})</span>}
-                            </span>
-                            {booking.roomName && (
-                              <span className="text-xs text-slate-600 font-semibold">
-                                • {booking.roomName}
-                              </span>
-                            )}
-                            <span className="font-mono text-[11px] text-slate-400">
-                              (حجز #{booking.id})
-                            </span>
-                            <span
-                              className={`px-2.5 py-0.5 rounded-full text-xs font-bold ${
-                                isConfirmed
-                                  ? "bg-emerald-100 text-emerald-800"
-                                  : "bg-slate-200 text-slate-700"
-                              }`}
-                            >
-                              {isConfirmed
-                                ? (isRTL ? "حجز مقعد مؤكد — بانتظار حضورك" : "Confirmed — Awaiting Visit")
-                                : (isRTL ? "ملغي / لم يحضر" : "Cancelled / No-Show")}
-                            </span>
-                          </div>
-                          <div className="flex flex-wrap items-center gap-2 sm:gap-3 text-xs sm:text-sm font-extrabold text-brand-navy">
-                            <span className="flex items-center gap-1">
-                              <Calendar className="w-3.5 h-3.5 text-slate-400" />
-                              {cleanBookingDate(booking.date)}
-                            </span>
-                            <span>•</span>
-                            <span className="flex items-center gap-1 font-mono text-slate-600 font-normal text-xs">
-                              <Clock className="w-3.5 h-3.5 text-slate-400" />
-                              {booking.startTime && booking.endTime
-                                ? `${formatHour12(booking.startTime)} – ${formatHour12(booking.endTime)}`
-                                : (isRTL ? "8 ص – 4 م" : "8 AM – 4 PM")}
-                            </span>
-                          </div>
-                          {booking.notes && (
-                            <p className="text-xs text-slate-500 font-normal">
-                              {booking.notes}
-                            </p>
-                          )}
-                        </div>
-
-                        {isConfirmed && booking.canCancel && (
-                          <button
-                            type="button"
-                            onClick={() => handleCancelBooking(booking.id)}
-                            className="px-3.5 py-1.5 rounded-xl border border-red-200 text-xs font-bold text-red-600 hover:bg-red-50 transition-colors cursor-pointer self-end sm:self-auto"
-                          >
-                            {isRTL ? "إلغاء حجز المقعد" : "Cancel Reservation"}
-                          </button>
-                        )}
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
-            </div>
+            <MemberBookingsList
+              bookings={bookings}
+              onCancelBooking={handleCancelBooking}
+            />
           )}
 
         </div>
       )}
 
       {/* ── Change Password Modal ── */}
-      {changePassOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-xs animate-in fade-in">
-          <div className="bg-white rounded-2xl border border-slate-200 shadow-2xl max-w-md w-full p-6 space-y-4">
-            <div className="flex items-center justify-between pb-3 border-b border-slate-100">
-              <div className="flex items-center gap-2">
-                <div className="w-9 h-9 rounded-xl bg-emerald-50 text-emerald-700 flex items-center justify-center">
-                  <KeyRound className="w-5 h-5" />
-                </div>
-                <div>
-                  <h4 className="font-bold text-slate-900 text-sm sm:text-base">
-                    {isRTL ? "تغيير كلمة المرور" : "Change Password"}
-                  </h4>
-                  <p className="text-[11px] text-slate-400">
-                    {isRTL ? "قم بتعيين كلمة مرور خاصة وسهلة التذكر" : "Set a secure personal password"}
-                  </p>
-                </div>
-              </div>
-              <button
-                type="button"
-                onClick={() => setChangePassOpen(false)}
-                className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors cursor-pointer"
-              >
-                <X className="w-4 h-4" />
-              </button>
-            </div>
-
-            {changePassError && (
-              <div className="p-3 rounded-xl bg-red-50 border border-red-200 text-xs font-bold text-red-700 flex items-center gap-2 animate-in fade-in">
-                <AlertCircle className="w-4 h-4 shrink-0" />
-                <span>{changePassError}</span>
-              </div>
-            )}
-
-            {changePassSuccess && (
-              <div className="p-3 rounded-xl bg-emerald-50 border border-emerald-200 text-xs font-bold text-emerald-800 flex items-center gap-2 animate-in fade-in">
-                <CheckCircle2 className="w-4 h-4 shrink-0 text-emerald-600" />
-                <span>{changePassSuccess}</span>
-              </div>
-            )}
-
-            <form onSubmit={handleChangePassword} className="space-y-3.5">
-              <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1">
-                  {isRTL ? "كلمة المرور الحالية (المؤقتة):" : "Current (Temporary) Password:"}
-                </label>
-                <input
-                  type="password"
-                  required
-                  value={currentPass}
-                  onChange={(e) => setCurrentPass(e.target.value)}
-                  placeholder="••••••••"
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm font-mono outline-none focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition-all"
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1">
-                  {isRTL ? "كلمة المرور الجديدة:" : "New Password:"}
-                </label>
-                <input
-                  type="password"
-                  required
-                  value={newPass}
-                  onChange={(e) => setNewPass(e.target.value)}
-                  placeholder="••••••••"
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm font-mono outline-none focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition-all"
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1">
-                  {isRTL ? "تأكيد كلمة المرور الجديدة:" : "Confirm New Password:"}
-                </label>
-                <input
-                  type="password"
-                  required
-                  value={confirmPass}
-                  onChange={(e) => setConfirmPass(e.target.value)}
-                  placeholder="••••••••"
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm font-mono outline-none focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition-all"
-                />
-              </div>
-
-              <div className="pt-2 flex items-center gap-2">
-                <button
-                  type="submit"
-                  disabled={changePassLoading}
-                  className="flex-1 py-2.5 rounded-xl font-bold text-white bg-emerald-600 hover:bg-emerald-700 transition-all text-xs sm:text-sm flex items-center justify-center gap-1.5 cursor-pointer disabled:bg-slate-400"
-                >
-                  {changePassLoading ? (
-                    <>
-                      <Loader2 className="w-4 h-4 animate-spin" />
-                      <span>{isRTL ? "جاري التحديث..." : "Updating..."}</span>
-                    </>
-                  ) : (
-                    <span>{isRTL ? "حفظ كلمة المرور الجديدة" : "Save New Password"}</span>
-                  )}
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setChangePassOpen(false)}
-                  className="px-4 py-2.5 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-100 font-bold text-xs sm:text-sm cursor-pointer transition-colors"
-                >
-                  {isRTL ? "إلغاء" : "Cancel"}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
+      <ChangePasswordModal
+        isOpen={changePassOpen}
+        onClose={() => setChangePassOpen(false)}
+        authToken={authToken}
+      />
     </div>
   );
 }

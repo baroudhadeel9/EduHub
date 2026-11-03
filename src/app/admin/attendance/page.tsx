@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useMemo, useEffect, useCallback } from "react";
+import React, { useState, useMemo, useEffect, useCallback, useRef } from "react";
 import { useLanguage } from "@/context/LanguageContext";
 import AdminSidebar from "@/components/admin/AdminSidebar";
 import AdminHeader from "@/components/admin/AdminHeader";
@@ -14,7 +14,6 @@ import {
 } from "lucide-react";
 import {
   getAdminAttendanceApi,
-  getAdminBookingsApi,
   checkInAttendanceApi,
   checkOutAttendanceApi,
   createManualAttendanceApi,
@@ -30,6 +29,10 @@ export default function AdminAttendancePage() {
   const [isCheckInOpen, setIsCheckInOpen] = useState(false);
   const [records, setRecords] = useState<AttendanceRecord[]>([]);
   const [loading, setLoading] = useState(true);
+
+  // Persistent session lock to guarantee no row reverts to 'waiting' after check-in
+  const sessionCheckedInMap = useRef<Map<string, { id: string; arrivalTime: string }>>(new Map());
+  const sessionCheckedOutMap = useRef<Map<string, { departureTime: string; actualDuration: string }>>(new Map());
 
   // Allowed Week Dates Calculation (Saturday to Thursday, Friday closed)
   const weekInfo = useMemo(() => getAllowedWeekDates(), []);
@@ -73,7 +76,7 @@ export default function AdminAttendancePage() {
           (r.departure_time as string) ||
           (r.status === "inside" ? (isRTL ? "داخل المساحة الآن" : "Inside space now") : "-"),
         actualDuration: (r.actual_duration as string) || "-",
-        status: (r.status as "inside" | "waiting" | "left") || "waiting",
+        status: (r.status as "inside" | "waiting" | "left" | "unattended") || "waiting",
         userId: (r.user_id || user.id) as number | string | undefined,
         bookingId: (r.booking_id || (r.booking as Record<string, unknown>)?.id) as number | string | undefined,
         visitorPassId: (r.visitor_pass_id || visitorPass.id) as number | string | undefined,
@@ -87,47 +90,43 @@ export default function AdminAttendancePage() {
     setLoading(true);
     const targetDate = dateToLoad || selectedDate;
     try {
-      const [attRes, bookingsRes] = await Promise.allSettled([
-        getAdminAttendanceApi(targetDate),
-        getAdminBookingsApi(targetDate),
-      ]);
-
-      const attList = attRes.status === "fulfilled" && attRes.value?.data ? attRes.value.data : [];
-      const bookingsList = bookingsRes.status === "fulfilled" && Array.isArray(bookingsRes.value) ? bookingsRes.value : [];
-
+      const attRes = await getAdminAttendanceApi(targetDate);
+      const attList = attRes?.data ? attRes.data : [];
       const initialMapped = mapRecords(attList);
-      const existingIds = new Set(initialMapped.map((r) => r.id));
 
-      const pendingBookings: AttendanceRecord[] = [];
-      for (const b of bookingsList) {
-        const bIdStr = String(b.id);
-        const bookingKey = `booking_${b.id}`;
-        if (!existingIds.has(bIdStr) && !existingIds.has(bookingKey)) {
-          const user = b.user || {};
-          const memberType = (user.member_type === "freelancer" ? "freelancer" : "student") as "freelancer" | "student";
-          const start = b.start_time || "";
-          const end = b.end_time || "";
-          pendingBookings.push({
-            id: bookingKey,
-            name: user.name || "عضو مسجل",
-            avatarLetter: user.name ? user.name.charAt(0) : "ع",
-            avatarColor: memberType === "freelancer" ? "bg-teal-50 text-teal-800 border-teal-200" : "bg-emerald-50 text-emerald-800 border-emerald-200",
-            type: memberType,
-            subText: isRTL ? `حجز مقعد مسبق (${b.hours_count || 8} ساعات)` : `Seat booking (${b.hours_count || 8}h)`,
-            bookingTime: start && end ? `${start} – ${end}` : "حجز مسبق",
-            arrivalTime: isRTL ? "لم يسجل بعد" : "Not recorded",
-            departureTime: "-",
-            actualDuration: "-",
-            status: "waiting",
-            userId: (b.user_id || user.id) as number | string | undefined,
-            bookingId: b.id as number | string | undefined,
-            phone: String(user.phone || ""),
-            nationalId: String(user.national_id || user.nationalId || ""),
-          });
+      const mergedList = initialMapped.map((rec) => {
+        // Enforce session check-in / check-out lock to prevent any 1-second reversion
+        const checkedInInfo =
+          sessionCheckedInMap.current.get(rec.id) ||
+          (rec.bookingId && sessionCheckedInMap.current.get(`booking_${rec.bookingId}`)) ||
+          (rec.bookingId && sessionCheckedInMap.current.get(String(rec.bookingId))) ||
+          (rec.visitorPassId && sessionCheckedInMap.current.get(`visitor_${rec.visitorPassId}`));
+
+        if (checkedInInfo && (rec.status === "waiting" || rec.status === "unattended")) {
+          return {
+            ...rec,
+            id: checkedInInfo.id,
+            status: "inside" as const,
+            arrivalTime: checkedInInfo.arrivalTime,
+            departureTime: isRTL ? "داخل المساحة الآن" : "Inside space now",
+            actualDuration: isRTL ? "منذ قليل" : "Just now",
+          };
         }
-      }
 
-      setRecords([...initialMapped, ...pendingBookings]);
+        const checkedOutInfo = sessionCheckedOutMap.current.get(rec.id);
+        if (checkedOutInfo && rec.status === "inside") {
+          return {
+            ...rec,
+            status: "left" as const,
+            departureTime: checkedOutInfo.departureTime,
+            actualDuration: checkedOutInfo.actualDuration,
+          };
+        }
+
+        return rec;
+      });
+
+      setRecords(mergedList);
     } catch (err) {
       console.warn("Failed to load attendance:", err);
     } finally {
@@ -157,11 +156,13 @@ export default function AdminAttendancePage() {
     const attended = records.filter((r) => r.status === "inside" || r.status === "left").length;
     const inside = records.filter((r) => r.status === "inside").length;
     const awaiting = records.filter((r) => r.status === "waiting").length;
+    const unattended = records.filter((r) => r.status === "unattended").length;
 
     return {
       attendedCount: attended,
       insideCount: inside,
       awaitingCount: awaiting,
+      unattendedCount: unattended,
     };
   }, [records]);
 
@@ -177,45 +178,99 @@ export default function AdminAttendancePage() {
         visitorPassId: record?.visitorPassId,
         notes: record?.subText || "تسجيل حضور من كشف الاستقبال",
       });
+
+      const newId = updated?.id ? String(updated.id) : id;
+      const gazaNowStr = new Intl.DateTimeFormat("en-GB", {
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: false,
+        timeZone: "Asia/Gaza",
+      }).format(new Date());
+
+      const arrival = updated?.arrival_time || gazaNowStr;
+
+      // Lock in session ref
+      sessionCheckedInMap.current.set(id, { id: newId, arrivalTime: arrival });
+      sessionCheckedInMap.current.set(newId, { id: newId, arrivalTime: arrival });
+      if (record?.bookingId) {
+        sessionCheckedInMap.current.set(`booking_${record.bookingId}`, { id: newId, arrivalTime: arrival });
+        sessionCheckedInMap.current.set(String(record.bookingId), { id: newId, arrivalTime: arrival });
+      }
+      if (record?.visitorPassId) {
+        sessionCheckedInMap.current.set(`visitor_${record.visitorPassId}`, { id: newId, arrivalTime: arrival });
+      }
+
+      // Immediately flip button & row status to 'inside'
       setRecords((prev) =>
         prev.map((r) =>
-          r.id === id
+          r.id === id || r.id === newId || (record?.bookingId && r.bookingId === record.bookingId)
             ? {
                 ...r,
-                id: updated?.id ? String(updated.id) : r.id,
+                id: newId,
                 status: "inside",
-                arrivalTime: updated?.arrival_time || "الآن",
-                departureTime: isRTL ? "لم يغادر بعد" : "Still in hub",
+                arrivalTime: arrival,
+                departureTime: isRTL ? "داخل المساحة الآن" : "Inside space now",
                 actualDuration: isRTL ? "منذ قليل" : "Just now",
               }
             : r
         )
       );
+
+      // Re-sync with server authoritative state
+      await loadAttendance(selectedDate);
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : "";
       alert(msg || "تعذر تسجيل الدخول");
+      throw err;
     }
   };
 
   // Check-Out Action handler
   const handleCheckOut = async (id: string) => {
     try {
+      const record = records.find((r) => r.id === id);
       const updated = await checkOutAttendanceApi(id);
+      const gazaNowStr = new Intl.DateTimeFormat("en-GB", {
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: false,
+        timeZone: "Asia/Gaza",
+      }).format(new Date());
+
+      const departure = updated?.departure_time || gazaNowStr;
+      const duration = updated?.actual_duration || (isRTL ? "تمت المغادرة" : "Departed");
+
+      sessionCheckedOutMap.current.set(id, { departureTime: departure, actualDuration: duration });
+      if (updated?.id) {
+        sessionCheckedOutMap.current.set(String(updated.id), { departureTime: departure, actualDuration: duration });
+      }
+      if (record?.bookingId) {
+        sessionCheckedOutMap.current.set(`booking_${record.bookingId}`, { departureTime: departure, actualDuration: duration });
+      }
+      if (record?.visitorPassId) {
+        sessionCheckedOutMap.current.set(`visitor_${record.visitorPassId}`, { departureTime: departure, actualDuration: duration });
+      }
+
+      // Immediately flip button & row status to 'left'
       setRecords((prev) =>
         prev.map((r) =>
-          r.id === id
+          r.id === id || (updated?.id && r.id === String(updated.id)) || (record?.bookingId && r.bookingId === record.bookingId)
             ? {
                 ...r,
                 status: "left",
-                departureTime: updated.departure_time || "الآن",
-                actualDuration: updated.actual_duration || (isRTL ? "تمت المغادرة" : "Departed"),
+                departureTime: departure,
+                actualDuration: duration,
               }
             : r
         )
       );
+
+      // Re-sync with server authoritative state
+      await loadAttendance(selectedDate);
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : "";
       alert(msg || "تعذر تسجيل الخروج");
+      throw err;
     }
   };
 
@@ -280,78 +335,11 @@ export default function AdminAttendancePage() {
           />
 
           {/* ── Date Navigator & Filter Bar ── */}
-          <div className="bg-white rounded-2xl border border-slate-200/80 p-3.5 sm:p-4 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4">
-            
-            {/* Quick Allowed Days Shortcut Buttons (Saturday to Thursday) */}
-            <div className="flex items-center gap-1.5 overflow-x-auto pb-1 md:pb-0 scrollbar-none">
-              {weekInfo.currentWeek.map((dayItem) => {
-                const isSelected = selectedDate === dayItem.date;
-                return (
-                  <button
-                    key={dayItem.date}
-                    type="button"
-                    onClick={() => handleSelectDate(dayItem.date)}
-                    className={`px-3 py-2 rounded-xl text-xs sm:text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 whitespace-nowrap ${
-                      isSelected
-                        ? "bg-gradient-to-r from-emerald-600 to-teal-700 text-white shadow-xs scale-[1.02]"
-                        : "bg-slate-100 text-slate-700 hover:bg-slate-200/80"
-                    }`}
-                  >
-                    <span>{isRTL ? dayItem.dayNameAr : dayItem.dayNameEn}</span>
-                    <span
-                      className={`text-[11px] font-mono ${
-                        isSelected ? "text-emerald-100" : "text-slate-400"
-                      }`}
-                    >
-                      {dayItem.formattedShort}
-                    </span>
-                    {dayItem.isToday && (
-                      <span
-                        className={`w-1.5 h-1.5 rounded-full ${
-                          isSelected ? "bg-white" : "bg-emerald-600 animate-pulse"
-                        }`}
-                      />
-                    )}
-                  </button>
-                );
-              })}
-
-              {weekInfo.nextWeek.length > 0 && (
-                <>
-                  <span className="text-slate-300 px-0.5">|</span>
-                  {weekInfo.nextWeek.map((dayItem) => {
-                    const isSelected = selectedDate === dayItem.date;
-                    return (
-                      <button
-                        key={dayItem.date}
-                        type="button"
-                        onClick={() => handleSelectDate(dayItem.date)}
-                        className={`px-3 py-2 rounded-xl text-xs sm:text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 whitespace-nowrap ${
-                          isSelected
-                            ? "bg-[#0c2340] text-white shadow-xs scale-[1.02]"
-                            : "bg-indigo-50 text-indigo-700 hover:bg-indigo-100"
-                        }`}
-                        title={isRTL ? "الأسبوع القادم (مفتوح)" : "Next Week"}
-                      >
-                        <span>{isRTL ? dayItem.dayNameAr : dayItem.dayNameEn}</span>
-                        <span
-                          className={`text-[11px] font-mono ${
-                            isSelected ? "text-indigo-200" : "text-indigo-400"
-                          }`}
-                        >
-                          {dayItem.formattedShort}
-                        </span>
-                      </button>
-                    );
-                  })}
-                </>
-              )}
-            </div>
-
-            {/* Date Select Dropdown & Status Tag */}
-            <div className="flex items-center gap-2.5 flex-wrap sm:flex-nowrap">
+          <div className="bg-white rounded-2xl border border-slate-200/80 p-3.5 sm:p-4 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            {/* Date Select Dropdown & Today Quick Return */}
+            <div className="flex items-center gap-2.5 flex-wrap">
               {/* قائمة التاريخ المحددة بأيام الأسبوع المسموح بها فقط */}
-              <div className="flex items-center gap-2 bg-[#f8fafc] border border-slate-200 rounded-xl px-3 py-1.5 hover:border-emerald-500/40 transition-colors shadow-2xs">
+              <div className="flex items-center gap-2 bg-[#f8fafc] border border-slate-200 rounded-xl px-3.5 py-2 hover:border-emerald-500/40 transition-colors shadow-2xs">
                 <CalendarDays className="w-4 h-4 text-emerald-700 shrink-0" />
                 <label htmlFor="attendance-date-select" className="text-xs font-bold text-slate-600 whitespace-nowrap">
                   {isRTL ? "قائمة التاريخ:" : "Date:"}
@@ -391,6 +379,20 @@ export default function AdminAttendancePage() {
                 </select>
               </div>
 
+              {/* Quick Return to Today button if different date is selected */}
+              {!isToday && (
+                <button
+                  type="button"
+                  onClick={() => handleSelectDate(todayStr)}
+                  className="px-3 py-2 rounded-xl text-xs font-bold bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 transition-colors cursor-pointer shrink-0"
+                >
+                  {isRTL ? "العودة لليوم" : "Back to Today"}
+                </button>
+              )}
+            </div>
+
+            {/* Status Badge & Refresh Button */}
+            <div className="flex items-center gap-2.5 self-end sm:self-auto">
               {/* Status Badge */}
               {isToday ? (
                 <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-50 text-emerald-800 text-xs font-bold border border-emerald-200 shrink-0">
@@ -455,6 +457,7 @@ export default function AdminAttendancePage() {
             attendedCount={stats.attendedCount}
             insideCount={stats.insideCount}
             awaitingCount={stats.awaitingCount}
+            unattendedCount={stats.unattendedCount}
           />
 
           {/* Attendance Table & Filters */}
@@ -462,6 +465,7 @@ export default function AdminAttendancePage() {
             records={records}
             onCheckIn={handleCheckIn}
             onCheckOut={handleCheckOut}
+            isToday={isToday}
           />
 
         </main>

@@ -21,11 +21,11 @@
     "faq": "FAQ",
     "contact": "Contact Us",
     "langAria": "Select website language",
-    "hubStatus": "Hub Open Today (Until 07:00 PM)",
+    "hubStatus": "Hub Open Today (Until 04:00 PM)",
     "verifiedBadge": "Verified Gaza Non-Profit Hub"
   },
   "hero": {
-    "liveStatusBadge": "The center is open now for students and professionals (until 07:00 PM)",
+    "liveStatusBadge": "The center is open now for students and professionals (until 04:00 PM)",
     "titlePart1": "A Lifeline for Education and Work",
     "titleHighlight": "in the Heart of Gaza",
     "description": "A non-profit community initiative empowering young people to continue learning, develop their skills, and access digital work opportunities through sustainable energy, reliable internet, and equipped learning environments, addressing the challenges of power outages, damaged infrastructure, and limited educational and employment opportunities",
@@ -115,8 +115,8 @@
     },
     "hoursStatus": {
       "title": "Today's Operating Hours",
-      "value": "08:00 AM - 07:00 PM",
-      "desc": "3 daily shifts to maximize community access",
+      "value": "08:00 AM - 04:00 PM",
+      "desc": "Flexible daily operating hours to maximize community access",
       "percentage": 80
     },
     "powerTitle": "Solar Power",
@@ -523,7 +523,7 @@
     ],
     "transparencyTitle": "Transparency & Operations",
     "transparencyItems": [
-      "Working Hours: 08:00 AM - 07:00 PM",
+      "Working Hours: 08:00 AM - 04:00 PM",
       "Location: Gaza - Al-Wehda St, Sondos Bldg (1st Floor)",
       "Energy System: Solar energy & generators for continuous uptime",
       "Connectivity: Dedicated High-Speed 100 Mbps Internet",

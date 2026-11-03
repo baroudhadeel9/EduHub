@@ -62,7 +62,7 @@ export default function DuesTable({ onOpenMobileMenu }: DuesTableProps = {}) {
       const res = await getAdminDuesApi({
         query: searchQuery,
         type: typeFilter,
-        onlyDebtors: false,
+        onlyDebtors: true,
       });
       setData(res);
     } catch (err: unknown) {
@@ -99,7 +99,8 @@ export default function DuesTable({ onOpenMobileMenu }: DuesTableProps = {}) {
 
   const filteredMembers = useMemo(() => {
     if (!data?.data) return [];
-    let list = data.data;
+    // Strictly filter out any member with 0 or negative balance - dues table is exclusively for active claims
+    let list = data.data.filter((m) => m.due_amount > 0);
 
     if (searchQuery.trim()) {
       const q = searchQuery.toLowerCase().trim();
@@ -467,16 +468,16 @@ export default function DuesTable({ onOpenMobileMenu }: DuesTableProps = {}) {
                 </div>
               ) : filteredMembers.length === 0 ? (
                 <div className="p-12 text-center">
-                  <div className="w-14 h-14 rounded-2xl bg-slate-50 text-slate-400 flex items-center justify-center mx-auto mb-3 border border-slate-200">
+                  <div className="w-14 h-14 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center mx-auto mb-3 border border-emerald-200">
                     <CheckCircle2 className="w-7 h-7 text-emerald-600" />
                   </div>
                   <h3 className="text-base font-black text-slate-800 mb-1">
-                    {isRTL ? "لا توجد سجلات مطابقة" : "No Matching Records Found"}
+                    {isRTL ? "لا توجد أي مبالغ مستحقة معلقة" : "No Outstanding Dues"}
                   </h3>
                   <p className="text-xs text-slate-500 max-w-sm mx-auto">
                     {isRTL
-                      ? "لم يتم العثور على أي أعضاء مطابقين لبحثك الحالي في جدول المستحقات."
-                      : "No members found matching your search criteria."}
+                      ? "رائع! جميع الأعضاء ملتزمون بساعاتهم المعتمدة وخالصو الرصيد، ولا توجد أي مبالغ مستحقة للتحصيل حالياً."
+                      : "Great! All members are within their limits with zero outstanding dues."}
                   </p>
                 </div>
               ) : (

@@ -1,6 +1,11 @@
 import { getAdminHeaders, safeJsonParse, extractErrorMessage } from "./applications";
 
-const API_BASE_URL = typeof window !== "undefined" ? "/api/proxy" : "https://eduhub-api-uz1z.onrender.com/api";
+const API_BASE_URL =
+  typeof window !== "undefined"
+    ? "/api/proxy"
+    : process.env.BACKEND_API_URL ||
+      process.env.NEXT_PUBLIC_API_BASE_URL ||
+      "https://eduhub-api-uz1z.onrender.com/api";
 
 export interface SeatSlot {
   slot_index: number;
@@ -59,7 +64,12 @@ export interface RoomItem {
   booked_slots_count: number;
   room_occupancy_percentage: number;
   is_closed?: boolean;
+  has_full_day_closure?: boolean;
+  has_partial_closure?: boolean;
+  is_shift_closed?: boolean;
   closure_reason?: string;
+  closure_start_time?: string | null;
+  closure_end_time?: string | null;
   seats: SeatItem[];
 }
 
@@ -285,6 +295,8 @@ export interface RoomClosureItem {
   id: number;
   room_id: number;
   closure_date: string;
+  start_time?: string | null;
+  end_time?: string | null;
   reason: string;
   created_by?: number;
   created_at?: string;
@@ -316,11 +328,14 @@ export async function getAdminRoomClosuresApi(): Promise<{ success: boolean; dat
 }
 
 /**
- * Create or update a room closure for a specific date with a reason
+ * Create or update a room closure for a specific date or time range with a reason
  */
 export async function createRoomClosureApi(payload: {
   room_id: number | string;
   closure_date: string;
+  start_time?: string | null;
+  end_time?: string | null;
+  is_full_day?: boolean;
   reason: string;
 }): Promise<{ success: boolean; message: string; data: RoomClosureItem }> {
   const response = await fetch(`${API_BASE_URL}/admin/room-closures`, {

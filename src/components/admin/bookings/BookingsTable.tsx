@@ -44,7 +44,7 @@ export interface AdminBookingRecord {
   end_time: string;
   hours_count: number;
   notes?: string;
-  status: "confirmed" | "cancelled";
+  status: "confirmed" | "attended" | "cancelled";
   created_at?: string;
   cancelled_at?: string;
   cancellation_reason?: string;
@@ -87,7 +87,7 @@ export default function BookingsTable({ refreshTrigger = 0 }: BookingsTableProps
 
   // Filter state
   const [activeCategoryTab, setActiveCategoryTab] = useState<
-    "all" | "student" | "freelancer" | "confirmed" | "cancelled"
+    "all" | "student" | "freelancer" | "confirmed" | "attended" | "cancelled"
   >("all");
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -178,14 +178,18 @@ export default function BookingsTable({ refreshTrigger = 0 }: BookingsTableProps
   const stats = useMemo(() => {
     const total = bookings.length;
     const confirmed = bookings.filter((b) => b.status === "confirmed");
+    const attended = bookings.filter((b) => b.status === "attended");
+    const activeBookings = bookings.filter((b) => b.status === "confirmed" || b.status === "attended");
     const cancelled = bookings.filter((b) => b.status === "cancelled");
-    const students = confirmed.filter((b) => (b.user?.member_type || "student") === "student").length;
-    const freelancers = confirmed.filter((b) => b.user?.member_type === "freelancer").length;
-    const totalHours = confirmed.reduce((acc, b) => acc + (Number(b.hours_count) || 8), 0);
+    const students = activeBookings.filter((b) => (b.user?.member_type || "student") === "student").length;
+    const freelancers = activeBookings.filter((b) => b.user?.member_type === "freelancer").length;
+    const totalHours = activeBookings.reduce((acc, b) => acc + (Number(b.hours_count) || 8), 0);
 
     return {
       total,
       confirmedCount: confirmed.length,
+      attendedCount: attended.length,
+      activeCount: activeBookings.length,
       cancelledCount: cancelled.length,
       studentsCount: students,
       freelancersCount: freelancers,
@@ -201,6 +205,7 @@ export default function BookingsTable({ refreshTrigger = 0 }: BookingsTableProps
       if (activeCategoryTab === "student" && uType !== "student") return false;
       if (activeCategoryTab === "freelancer" && uType !== "freelancer") return false;
       if (activeCategoryTab === "confirmed" && b.status !== "confirmed") return false;
+      if (activeCategoryTab === "attended" && b.status !== "attended") return false;
       if (activeCategoryTab === "cancelled" && b.status !== "cancelled") return false;
 
       if (searchQuery.trim()) {
@@ -344,78 +349,116 @@ export default function BookingsTable({ refreshTrigger = 0 }: BookingsTableProps
         </div>
       </div>
 
-      {/* ── 2. Top Metric Cards ── */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
+      {/* ── 2. Top Metric Cards (Responsive: Compact 3-col on mobile, spacious on desktop) ── */}
+      <div className="grid grid-cols-3 gap-2 sm:gap-4">
         {/* Card 1: Total Bookings */}
-        <div className="bg-white rounded-2xl border border-slate-200/80 p-4 shadow-2xs flex items-center justify-between">
+        <div className="bg-white rounded-2xl border border-slate-200/80 p-2.5 sm:p-4 shadow-2xs flex flex-col sm:flex-row sm:items-center justify-between gap-1 sm:gap-2">
           <div>
-            <span className="text-xs font-bold text-slate-500 block">
+            <span className="text-[10px] sm:text-xs font-bold text-slate-500 block truncate">
               {isRTL ? "إجمالي الحجوزات" : "Total Bookings"}
             </span>
-            <span className="text-2xl font-black text-slate-900 mt-1 block">
+            <span className="text-base sm:text-2xl font-black text-slate-900 mt-0.5 sm:mt-1 block">
               {stats.total}
             </span>
-            <span className="text-[11px] text-emerald-700 font-semibold">
-              {stats.confirmedCount} {isRTL ? "مؤكد" : "confirmed"}
-              {stats.cancelledCount > 0 && ` • ${stats.cancelledCount} ملغي`}
+            <span className="text-[10px] sm:text-[11px] text-emerald-700 font-semibold block truncate">
+              {stats.activeCount} {isRTL ? "مؤكد / حضر" : "active"}
+              {stats.attendedCount > 0 && ` (${stats.attendedCount} ${isRTL ? "حضر" : "attended"})`}
+              {stats.cancelledCount > 0 && ` • ${stats.cancelledCount} ${isRTL ? "ملغي" : "cancelled"}`}
             </span>
           </div>
-          <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0">
-            <CalendarDays className="w-5 h-5" />
+          <div className="w-7 h-7 sm:w-10 sm:h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0 self-end sm:self-auto">
+            <CalendarDays className="w-4 h-4 sm:w-5 sm:h-5" />
           </div>
         </div>
 
         {/* Card 2: Students vs Freelancers */}
-        <div className="bg-white rounded-2xl border border-slate-200/80 p-4 shadow-2xs flex items-center justify-between">
+        <div className="bg-white rounded-2xl border border-slate-200/80 p-2.5 sm:p-4 shadow-2xs flex flex-col sm:flex-row sm:items-center justify-between gap-1 sm:gap-2">
           <div>
-            <span className="text-xs font-bold text-slate-500 block">
+            <span className="text-[10px] sm:text-xs font-bold text-slate-500 block truncate">
               {isRTL ? "حسب الفئة" : "By Category"}
             </span>
-            <div className="flex items-center gap-2 mt-1">
-              <span className="text-lg font-black text-slate-900">
-                {stats.studentsCount} <span className="text-xs font-semibold text-slate-400">طالب</span>
+            <div className="flex items-center gap-1 sm:gap-2 mt-0.5 sm:mt-1">
+              <span className="text-xs sm:text-lg font-black text-slate-900">
+                {stats.studentsCount} <span className="text-[10px] font-semibold text-slate-400">طالب</span>
               </span>
               <span className="text-slate-300">•</span>
-              <span className="text-lg font-black text-slate-900">
-                {stats.freelancersCount} <span className="text-xs font-semibold text-slate-400">مستقل</span>
+              <span className="text-xs sm:text-lg font-black text-slate-900">
+                {stats.freelancersCount} <span className="text-[10px] font-semibold text-slate-400">مستقل</span>
               </span>
             </div>
-            <span className="text-[11px] text-slate-400 font-medium">
-              {isRTL ? "توزيع المقاعد المؤكدة" : "Confirmed desk shares"}
+            <span className="text-[10px] sm:text-[11px] text-slate-400 font-medium block truncate">
+              {isRTL ? "توزيع المقاعد" : "Desk shares"}
             </span>
           </div>
-          <div className="w-10 h-10 rounded-xl bg-teal-50 text-teal-600 flex items-center justify-center shrink-0">
-            <Users className="w-5 h-5" />
+          <div className="w-7 h-7 sm:w-10 sm:h-10 rounded-xl bg-teal-50 text-teal-600 flex items-center justify-center shrink-0 self-end sm:self-auto">
+            <Users className="w-4 h-4 sm:w-5 sm:h-5" />
           </div>
         </div>
 
         {/* Card 3: Total Reserved Hours */}
-        <div className="bg-white rounded-2xl border border-slate-200/80 p-4 shadow-2xs flex items-center justify-between">
+        <div className="bg-white rounded-2xl border border-slate-200/80 p-2.5 sm:p-4 shadow-2xs flex flex-col sm:flex-row sm:items-center justify-between gap-1 sm:gap-2">
           <div>
-            <span className="text-xs font-bold text-slate-500 block">
-              {isRTL ? "إجمالي الساعات المحجوزة" : "Total Reserved Hours"}
+            <span className="text-[10px] sm:text-xs font-bold text-slate-500 block truncate">
+              {isRTL ? "الساعات المحجوزة" : "Reserved Hours"}
             </span>
-            <span className="text-2xl font-black text-indigo-600 mt-1 block">
+            <span className="text-base sm:text-2xl font-black text-indigo-600 mt-0.5 sm:mt-1 block">
               {stats.totalHours}{" "}
-              <span className="text-xs font-semibold text-slate-400">
-                {isRTL ? "ساعة" : "hrs"}
+              <span className="text-[10px] font-semibold text-slate-400">
+                {isRTL ? "س" : "hrs"}
               </span>
             </span>
-            <span className="text-[11px] text-slate-400 font-medium">
-              {isRTL ? "مجموع ساعات المقاعد المؤكدة" : "Total confirmed seat hours"}
+            <span className="text-[10px] sm:text-[11px] text-slate-400 font-medium block truncate">
+              {isRTL ? "ساعات المقاعد" : "Confirmed hours"}
             </span>
           </div>
-          <div className="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center shrink-0">
-            <Clock className="w-5 h-5" />
+          <div className="w-7 h-7 sm:w-10 sm:h-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center shrink-0 self-end sm:self-auto">
+            <Clock className="w-4 h-4 sm:w-5 sm:h-5" />
           </div>
         </div>
       </div>
 
-      {/* ── 3. Category Navbar / Tabs & Clean Search Bar ── */}
+      {/* ── 3. Category Selector & Clean Search Bar ── */}
       <div className="bg-white rounded-2xl border border-slate-200/80 p-3 sm:p-3.5 shadow-2xs space-y-3">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
-          {/* Category Navigation Bar (Pill Tabs) */}
-          <div className="inline-flex items-center gap-1 p-1 bg-slate-100 rounded-xl overflow-x-auto self-start sm:self-auto">
+          
+          {/* Mobile Category Dropdown (Clean, modern select instead of overflowing tabs) */}
+          <div className="block sm:hidden w-full">
+            <label className="text-[11px] font-bold text-slate-500 mb-1 flex items-center justify-between">
+              <span>{isRTL ? "تصفية الحجوزات حسب الفئة:" : "Filter by Category:"}</span>
+              <span className="text-emerald-700 font-mono text-[10px]">
+                {filteredBookings.length} {isRTL ? "حجز معروض" : "shown"}
+              </span>
+            </label>
+            <div className="relative">
+              <select
+                value={activeCategoryTab}
+                onChange={(e) => setActiveCategoryTab(e.target.value as "all" | "student" | "freelancer" | "confirmed" | "attended" | "cancelled")}
+                className="w-full py-2.5 ps-3 pe-9 rounded-xl bg-slate-50 border border-slate-200 text-xs font-bold text-slate-800 outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-600 transition-all cursor-pointer shadow-2xs"
+              >
+                <option value="all">
+                  {isRTL ? `جميع الحجوزات (${bookings.length})` : `All Bookings (${bookings.length})`}
+                </option>
+                <option value="confirmed">
+                  {isRTL ? `المؤكدة (${stats.confirmedCount})` : `Confirmed (${stats.confirmedCount})`}
+                </option>
+                <option value="attended">
+                  {isRTL ? `تم الحضور (${stats.attendedCount})` : `Attended (${stats.attendedCount})`}
+                </option>
+                <option value="cancelled">
+                  {isRTL ? `الملغية (${stats.cancelledCount})` : `Cancelled (${stats.cancelledCount})`}
+                </option>
+                <option value="student">
+                  {isRTL ? `الطلاب (${stats.studentsCount})` : `Students (${stats.studentsCount})`}
+                </option>
+                <option value="freelancer">
+                  {isRTL ? `المستقلين (${stats.freelancersCount})` : `Freelancers (${stats.freelancersCount})`}
+                </option>
+              </select>
+            </div>
+          </div>
+
+          {/* Desktop Category Navigation Bar (Pill Tabs - hidden on mobile) */}
+          <div className="hidden sm:inline-flex items-center gap-1 p-1 bg-slate-100 rounded-xl overflow-x-auto self-start sm:self-auto">
             <button
               type="button"
               onClick={() => setActiveCategoryTab("all")}
@@ -425,7 +468,45 @@ export default function BookingsTable({ refreshTrigger = 0 }: BookingsTableProps
                   : "text-slate-600 hover:text-slate-900"
               }`}
             >
-              {isRTL ? "جميع الحجوزات" : "All"} ({bookings.length})
+              {isRTL ? "الكل" : "All"} ({bookings.length})
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setActiveCategoryTab("confirmed")}
+              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
+                activeCategoryTab === "confirmed"
+                  ? "bg-white text-blue-800 shadow-2xs"
+                  : "text-slate-600 hover:text-slate-900"
+              }`}
+            >
+              {isRTL ? "المؤكدة" : "Confirmed"} ({stats.confirmedCount})
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setActiveCategoryTab("attended")}
+              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer whitespace-nowrap flex items-center gap-1 ${
+                activeCategoryTab === "attended"
+                  ? "bg-white text-emerald-800 shadow-2xs"
+                  : "text-slate-600 hover:text-slate-900"
+              }`}
+            >
+              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+              <span>{isRTL ? "تم الحضور" : "Attended"}</span>
+              <span>({stats.attendedCount})</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setActiveCategoryTab("cancelled")}
+              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
+                activeCategoryTab === "cancelled"
+                  ? "bg-white text-rose-800 shadow-2xs"
+                  : "text-slate-600 hover:text-slate-900"
+              }`}
+            >
+              {isRTL ? "الملغية" : "Cancelled"} ({stats.cancelledCount})
             </button>
 
             <button
@@ -452,30 +533,6 @@ export default function BookingsTable({ refreshTrigger = 0 }: BookingsTableProps
             >
               <Users className="w-3.5 h-3.5 text-teal-600" />
               <span>{isRTL ? "المستقلين" : "Freelancers"}</span>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => setActiveCategoryTab("confirmed")}
-              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
-                activeCategoryTab === "confirmed"
-                  ? "bg-white text-emerald-800 shadow-2xs"
-                  : "text-slate-600 hover:text-slate-900"
-              }`}
-            >
-              {isRTL ? "المؤكدة" : "Confirmed"} ({stats.confirmedCount})
-            </button>
-
-            <button
-              type="button"
-              onClick={() => setActiveCategoryTab("cancelled")}
-              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
-                activeCategoryTab === "cancelled"
-                  ? "bg-white text-rose-800 shadow-2xs"
-                  : "text-slate-600 hover:text-slate-900"
-              }`}
-            >
-              {isRTL ? "الملغية" : "Cancelled"} ({stats.cancelledCount})
             </button>
           </div>
 
@@ -569,6 +626,16 @@ export default function BookingsTable({ refreshTrigger = 0 }: BookingsTableProps
                           )}
                         </span>
                         <div className="flex items-center gap-1">
+                          {b.status === "attended" && (
+                            <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-emerald-50 text-emerald-800 border border-emerald-200">
+                              {isRTL ? "تم الحضور" : "Attended"}
+                            </span>
+                          )}
+                          {b.status === "confirmed" && (
+                            <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-blue-50 text-blue-700 border border-blue-200">
+                              {isRTL ? "مؤكد" : "Confirmed"}
+                            </span>
+                          )}
                           {isCancelled && (
                             <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-rose-50 text-rose-700 border border-rose-200">
                               {isRTL ? "ملغي" : "Cancelled"}
@@ -581,21 +648,33 @@ export default function BookingsTable({ refreshTrigger = 0 }: BookingsTableProps
                       </div>
                     </div>
 
-                    {/* Timing and Schedule */}
-                    <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-100 text-xs space-y-1">
-                      <div className="flex items-center justify-between text-slate-700 font-semibold">
-                        <span className="text-slate-500">{isRTL ? "القاعة المخصصة:" : "Hall:"}</span>
-                        <span className="font-bold text-slate-900">
-                          {b.room_name || (b.room?.room_key === "female_hall" ? (isRTL ? "صالة الإناث" : "Female Hall") : (isRTL ? "صالة الشباب" : "Youth Hall"))}
+                    {/* Timing and Schedule Info (Polished Mobile Layout) */}
+                    <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200/60 text-xs space-y-1.5">
+                      <div className="flex items-center justify-between gap-2">
+                        <span className="text-[11px] font-bold text-slate-500">
+                          {isRTL ? "القاعة المخصصة:" : "Assigned Hall:"}
+                        </span>
+                        <span className="font-bold text-slate-900 text-xs">
+                          {b.room_name || (b.room?.room_key === "female_hall" ? (isRTL ? "صالة الإناث 👩" : "Female Hall") : (isRTL ? "صالة الشباب 🚹" : "Youth Hall"))}
                         </span>
                       </div>
-                      <div className="flex items-center justify-between text-slate-700 font-semibold">
-                        <span className="text-slate-500">{isRTL ? "موعد الحجز:" : "Booking:"}</span>
-                        <span className="font-bold">{cleanBookingDate(b.booking_date)} ({formatHour12(b.start_time)} – {formatHour12(b.end_time)})</span>
+
+                      <div className="flex items-center justify-between gap-2">
+                        <span className="text-[11px] font-bold text-slate-500">
+                          {isRTL ? "فترة الحجز:" : "Booking Slot:"}
+                        </span>
+                        <div className="flex items-center gap-1.5 font-bold text-slate-900 text-xs">
+                          <span>{cleanBookingDate(b.booking_date)}</span>
+                          <span className="text-slate-300">•</span>
+                          <span dir="ltr" className="font-mono text-emerald-800 bg-emerald-100/70 px-1.5 py-0.5 rounded text-[11px]">
+                            {formatHour12(b.start_time)} – {formatHour12(b.end_time)}
+                          </span>
+                        </div>
                       </div>
-                      <div className="flex items-center justify-between text-[11px] text-slate-500">
-                        <span>{isRTL ? "متى تم الحجز:" : "Booked At:"}</span>
-                        <span className="font-medium text-slate-700">{formatBookingCreatedAt(b.created_at, isRTL)}</span>
+
+                      <div className="flex items-center justify-between text-[10.5px] text-slate-400 pt-0.5 border-t border-slate-100">
+                        <span>{isRTL ? "تاريخ تقديم الطلب:" : "Booked At:"}</span>
+                        <span className="font-medium text-slate-600">{formatBookingCreatedAt(b.created_at, isRTL)}</span>
                       </div>
                     </div>
                   </div>
@@ -641,6 +720,16 @@ export default function BookingsTable({ refreshTrigger = 0 }: BookingsTableProps
                                 {(b.seat_code || b.seat?.code) && (
                                   <span className="font-mono text-[10px] font-black text-emerald-800 bg-emerald-100/90 px-1.5 py-0.5 rounded">
                                     {b.seat_code || b.seat?.code}
+                                  </span>
+                                )}
+                                {b.status === "attended" && (
+                                  <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-emerald-50 text-emerald-800 border border-emerald-200">
+                                    {isRTL ? "تم الحضور" : "Attended"}
+                                  </span>
+                                )}
+                                {b.status === "confirmed" && (
+                                  <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-blue-50 text-blue-700 border border-blue-200">
+                                    {isRTL ? "مؤكد" : "Confirmed"}
                                   </span>
                                 )}
                                 {isCancelled && (
@@ -735,6 +824,36 @@ export default function BookingsTable({ refreshTrigger = 0 }: BookingsTableProps
             </div>
 
             <div className="space-y-2.5 text-xs text-slate-700">
+              {/* Booking Status Banner in Modal */}
+              <div className="flex items-center justify-between p-2.5 rounded-xl border">
+                <span className="text-slate-500 font-bold">{isRTL ? "حالة الحجز الحالية:" : "Current Status:"}</span>
+                {selectedDetailBooking.status === "attended" && (
+                  <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-black bg-emerald-100 text-emerald-800 border border-emerald-300">
+                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-700" />
+                    <span>{isRTL ? "تم الحضور (المستفيد داخل المركز)" : "Attended & Checked In"}</span>
+                  </span>
+                )}
+                {selectedDetailBooking.status === "confirmed" && (
+                  <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-black bg-blue-100 text-blue-800 border border-blue-300">
+                    <Clock className="w-3.5 h-3.5 text-blue-700" />
+                    <span>{isRTL ? "حجز مؤكد (في انتظار الوصول)" : "Confirmed (Awaiting Arrival)"}</span>
+                  </span>
+                )}
+                {selectedDetailBooking.status === "cancelled" && (
+                  <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-black bg-rose-100 text-rose-800 border border-rose-300">
+                    <XCircle className="w-3.5 h-3.5 text-rose-700" />
+                    <span>{isRTL ? "حجز ملغي" : "Cancelled"}</span>
+                  </span>
+                )}
+              </div>
+
+              {selectedDetailBooking.status === "cancelled" && selectedDetailBooking.cancellation_reason && (
+                <div className="p-2.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-800">
+                  <span className="font-bold block mb-0.5">{isRTL ? "سبب الإلغاء:" : "Cancellation Reason:"}</span>
+                  <span className="text-rose-700 font-medium">{selectedDetailBooking.cancellation_reason}</span>
+                </div>
+              )}
+
               <div className="flex items-center justify-between p-2.5 rounded-xl bg-slate-50 border border-slate-100">
                 <span className="text-slate-500">{isRTL ? "المقعد المخصص:" : "Reserved Desk:"}</span>
                 <span className="font-black text-emerald-800 flex items-center gap-1.5 text-xs sm:text-sm">
