@@ -148,7 +148,7 @@ export default function CompactMemberForm({ onReturnToHub }: CompactMemberFormPr
         </h2>
         <p className="text-xs text-slate-500 max-w-md mx-auto">
           {isRTL
-            ? "أدخل بياناتك الأساسية للتحقق وحجز مقعدك في الصالة المناسبة."
+            ? "أدخل بياناتك الأساسية للتحقق وحجز مقعدك في المساحة."
             : "Enter your essential contact details to verify your membership."}
         </p>
       </div>
@@ -260,11 +260,10 @@ export default function CompactMemberForm({ onReturnToHub }: CompactMemberFormPr
         </div>
       </div>
 
-      {/* Gender: Male or Female (Required for Hall Allocation) */}
+      {/* Gender: Male or Female */}
       <div>
         <label className="block text-xs font-bold text-slate-700 mb-1.5">
-          {isRTL ? "الجنس (لتخصيص الصالة المناسبة)" : "Gender (For Hall Allocation)"}{" "}
-          <span className="text-red-500">*</span>
+          {isRTL ? "الجنس" : "Gender"} <span className="text-red-500">*</span>
         </label>
         <div className="grid grid-cols-2 gap-2.5">
           <button
@@ -276,7 +275,7 @@ export default function CompactMemberForm({ onReturnToHub }: CompactMemberFormPr
                 : "bg-white border-slate-200 text-slate-700 hover:bg-slate-50"
             }`}
           >
-            <span>{isRTL ? "ذكر (صالة الشباب)" : "Male (Youth Hall)"}</span>
+            <span>{isRTL ? "ذكر" : "Male"}</span>
           </button>
 
           <button
@@ -288,7 +287,7 @@ export default function CompactMemberForm({ onReturnToHub }: CompactMemberFormPr
                 : "bg-white border-slate-200 text-slate-700 hover:bg-slate-50"
             }`}
           >
-            <span>{isRTL ? "أنثى (صالة الإناث)" : "Female (Women Hall)"}</span>
+            <span>{isRTL ? "أنثى" : "Female"}</span>
           </button>
         </div>
       </div>
@@ -316,3 +315,4 @@ export default function CompactMemberForm({ onReturnToHub }: CompactMemberFormPr
     </form>
   );
 }
+

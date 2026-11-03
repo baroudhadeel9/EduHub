@@ -16,7 +16,6 @@ import {
   Zap,
   ClipboardList,
   ExternalLink,
-  ShieldCheck,
   Settings2,
 } from "lucide-react";
 
@@ -96,8 +95,6 @@ export default function MembershipIntakeModeControl() {
       subtitle: isRTL
         ? "النموذج الشامل: البيانات الشخصية، التخصص الأكاديمي، الأجهزة والطاقة، والإقرارات."
         : "Comprehensive intake: personal info, academic status, power needs, and declarations.",
-      badge: isRTL ? "شامل وتفصيلي" : "Comprehensive",
-      badgeClass: "bg-emerald-100 text-emerald-800 border-emerald-200",
       activeBorder: "border-emerald-500 ring-2 ring-emerald-500/20 bg-emerald-50/40",
       icon: ClipboardList,
       iconColor: "text-emerald-600 bg-emerald-100",
@@ -108,8 +105,6 @@ export default function MembershipIntakeModeControl() {
       subtitle: isRTL
         ? "بيانات أساسية فقط: الاسم الكامل، رقم الجوال، الإيميل، طالب أو فريلانسر، والجنس."
         : "Basic essentials only: Full name, phone, email, category (student/freelancer), and gender.",
-      badge: isRTL ? "سريع ومختصر" : "Express",
-      badgeClass: "bg-amber-100 text-amber-800 border-amber-200",
       activeBorder: "border-amber-500 ring-2 ring-amber-500/20 bg-amber-50/40",
       icon: Zap,
       iconColor: "text-amber-600 bg-amber-100",
@@ -120,8 +115,6 @@ export default function MembershipIntakeModeControl() {
       subtitle: isRTL
         ? "يظهر للزائر رسالة: «لا يوجد انضمام عضوية حالياً»، ويرفض السيرفر أي تسجيلات جديدة."
         : "Shows 'Applications closed' message to visitors and strictly rejects new submissions.",
-      badge: isRTL ? "معلق مؤقتاً" : "Closed",
-      badgeClass: "bg-rose-100 text-rose-800 border-rose-200",
       activeBorder: "border-rose-500 ring-2 ring-rose-500/20 bg-rose-50/40",
       icon: Lock,
       iconColor: "text-rose-600 bg-rose-100",
@@ -137,11 +130,8 @@ export default function MembershipIntakeModeControl() {
             <Settings2 className="w-5 h-5 text-emerald-700" />
           </div>
           <div>
-            <h2 className="text-base sm:text-lg font-bold text-slate-900 flex items-center gap-2">
-              <span>{isRTL ? "التحكم في نموذج استقبال العضويات" : "Membership Intake Control"}</span>
-              <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 border border-slate-200">
-                {isRTL ? "مرتبط بالباك إند" : "Server Driven"}
-              </span>
+            <h2 className="text-base sm:text-lg font-bold text-slate-900">
+              {isRTL ? "التحكم في نموذج استقبال العضويات" : "Membership Intake Control"}
             </h2>
             <p className="text-xs text-slate-500">
               {isRTL
@@ -151,7 +141,7 @@ export default function MembershipIntakeModeControl() {
           </div>
         </div>
 
-        {/* Live preview link & server status indicator */}
+        {/* Live preview link */}
         <div className="flex items-center gap-2 self-stretch sm:self-auto justify-end">
           <Link
             href="/join"
@@ -191,14 +181,11 @@ export default function MembershipIntakeModeControl() {
                     : "border-slate-200 hover:border-slate-300 hover:bg-slate-50/70 bg-white"
                 } ${updating ? "opacity-60 cursor-wait" : ""}`}
               >
-                {/* Top: Icon + Badge */}
+                {/* Top: Icon */}
                 <div className="flex items-center justify-between w-full">
                   <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${item.iconColor}`}>
                     <Icon className="w-5 h-5" />
                   </div>
-                  <span className={`text-[11px] font-bold px-2 py-0.5 rounded-full border ${item.badgeClass}`}>
-                    {item.badge}
-                  </span>
                 </div>
 
                 {/* Middle: Title & Description */}
@@ -254,26 +241,6 @@ export default function MembershipIntakeModeControl() {
           <span className="flex-1">{feedback.message}</span>
         </div>
       )}
-
-      {/* Current Active Info Banner */}
-      <div className="bg-slate-50 rounded-xl p-3 border border-slate-200/80 flex items-center justify-between flex-wrap gap-2 text-xs text-slate-600">
-        <div className="flex items-center gap-2">
-          <ShieldCheck className="w-4 h-4 text-emerald-700 shrink-0" />
-          <span>
-            {isRTL
-              ? "الوضع الفعلي المخزن في قاعدة البيانات:"
-              : "Active server database mode:"}
-          </span>
-          <span className="font-mono font-extrabold text-slate-900 bg-white px-2 py-0.5 rounded border border-slate-200">
-            {currentMode}
-          </span>
-        </div>
-        <span className="text-[11px] text-slate-400">
-          {isRTL
-            ? "يتم تطبيق التغيير فورياً على السيرفر ولجميع الزوار"
-            : "Changes apply instantly to the server and all users"}
-        </span>
-      </div>
     </div>
   );
 }
