@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
@@ -12,14 +12,42 @@ import {
   HelpCircle,
   Mail,
   Home,
+  Lock,
+  Loader2,
+  Ticket,
 } from "lucide-react";
 import NewMemberTab from "@/components/booking/NewMemberTab";
+import CompactMemberForm from "@/components/booking/CompactMemberForm";
+import {
+  getMembershipIntakeModeApi,
+  MembershipIntakeMode,
+} from "@/services/applications";
 
 export default function JoinPage() {
   const router = useRouter();
   const { locale, setLocale, dir } = useLanguage();
   const isRTL = dir === "rtl" || locale === "ar";
   const BackArrow = isRTL ? ArrowRight : ArrowLeft;
+
+  const [intakeMode, setIntakeMode] = useState<MembershipIntakeMode | "loading">("loading");
+
+  useEffect(() => {
+    let mounted = true;
+    getMembershipIntakeModeApi()
+      .then((mode) => {
+        if (mounted) {
+          setIntakeMode(mode);
+        }
+      })
+      .catch((err) => {
+        console.warn("Failed to load membership intake mode:", err);
+        if (mounted) setIntakeMode("full");
+      });
+
+    return () => {
+      mounted = false;
+    };
+  }, []);
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-50 via-white to-slate-50 text-slate-800 flex flex-col selection:bg-emerald-500 selection:text-white">
@@ -96,12 +124,28 @@ export default function JoinPage() {
           
           {/* Page Banner & Context */}
           <div className="text-center max-w-2xl mx-auto mb-10 space-y-3">
-            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-50 border border-emerald-200 text-xs sm:text-sm font-extrabold text-emerald-800 shadow-2xs">
-              <Sparkles className="w-4 h-4 text-emerald-600 shrink-0" />
-              <span>
-                {isRTL ? "بوابة العضوية الرسمية • التسجيل مفتوح" : "Official Membership Portal • Open for Intake"}
-              </span>
-            </div>
+            {intakeMode === "closed" ? (
+              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-rose-50 border border-rose-200 text-xs sm:text-sm font-extrabold text-rose-800 shadow-2xs">
+                <Lock className="w-4 h-4 text-rose-600 shrink-0" />
+                <span>
+                  {isRTL ? "بوابة العضوية • التسجيل معلق حالياً" : "Membership Portal • Intake Paused"}
+                </span>
+              </div>
+            ) : intakeMode === "short" ? (
+              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-amber-50 border border-amber-200 text-xs sm:text-sm font-extrabold text-amber-900 shadow-2xs">
+                <Sparkles className="w-4 h-4 text-amber-600 shrink-0" />
+                <span>
+                  {isRTL ? "بوابة العضوية الرسمية • التسجيل السريع مفعّل" : "Official Membership Portal • Express Intake"}
+                </span>
+              </div>
+            ) : (
+              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-50 border border-emerald-200 text-xs sm:text-sm font-extrabold text-emerald-800 shadow-2xs">
+                <Sparkles className="w-4 h-4 text-emerald-600 shrink-0" />
+                <span>
+                  {isRTL ? "بوابة العضوية الرسمية • التسجيل مفتوح" : "Official Membership Portal • Open for Intake"}
+                </span>
+              </div>
+            )}
 
             <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black text-brand-navy tracking-tight">
               {isRTL ? "طلب عضوية وانضمام لمساحة إديو هب غزة" : "Apply for Membership at EduHub Gaza"}
@@ -114,9 +158,73 @@ export default function JoinPage() {
             </p>
           </div>
 
-          {/* ─── The Official 4-Step Registration Form Card ─── */}
+          {/* ─── The Single Registration Form / Notice Card ─── */}
           <div className="bg-white rounded-3xl border border-slate-200/90 shadow-xl overflow-hidden p-6 sm:p-10">
-            <NewMemberTab onReturnToHub={() => router.push("/")} />
+            {intakeMode === "loading" ? (
+              <div className="py-20 flex flex-col items-center justify-center gap-3 text-slate-500">
+                <Loader2 className="w-8 h-8 animate-spin text-emerald-600" />
+                <p className="text-xs sm:text-sm font-semibold">
+                  {isRTL ? "جاري فحص حالة بوابة التسجيل..." : "Checking intake status..."}
+                </p>
+              </div>
+            ) : intakeMode === "closed" ? (
+              /* Case 1: Closed Registration View */
+              <div className="text-center py-10 px-2 max-w-xl mx-auto space-y-6 animate-in fade-in duration-300">
+                <div className="w-16 h-16 rounded-3xl bg-rose-50 text-rose-600 border border-rose-200 mx-auto flex items-center justify-center shadow-inner">
+                  <Lock className="w-8 h-8" />
+                </div>
+
+                <div className="space-y-2.5">
+                  <h2 className="text-2xl sm:text-3xl font-black text-slate-900">
+                    {isRTL ? "لا يوجد انضمام عضوية حالياً" : "Membership Applications Are Currently Closed"}
+                  </h2>
+                  <p className="text-xs sm:text-sm text-slate-600 leading-relaxed font-medium">
+                    {isRTL
+                      ? "نعتذر منكم، تم إغلاق باب التقديم للعضويات الجديدة مؤقتاً لاكتمال الطاقة الاستيعابية وحرصاً على ضمان جودة الخدمة والمقاعد للطلبة والمستقلين الحاليين."
+                      : "We apologize, new membership intake is temporarily paused due to maximum capacity."}
+                  </p>
+                </div>
+
+                {/* Visitor pass alternative note */}
+                <div className="p-4 sm:p-5 rounded-2xl bg-slate-50 border border-slate-200 text-start space-y-3">
+                  <div className="flex items-center gap-2 text-xs font-bold text-slate-800">
+                    <Ticket className="w-4 h-4 text-emerald-600" />
+                    <span>
+                      {isRTL
+                        ? "هل تحتاج للمساحة لظرف طارئ أو تقديم اختبار؟"
+                        : "Need urgent workspace access for an exam or task?"}
+                    </span>
+                  </div>
+                  <p className="text-xs text-slate-500 leading-relaxed">
+                    {isRTL
+                      ? "يمكنك طلب تصريح زيارة ليوم واحد لإنجاز مهامك العاجلة، تقديم الامتحانات، أو شحن الأجهزة دون الحاجة لعضوية دائمة."
+                      : "You can request a 1-day visitor pass for urgent tasks without needing permanent membership."}
+                  </p>
+                  <div className="pt-1 flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5">
+                    <Link
+                      href="/visit"
+                      className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-xs transition-all active:scale-95"
+                    >
+                      <Ticket className="w-3.5 h-3.5" />
+                      <span>{isRTL ? "طلب تصريح زيارة (يوم واحد)" : "Request 1-Day Pass"}</span>
+                    </Link>
+                    <Link
+                      href="/"
+                      className="inline-flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 font-bold text-xs transition-all"
+                    >
+                      <Home className="w-3.5 h-3.5" />
+                      <span>{isRTL ? "العودة للرئيسية" : "Return to Home"}</span>
+                    </Link>
+                  </div>
+                </div>
+              </div>
+            ) : intakeMode === "short" ? (
+              /* Case 2: Short / Express Intake Form */
+              <CompactMemberForm onReturnToHub={() => router.push("/")} />
+            ) : (
+              /* Case 3: Full 4-Step Detailed Intake Form */
+              <NewMemberTab onReturnToHub={() => router.push("/")} />
+            )}
           </div>
 
           {/* Need help footer strip */}

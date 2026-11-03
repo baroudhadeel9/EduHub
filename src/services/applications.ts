@@ -135,6 +135,94 @@ export async function submitMembershipApplication(
   return result;
 }
 
+export type MembershipIntakeMode = "full" | "short" | "closed";
+
+export interface IntakeModeResponse {
+  success: boolean;
+  mode: MembershipIntakeMode;
+}
+
+/**
+ * Fetch current membership application intake mode (full, short, closed)
+ */
+export async function getMembershipIntakeModeApi(): Promise<MembershipIntakeMode> {
+  try {
+    const response = await fetch(`${API_BASE_URL}/membership-applications/intake-mode`, {
+      method: "GET",
+      headers: { Accept: "application/json" },
+      cache: "no-store",
+    });
+    if (!response.ok) return "full";
+    const result = await safeJsonParse<IntakeModeResponse>(response);
+    return result?.mode || "full";
+  } catch (err) {
+    console.warn("Failed to get membership intake mode:", err);
+    return "full";
+  }
+}
+
+/**
+ * Update membership application intake mode (Admin only)
+ */
+export async function updateMembershipIntakeModeApi(
+  mode: MembershipIntakeMode
+): Promise<{ success: boolean; mode: MembershipIntakeMode; message?: string }> {
+  const headers = getAdminHeaders({ "Content-Type": "application/json" });
+
+  const response = await fetch(`${API_BASE_URL}/admin/membership-applications/intake-mode`, {
+    method: "PATCH",
+    headers,
+    body: JSON.stringify({ mode }),
+  });
+
+  const result = await safeJsonParse<{ success: boolean; mode: MembershipIntakeMode; message?: string }>(response);
+
+  if (!response.ok || !result?.success) {
+    throw new Error(extractErrorMessage(result, response, "تعذر تحديث حالة بوابة العضوية."));
+  }
+
+  return result;
+}
+
+export interface ShortMembershipApplicationPayload {
+  fullName: string;
+  phone: string;
+  email: string;
+  category: "student" | "freelancer";
+  gender: "male" | "female";
+}
+
+/**
+ * Submit short 1-step membership application
+ */
+export async function submitShortMembershipApplicationApi(
+  data: ShortMembershipApplicationPayload
+): Promise<SubmitApplicationResponse> {
+  const response = await fetch(`${API_BASE_URL}/membership-applications`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+    },
+    body: JSON.stringify({
+      fullName: data.fullName,
+      phone: data.phone,
+      email: data.email,
+      category: data.category === "freelancer" ? "مستقل / فريلانسر Freelancer" : "طالب/ة جامعي",
+      gender: data.gender,
+      formType: "short",
+    }),
+  });
+
+  const result = await safeJsonParse<SubmitApplicationResponse>(response);
+
+  if (!response.ok || !result) {
+    throw new Error(extractErrorMessage(result, response, "فشل إرسال طلب العضوية السريع."));
+  }
+
+  return result;
+}
+
 export interface CheckEmailResponse {
   exists: boolean;
   status?: string;

@@ -209,23 +209,25 @@ export default function HeroSection({ onOpenBooking, onOpenDonation }: HeroSecti
                 isRTL ? "anim-text-item-rtl" : "anim-text-item-ltr"
               } anim-delay-ctas`}
             >
-              <button
-                type="button"
-                onClick={onOpenBooking}
-                className="group inline-flex items-center justify-center gap-2.5 px-7 py-3.5 rounded-2xl text-sm sm:text-base font-bold text-white bg-emerald-600 hover:bg-emerald-700 shadow-lg shadow-emerald-600/25 hover:shadow-xl hover:shadow-emerald-600/30 active:scale-[0.97] transition-all cursor-pointer focus-visible:ring-2 focus-visible:ring-emerald-500 whitespace-nowrap"
-              >
-                <CalendarCheck className="w-5 h-5 text-emerald-100 shrink-0" />
-                <span>{t.hero.bookSeatFreeCta}</span>
-                <ArrowIcon className="w-4 h-4 text-emerald-200 group-hover:translate-x-0.5 transition-transform shrink-0" />
-              </button>
-
+              {/* 1. Primary: Donate to sponsor a seat (Green) */}
               <button
                 type="button"
                 onClick={() => onOpenDonation()}
-                className="group inline-flex items-center justify-center gap-2.5 px-7 py-3.5 rounded-2xl text-sm sm:text-base font-bold text-white bg-brand-navy hover:bg-brand-navy-hover shadow-lg shadow-slate-900/15 hover:shadow-xl active:scale-[0.97] transition-all cursor-pointer focus-visible:ring-2 focus-visible:ring-brand-navy whitespace-nowrap"
+                className="group inline-flex items-center justify-center gap-2.5 px-7 py-3.5 rounded-2xl text-sm sm:text-base font-bold text-white bg-emerald-600 hover:bg-emerald-700 shadow-lg shadow-emerald-600/25 hover:shadow-xl hover:shadow-emerald-600/30 active:scale-[0.97] transition-all cursor-pointer focus-visible:ring-2 focus-visible:ring-emerald-500 whitespace-nowrap"
               >
                 <Heart className="w-5 h-5 fill-white text-white shrink-0 group-hover:scale-110 transition-transform" />
-                <span>{t.hero.sponsorStudentCta || (isRTL ? "اكفل طالباً في غزة" : "Sponsor a Student")}</span>
+                <span>{t.hero.sponsorStudentCta || (isRTL ? "تبرع لكفالة مقعد دراسي" : "Donate to sponsor a seat")}</span>
+              </button>
+
+              {/* 2. Secondary: Book your seat */}
+              <button
+                type="button"
+                onClick={onOpenBooking}
+                className="group inline-flex items-center justify-center gap-2.5 px-7 py-3.5 rounded-2xl text-sm sm:text-base font-bold text-white bg-brand-navy hover:bg-brand-navy-hover shadow-lg shadow-slate-900/15 hover:shadow-xl active:scale-[0.97] transition-all cursor-pointer focus-visible:ring-2 focus-visible:ring-brand-navy whitespace-nowrap"
+              >
+                <CalendarCheck className="w-5 h-5 text-emerald-300 shrink-0" />
+                <span>{t.hero.bookSeatFreeCta || (isRTL ? "احجز مقعدك" : "Book your seat")}</span>
+                <ArrowIcon className="w-4 h-4 text-slate-300 group-hover:translate-x-0.5 transition-transform shrink-0" />
               </button>
             </div>
 

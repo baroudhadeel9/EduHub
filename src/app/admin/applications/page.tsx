@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { useLanguage } from "@/context/LanguageContext";
 import AdminSidebar from "@/components/admin/AdminSidebar";
 import ApplicationsTable from "@/components/admin/applications/ApplicationsTable";
+import MembershipIntakeModeControl from "@/components/admin/applications/MembershipIntakeModeControl";
 import { Menu } from "lucide-react";
 
 export default function AdminApplicationsPage() {
@@ -54,6 +55,9 @@ export default function AdminApplicationsPage() {
               </div>
             </div>
           </div>
+
+          {/* 3-Mode Server-Driven Membership Intake Control */}
+          <MembershipIntakeModeControl />
 
           {/* Applications Table Component */}
           <ApplicationsTable />
