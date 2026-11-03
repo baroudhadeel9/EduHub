@@ -410,6 +410,7 @@ export interface MemberBookingItem {
   status: "confirmed" | "cancelled";
   notes?: string;
   canCancel?: boolean;
+  can_cancel?: boolean;
   seatNumber?: number;
   seat_number?: number;
   seatLabel?: string;

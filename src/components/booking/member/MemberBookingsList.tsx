@@ -20,6 +20,7 @@ export interface MemberBookingItem {
   seatCode?: string;
   notes?: string;
   canCancel?: boolean;
+  can_cancel?: boolean;
 }
 
 interface MemberBookingsListProps {
@@ -126,6 +127,15 @@ export default function MemberBookingsList({
                     {isCancelling && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
                     <span>{isRTL ? "إلغاء حجز المقعد" : "Cancel Reservation"}</span>
                   </button>
+                )}
+
+                {isConfirmed && !booking.canCancel && (
+                  <span
+                    title={isRTL ? "لا يمكن إلغاء الحجز قبل أقل من ساعة من موعد بدايته" : "Cannot cancel within 1 hour of start time"}
+                    className="px-2.5 py-1 rounded-lg bg-slate-100 border border-slate-200 text-[11px] font-bold text-slate-500 self-end sm:self-auto cursor-help"
+                  >
+                    {isRTL ? "مغلق للإلغاء (< ساعة)" : "Locked (< 1h)"}
+                  </span>
                 )}
               </div>
             );
