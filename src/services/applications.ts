@@ -1166,6 +1166,22 @@ export async function updateAdminMemberApi(
 }
 
 /**
+ * Permanently delete member from database (Server-driven complete cascade delete)
+ */
+export async function deleteAdminMemberApi(id: string | number) {
+  const response = await fetch(`${API_BASE_URL}/admin/members/${id}`, {
+    method: "DELETE",
+    headers: getAdminHeaders(),
+  });
+
+  const result = await safeJsonParse<{ success: boolean; message: string; deleted_id?: string | number }>(response);
+  if (!response.ok || !result) {
+    throw new Error(extractErrorMessage(result, response, "تعذر حذف العضو من قاعدة البيانات."));
+  }
+  return result;
+}
+
+/**
  * ── Visitor Requests API ──
  */
 export async function submitVisitorRequestApi(data: {

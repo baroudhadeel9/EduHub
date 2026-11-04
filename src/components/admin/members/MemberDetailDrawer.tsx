@@ -12,6 +12,7 @@ import {
   MessageSquare,
   History,
   ShieldCheck,
+  Trash2,
 } from "lucide-react";
 import { MemberRecord } from "./data";
 
@@ -20,6 +21,7 @@ interface MemberDetailDrawerProps {
   isOpen: boolean;
   onClose: () => void;
   onToggleStatus?: (id: string) => void;
+  onDeleteMember?: (member: MemberRecord) => void;
   onMemberUpdated?: () => void;
 }
 
@@ -28,6 +30,8 @@ export default function MemberDetailDrawer({
   isOpen,
   onClose,
   onToggleStatus,
+  onDeleteMember,
+  onMemberUpdated,
 }: MemberDetailDrawerProps) {
   const { dir, locale } = useLanguage();
   const isRTL = dir === "rtl" || locale === "ar";
@@ -314,12 +318,26 @@ export default function MemberDetailDrawer({
                 className={`py-2.5 px-4 rounded-xl border text-xs sm:text-sm font-bold transition-all cursor-pointer ${
                   member.status === "suspended"
                     ? "border-emerald-300 text-emerald-800 bg-emerald-50 hover:bg-emerald-100 shadow-2xs"
-                    : "border-rose-200 text-rose-700 bg-rose-50/50 hover:bg-rose-100"
+                    : "border-amber-200 text-amber-700 bg-amber-50/50 hover:bg-amber-100"
                 }`}
               >
                 {member.status === "suspended"
                   ? isRTL ? "تنشيط العضوية ✅" : "Activate"
-                  : isRTL ? "توقيف العضوية 🚫" : "Suspend"}
+                  : isRTL ? "توقيف مؤقت ⏸️" : "Suspend"}
+              </button>
+            )}
+
+            {onDeleteMember && (
+              <button
+                type="button"
+                onClick={() => {
+                  onDeleteMember(member);
+                }}
+                className="py-2.5 px-3.5 rounded-xl border border-rose-200 bg-rose-50/70 hover:bg-rose-100 text-rose-700 text-xs sm:text-sm font-bold transition-all cursor-pointer flex items-center gap-1.5 shadow-2xs"
+                title={isRTL ? "حذف العضو بالكامل من قاعدة البيانات" : "Delete member permanently"}
+              >
+                <Trash2 className="w-4 h-4 text-rose-600" />
+                <span>{isRTL ? "حذف نهائي" : "Delete"}</span>
               </button>
             )}
           </div>

@@ -17,7 +17,8 @@ import {
 } from "lucide-react";
 import { MemberRecord, MemberType, MemberStatus } from "./data";
 import MemberDetailDrawer from "./MemberDetailDrawer";
-import { getAdminMembersApi, updateAdminMemberApi } from "@/services/applications";
+import { getAdminMembersApi, updateAdminMemberApi, deleteAdminMemberApi } from "@/services/applications";
+import { Trash2, AlertTriangle, AlertCircle, Loader2 } from "lucide-react";
 
 type SortOption = "most_active" | "least_active" | "students_first" | "freelancers_first" | "newest";
 
@@ -36,6 +37,36 @@ export default function MembersTable({ onOpenMobileMenu }: MembersTableProps = {
   const [searchQuery, setSearchQuery] = useState("");
   const [sortBy, setSortBy] = useState<SortOption>("most_active");
   const [selectedMemberId, setSelectedMemberId] = useState<string | null>(null);
+  const [memberToDelete, setMemberToDelete] = useState<MemberRecord | null>(null);
+  const [deleting, setDeleting] = useState(false);
+  const [deleteFeedback, setDeleteFeedback] = useState<{ type: "success" | "error"; message: string } | null>(null);
+
+  const handleDeleteMember = async () => {
+    if (!memberToDelete || deleting) return;
+    setDeleting(true);
+    setDeleteFeedback(null);
+    try {
+      const res = await deleteAdminMemberApi(memberToDelete.id);
+      setMembers((prev) => prev.filter((m) => m.id !== memberToDelete.id));
+      setDeleteFeedback({
+        type: "success",
+        message: res.message || (isRTL ? "تم حذف العضو بالكامل من قاعدة البيانات بنجاح." : "Member deleted permanently."),
+      });
+      if (selectedMemberId === memberToDelete.id) {
+        setSelectedMemberId(null);
+      }
+      setMemberToDelete(null);
+      setTimeout(() => setDeleteFeedback(null), 5000);
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "";
+      setDeleteFeedback({
+        type: "error",
+        message: msg || (isRTL ? "فشل حذف العضو من قاعدة البيانات." : "Failed to delete member."),
+      });
+    } finally {
+      setDeleting(false);
+    }
+  };
 
   const loadMembers = React.useCallback(async () => {
     try {
@@ -362,6 +393,32 @@ export default function MembersTable({ onOpenMobileMenu }: MembersTableProps = {
         </div>
       </div>
 
+      {deleteFeedback && (
+        <div
+          className={`p-3.5 rounded-2xl border text-xs font-bold flex items-center justify-between gap-2.5 animate-in fade-in shadow-2xs ${
+            deleteFeedback.type === "success"
+              ? "bg-emerald-50 border-emerald-200 text-emerald-800"
+              : "bg-rose-50 border-rose-200 text-rose-800"
+          }`}
+        >
+          <div className="flex items-center gap-2">
+            {deleteFeedback.type === "success" ? (
+              <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+            ) : (
+              <AlertCircle className="w-4 h-4 text-rose-600 shrink-0" />
+            )}
+            <span>{deleteFeedback.message}</span>
+          </div>
+          <button
+            type="button"
+            onClick={() => setDeleteFeedback(null)}
+            className="text-slate-400 hover:text-slate-600 text-xs px-2 cursor-pointer"
+          >
+            ✕
+          </button>
+        </div>
+      )}
+
       {/* ── Members Table Card ── */}
       <div className="bg-white rounded-2xl border border-slate-200/90 shadow-2xs overflow-hidden">
         <div className="overflow-x-auto">
@@ -521,18 +578,32 @@ export default function MembersTable({ onOpenMobileMenu }: MembersTableProps = {
 
                     {/* Action: Open Member Profile Drawer & Full Details */}
                     <td className="py-3.5 px-4 text-center whitespace-nowrap">
-                      <div className="flex items-center justify-center">
+                      <div className="flex items-center justify-center gap-1.5">
                         <button
                           type="button"
                           onClick={(e) => {
                             e.stopPropagation();
                             setSelectedMemberId(member.id);
                           }}
-                          className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl border border-slate-200 text-xs font-semibold text-slate-700 hover:text-emerald-700 hover:border-emerald-300 hover:bg-emerald-50/50 transition-colors cursor-pointer shadow-2xs"
+                          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-slate-200 text-xs font-semibold text-slate-700 hover:text-emerald-700 hover:border-emerald-300 hover:bg-emerald-50/50 transition-colors cursor-pointer shadow-2xs"
+                          title={isRTL ? "عرض ملف العضو" : "View profile"}
                         >
                           <Eye className="w-3.5 h-3.5" />
                           <span>{isRTL ? "عرض الملف" : "Profile"}</span>
                           <ChevronIcon className="w-3 h-3 text-slate-400" />
+                        </button>
+
+                        {/* Small Trash Delete Icon */}
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setMemberToDelete(member);
+                          }}
+                          className="p-1.5 rounded-xl border border-rose-200 bg-rose-50/70 hover:bg-rose-100 text-rose-600 hover:border-rose-300 transition-colors cursor-pointer shadow-2xs group"
+                          title={isRTL ? "حذف العضو نهائياً من قاعدة البيانات" : "Delete member permanently"}
+                        >
+                          <Trash2 className="w-3.5 h-3.5 group-hover:scale-110 transition-transform" />
                         </button>
                       </div>
                     </td>
@@ -558,8 +629,78 @@ export default function MembersTable({ onOpenMobileMenu }: MembersTableProps = {
         isOpen={Boolean(selectedMember)}
         onClose={() => setSelectedMemberId(null)}
         onToggleStatus={handleToggleStatus}
+        onDeleteMember={(mem) => {
+          setSelectedMemberId(null);
+          setMemberToDelete(mem);
+        }}
         onMemberUpdated={loadMembers}
       />
+
+      {/* ── Delete Confirmation Modal ── */}
+      {memberToDelete && (
+        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 animate-in fade-in">
+          <div className="bg-white rounded-3xl max-w-md w-full p-6 space-y-5 shadow-2xl border border-slate-200 animate-in zoom-in-95">
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 rounded-2xl bg-rose-100 text-rose-600 flex items-center justify-center shrink-0">
+                <Trash2 className="w-6 h-6" />
+              </div>
+              <div>
+                <h3 className="text-base sm:text-lg font-black text-slate-900">
+                  {isRTL ? "تأكيد حذف العضو نهائياً" : "Confirm Permanent Deletion"}
+                </h3>
+                <p className="text-xs text-rose-600 font-bold">
+                  {isRTL ? "عملية مسح كاملة من قاعدة البيانات" : "Irreversible database wipe"}
+                </p>
+              </div>
+            </div>
+
+            <div className="p-4 rounded-2xl bg-rose-50/60 border border-rose-200/80 space-y-2 text-xs text-slate-700 leading-relaxed">
+              <p>
+                {isRTL ? "هل أنت متأكد من حذف العضو:" : "Are you sure you want to delete:"}{" "}
+                <span className="font-bold text-slate-900 font-sans">{memberToDelete.name}</span>
+              </p>
+              <p className="text-slate-500 font-mono text-[11px]">
+                {memberToDelete.email} • {memberToDelete.phone || ""}
+              </p>
+              <div className="pt-2 border-t border-rose-200/60 text-[11px] text-rose-800 font-medium leading-relaxed">
+                ⚠️ {isRTL
+                  ? "سيقوم السيرفر بحذف حسابه، وبريده الإلكتروني، وسجل حجوزاته، ورصيده، وبيانات طلبه نهائياً من قاعدة البيانات."
+                  : "The server will completely delete this member's account, email, quotas, bookings, and applications from the database."}
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2 pt-2">
+              <button
+                type="button"
+                disabled={deleting}
+                onClick={() => setMemberToDelete(null)}
+                className="flex-1 py-2.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-xs sm:text-sm font-bold transition-all cursor-pointer disabled:opacity-50"
+              >
+                {isRTL ? "إلغاء" : "Cancel"}
+              </button>
+
+              <button
+                type="button"
+                disabled={deleting}
+                onClick={handleDeleteMember}
+                className="flex-1 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs sm:text-sm font-bold shadow-md transition-all cursor-pointer flex items-center justify-center gap-2 disabled:bg-rose-400"
+              >
+                {deleting ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    <span>{isRTL ? "جاري المسح من السيرفر..." : "Deleting..."}</span>
+                  </>
+                ) : (
+                  <>
+                    <Trash2 className="w-4 h-4" />
+                    <span>{isRTL ? "نعم، حذف نهائي" : "Yes, Delete"}</span>
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
