@@ -57,7 +57,7 @@ export default function ApplicationDetailModal({
     email: string;
   } | null>(null);
 
-  const [notificationChannel, setNotificationChannel] = useState<"both" | "email" | "sms" | "none">("both");
+  const [notificationChannel, setNotificationChannel] = useState<"both" | "email" | "sms" | "none">("sms");
   const [customSmsMessage, setCustomSmsMessage] = useState<string>("");
 
   useEffect(() => {
@@ -66,7 +66,7 @@ export default function ApplicationDetailModal({
         `مرحباً ${initialApplication.fullName}، نبارك لك قبول عضويتك في مساحة EduHub غزة! يرجى تعيين كلمة المرور لحسابك وحجز مقعدك عبر الرابط: {set_password_url}`
       );
     }
-  }, [initialApplication?.fullName]);
+  }, [initialApplication?.id, initialApplication?.fullName]);
 
   // Sync state when initialApplication changes or modal opens
   useEffect(() => {
@@ -591,90 +591,123 @@ export default function ApplicationDetailModal({
 
           {/* ── Notification Channel & Custom SMS (Admin Controls) ── */}
           {application?.status === "pending" && (
-            <div className="bg-emerald-50/60 rounded-2xl p-4 sm:p-5 border border-emerald-200/80 space-y-3.5 mb-2 animate-in fade-in">
-              <div className="flex items-center gap-2.5">
-                <div className="w-8 h-8 rounded-lg bg-emerald-100 text-emerald-700 flex items-center justify-center shrink-0">
-                  <Send className="w-4 h-4" />
-                </div>
-                <div>
-                  <h4 className="text-xs sm:text-sm font-extrabold text-slate-900">
-                    {isRTL ? "طريقة إشعار العضو بالقبول" : "Acceptance Notification Channel"}
-                  </h4>
-                  <p className="text-[11px] text-slate-500">
-                    {isRTL
-                      ? "حدد كيف ترغب في إعلام العضو باعتماد عضويته:"
-                      : "Choose how the member will be notified:"}
-                  </p>
+            <div className="p-4 sm:p-5 rounded-2xl sm:rounded-3xl border border-emerald-200/80 bg-gradient-to-b from-emerald-50/50 to-white shadow-2xs space-y-3.5 mb-2 animate-in fade-in">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-8 h-8 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center shrink-0">
+                    <Send className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <h4 className="text-xs sm:text-sm font-bold text-slate-900">
+                      {isRTL ? "طريقة إرسال رابط تعيين كلمة المرور" : "Send Password Setup Link Via"}
+                    </h4>
+                    <p className="text-[11px] text-slate-500">
+                      {isRTL
+                        ? "اختر القناة لإرسال رابط تفعيل الحساب وتعيين كلمة المرور للعضو:"
+                        : "Choose channel to deliver the password setup & activation link:"}
+                    </p>
+                  </div>
                 </div>
               </div>
 
-              {/* Channel Selector Pills */}
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs font-bold">
-                <button
-                  type="button"
-                  onClick={() => setNotificationChannel("both")}
-                  className={`p-2.5 rounded-xl border text-center transition-all cursor-pointer ${
-                    notificationChannel === "both"
-                      ? "bg-emerald-600 text-white border-emerald-600 shadow-xs"
-                      : "bg-white text-slate-700 border-slate-200 hover:bg-slate-50"
-                  }`}
-                >
-                  ⚡ {isRTL ? "كلاهما (إيميل + SMS)" : "Both"}
-                </button>
-
+              {/* Sleek Segmented Switcher */}
+              <div className="bg-slate-100/90 p-1 rounded-2xl flex items-center gap-1 border border-slate-200/60">
                 <button
                   type="button"
                   onClick={() => setNotificationChannel("sms")}
-                  className={`p-2.5 rounded-xl border text-center transition-all cursor-pointer ${
+                  className={`flex-1 py-2 px-3 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
                     notificationChannel === "sms"
-                      ? "bg-emerald-600 text-white border-emerald-600 shadow-xs"
-                      : "bg-white text-slate-700 border-slate-200 hover:bg-slate-50"
+                      ? "bg-white text-emerald-800 shadow-xs border border-slate-200/60"
+                      : "text-slate-600 hover:text-slate-900 hover:bg-slate-200/40"
                   }`}
                 >
-                  📱 {isRTL ? "عبر SMS فقط" : "SMS Only"}
+                  <span>📱</span>
+                  <span>{isRTL ? "رسالة SMS" : "SMS"}</span>
                 </button>
 
                 <button
                   type="button"
                   onClick={() => setNotificationChannel("email")}
-                  className={`p-2.5 rounded-xl border text-center transition-all cursor-pointer ${
+                  className={`flex-1 py-2 px-3 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
                     notificationChannel === "email"
-                      ? "bg-emerald-600 text-white border-emerald-600 shadow-xs"
-                      : "bg-white text-slate-700 border-slate-200 hover:bg-slate-50"
+                      ? "bg-white text-emerald-800 shadow-xs border border-slate-200/60"
+                      : "text-slate-600 hover:text-slate-900 hover:bg-slate-200/40"
                   }`}
                 >
-                  ✉️ {isRTL ? "عبر البريد فقط" : "Email Only"}
+                  <span>✉️</span>
+                  <span>{isRTL ? "بريد إلكتروني" : "Email"}</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setNotificationChannel("both")}
+                  className={`flex-1 py-2 px-3 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
+                    notificationChannel === "both"
+                      ? "bg-white text-emerald-800 shadow-xs border border-slate-200/60"
+                      : "text-slate-600 hover:text-slate-900 hover:bg-slate-200/40"
+                  }`}
+                >
+                  <span>⚡</span>
+                  <span>{isRTL ? "كلاهما معاً" : "Both"}</span>
                 </button>
 
                 <button
                   type="button"
                   onClick={() => setNotificationChannel("none")}
-                  className={`p-2.5 rounded-xl border text-center transition-all cursor-pointer ${
+                  className={`py-2 px-2.5 rounded-xl text-[11px] font-medium transition-all cursor-pointer flex items-center justify-center gap-1 ${
                     notificationChannel === "none"
-                      ? "bg-slate-800 text-white border-slate-800 shadow-xs"
-                      : "bg-white text-slate-700 border-slate-200 hover:bg-slate-50"
+                      ? "bg-slate-800 text-white shadow-xs"
+                      : "text-slate-400 hover:text-slate-700"
                   }`}
+                  title={isRTL ? "بدون إرسال إشعار" : "No notification"}
                 >
-                  🔕 {isRTL ? "بدون إشعار" : "None"}
+                  <span>🔕</span>
+                  <span className="hidden sm:inline">{isRTL ? "بدون" : "None"}</span>
                 </button>
               </div>
 
-              {/* Password setup notice (strictly email) */}
-              <div className="text-[11px] text-slate-600 bg-white/90 p-2.5 rounded-xl border border-emerald-200/60 flex items-center gap-2">
-                <span className="text-emerald-600 font-bold shrink-0">ℹ️</span>
+              {/* Gentle status indicator: in both cases sends link to set password */}
+              <div className="flex items-center gap-2 p-2.5 rounded-xl bg-emerald-50/80 border border-emerald-200/60 text-emerald-900 text-xs font-semibold">
+                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shrink-0" />
                 <span>
-                  {isRTL
-                    ? "رابط تعيين كلمة المرور لأول مرة مرتبط دائماً ببريد العضو الإلكتروني لضمان أمان حسابه."
-                    : "Password setup link is securely routed to member's email."}
+                  {notificationChannel === "sms"
+                    ? isRTL
+                      ? "سيصل العضو رابط مباشر عبر SMS لتعيين كلمة مرور حسابه فوراً."
+                      : "Member will receive a direct SMS link to set their password."
+                    : notificationChannel === "email"
+                    ? isRTL
+                      ? "سيصل العضو رابط مباشر عبر البريد الإلكتروني لتعيين كلمة مرور حسابه فوراً."
+                      : "Member will receive an email link to set their password."
+                    : notificationChannel === "both"
+                    ? isRTL
+                      ? "سيصل العضو رابط تعيين كلمة المرور عبر الـ SMS والبريد معاً."
+                      : "Member will receive password setup links via both SMS and Email."
+                    : isRTL
+                    ? "تم اختيار اعتماد العضوية بدون إرسال إشعار."
+                    : "No notification will be sent."}
                 </span>
               </div>
 
+              {/* If Email Only selected: Show clean recipient box */}
+              {notificationChannel === "email" && (
+                <div className="p-3.5 rounded-2xl border border-slate-200/80 bg-white text-xs text-slate-700 flex items-center justify-between animate-in fade-in">
+                  <div className="flex items-center gap-2">
+                    <span className="text-base">✉️</span>
+                    <span>{isRTL ? "البريد الإلكتروني المستلم:" : "Recipient Email:"}</span>
+                    <span className="font-bold text-slate-900 font-mono">{application.email}</span>
+                  </div>
+                  <span className="text-[11px] text-emerald-700 font-bold bg-emerald-100/70 px-2.5 py-1 rounded-lg">
+                    {isRTL ? "جاهز للإرسال" : "Ready"}
+                  </span>
+                </div>
+              )}
+
               {/* Custom SMS Content Box (shown when SMS or Both is selected) */}
               {(notificationChannel === "sms" || notificationChannel === "both") && (
-                <div className="space-y-1.5 pt-1">
+                <div className="space-y-2 pt-1 animate-in fade-in">
                   <div className="flex items-center justify-between text-xs">
                     <label className="font-bold text-slate-800">
-                      {isRTL ? "نص رسالة الـ SMS (يمكنك تعديله بالكامل):" : "SMS Message (Fully Editable):"}
+                      {isRTL ? "نص رسالة الـ SMS (يمكنك تعديله بحرية):" : "SMS Message (Fully Editable):"}
                     </label>
                     <span className="text-[11px] font-mono text-slate-500">
                       {customSmsMessage.length} {isRTL ? "حرف" : "chars"}
@@ -693,21 +726,13 @@ export default function ApplicationDetailModal({
                     }
                   />
 
-                  {/* Dynamic Token Badge */}
-                  <p className="text-[11px] text-emerald-800 bg-emerald-50/90 p-2.5 rounded-xl border border-emerald-200/80 flex items-center gap-2 font-medium">
-                    <span className="text-sm">🔑</span>
-                    <span>
-                      {isRTL
-                        ? "سيتم استبدال الرمز {set_password_url} تلقائياً برابط صفحة تعيين كلمة المرور المباشر والمشفر الخاص بالعضو."
-                        : "The {set_password_url} placeholder will automatically be replaced with the member's secure password setup link."}
-                    </span>
-                  </p>
                   <div className="flex items-center justify-between text-[11px] text-slate-500">
-                    <span>
-                      {isRTL
-                        ? `رقم الجوال المستلم: ${application.phone || "غير محدد"}`
-                        : `Recipient: ${application.phone}`}
-                    </span>
+                    <div className="flex items-center gap-1.5 font-medium">
+                      <span>📱 {isRTL ? "رقم الجوال المستلم:" : "Recipient:"}</span>
+                      <span className="font-mono text-slate-800 font-bold" dir="ltr">
+                        {application.phone || "غير محدد"}
+                      </span>
+                    </div>
                     <button
                       type="button"
                       onClick={() =>
