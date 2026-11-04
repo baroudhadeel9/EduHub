@@ -610,59 +610,32 @@ export default function ApplicationDetailModal({
                 </div>
               </div>
 
-              {/* Sleek Segmented Switcher */}
-              <div className="bg-slate-100/90 p-1 rounded-2xl flex items-center gap-1 border border-slate-200/60">
+              {/* Sleek Segmented Switcher: Either SMS or Email */}
+              <div className="bg-slate-100/90 p-1 rounded-2xl flex items-center gap-1.5 border border-slate-200/60">
                 <button
                   type="button"
                   onClick={() => setNotificationChannel("sms")}
-                  className={`flex-1 py-2 px-3 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
+                  className={`flex-1 py-2.5 px-4 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer flex items-center justify-center gap-2 ${
                     notificationChannel === "sms"
                       ? "bg-white text-emerald-800 shadow-xs border border-slate-200/60"
                       : "text-slate-600 hover:text-slate-900 hover:bg-slate-200/40"
                   }`}
                 >
-                  <span>📱</span>
+                  <span className="text-base">📱</span>
                   <span>{isRTL ? "رسالة SMS" : "SMS"}</span>
                 </button>
 
                 <button
                   type="button"
                   onClick={() => setNotificationChannel("email")}
-                  className={`flex-1 py-2 px-3 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
+                  className={`flex-1 py-2.5 px-4 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer flex items-center justify-center gap-2 ${
                     notificationChannel === "email"
                       ? "bg-white text-emerald-800 shadow-xs border border-slate-200/60"
                       : "text-slate-600 hover:text-slate-900 hover:bg-slate-200/40"
                   }`}
                 >
-                  <span>✉️</span>
+                  <span className="text-base">✉️</span>
                   <span>{isRTL ? "بريد إلكتروني" : "Email"}</span>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => setNotificationChannel("both")}
-                  className={`flex-1 py-2 px-3 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
-                    notificationChannel === "both"
-                      ? "bg-white text-emerald-800 shadow-xs border border-slate-200/60"
-                      : "text-slate-600 hover:text-slate-900 hover:bg-slate-200/40"
-                  }`}
-                >
-                  <span>⚡</span>
-                  <span>{isRTL ? "كلاهما معاً" : "Both"}</span>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => setNotificationChannel("none")}
-                  className={`py-2 px-2.5 rounded-xl text-[11px] font-medium transition-all cursor-pointer flex items-center justify-center gap-1 ${
-                    notificationChannel === "none"
-                      ? "bg-slate-800 text-white shadow-xs"
-                      : "text-slate-400 hover:text-slate-700"
-                  }`}
-                  title={isRTL ? "بدون إرسال إشعار" : "No notification"}
-                >
-                  <span>🔕</span>
-                  <span className="hidden sm:inline">{isRTL ? "بدون" : "None"}</span>
                 </button>
               </div>
 
@@ -674,17 +647,9 @@ export default function ApplicationDetailModal({
                     ? isRTL
                       ? "سيصل العضو رابط مباشر عبر SMS لتعيين كلمة مرور حسابه فوراً."
                       : "Member will receive a direct SMS link to set their password."
-                    : notificationChannel === "email"
-                    ? isRTL
-                      ? "سيصل العضو رابط مباشر عبر البريد الإلكتروني لتعيين كلمة مرور حسابه فوراً."
-                      : "Member will receive an email link to set their password."
-                    : notificationChannel === "both"
-                    ? isRTL
-                      ? "سيصل العضو رابط تعيين كلمة المرور عبر الـ SMS والبريد معاً."
-                      : "Member will receive password setup links via both SMS and Email."
                     : isRTL
-                    ? "تم اختيار اعتماد العضوية بدون إرسال إشعار."
-                    : "No notification will be sent."}
+                    ? "سيصل العضو رابط مباشر عبر البريد الإلكتروني لتعيين كلمة مرور حسابه فوراً."
+                    : "Member will receive an email link to set their password."}
                 </span>
               </div>
 
@@ -702,8 +667,8 @@ export default function ApplicationDetailModal({
                 </div>
               )}
 
-              {/* Custom SMS Content Box (shown when SMS or Both is selected) */}
-              {(notificationChannel === "sms" || notificationChannel === "both") && (
+              {/* Custom SMS Content Box (shown when SMS is selected) */}
+              {notificationChannel === "sms" && (
                 <div className="space-y-2 pt-1 animate-in fade-in">
                   <div className="flex items-center justify-between text-xs">
                     <label className="font-bold text-slate-800">
