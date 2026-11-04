@@ -383,8 +383,8 @@ export default function AdminSmsPage() {
                   <div className="grid grid-cols-2 sm:grid-cols-5 gap-2 text-xs font-bold">
                     {[
                       { id: "all", label: isRTL ? "جميع الأعضاء 👥" : "All Members" },
-                      { id: "male", label: isRTL ? "صالة الشباب 👨" : "Youth (Male)" },
-                      { id: "female", label: isRTL ? "صالة الصبايا 👩" : "Women (Female)" },
+                      { id: "male", label: isRTL ? "الذكور 👨" : "Males" },
+                      { id: "female", label: isRTL ? "الإناث 👩" : "Females" },
                       { id: "students", label: isRTL ? "الطلاب الجامعيين 🎓" : "Students" },
                       { id: "freelancers", label: isRTL ? "المستقلين / فريلانسرز 💼" : "Freelancers" },
                     ].map((group) => (
@@ -684,9 +684,9 @@ export default function AdminSmsPage() {
                       {targetGroup === "all"
                         ? isRTL ? "جميع الأعضاء" : "All Members"
                         : targetGroup === "male"
-                        ? isRTL ? "صالة الشباب (ذكور)" : "Youth (Male)"
+                        ? isRTL ? "الذكور" : "Males"
                         : targetGroup === "female"
-                        ? isRTL ? "صالة الصبايا (إناث)" : "Women (Female)"
+                        ? isRTL ? "الإناث" : "Females"
                         : targetGroup === "students"
                         ? isRTL ? "الطلاب الجامعيين" : "Students"
                         : isRTL ? "المستقلين / فريلانسرز" : "Freelancers"}
@@ -722,3 +722,4 @@ export default function AdminSmsPage() {
     </div>
   );
 }
+
