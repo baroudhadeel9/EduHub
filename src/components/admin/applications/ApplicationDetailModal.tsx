@@ -63,7 +63,7 @@ export default function ApplicationDetailModal({
   useEffect(() => {
     if (initialApplication?.fullName) {
       setCustomSmsMessage(
-        `مرحباً ${initialApplication.fullName}، نبارك لك قبول عضويتك في مساحة EduHub غزة! يمكنك الآن تسجيل الدخول وحجز مقعدك عبر: https://edu-hub-six-umber.vercel.app/login`
+        `مرحباً ${initialApplication.fullName}، نبارك لك قبول عضويتك في مساحة EduHub غزة! يرجى تعيين كلمة المرور لحسابك وحجز مقعدك عبر الرابط: {set_password_url}`
       );
     }
   }, [initialApplication?.fullName]);
@@ -688,10 +688,20 @@ export default function ApplicationDetailModal({
                     className="w-full p-3 rounded-xl border border-slate-300 bg-white text-xs text-slate-800 focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 leading-relaxed font-sans"
                     placeholder={
                       isRTL
-                        ? `مرحباً ${application.fullName}، نبارك لك قبول عضويتك في مساحة EduHub غزة! يمكنك الآن تسجيل الدخول وحجز مقعدك.`
-                        : `Hello ${application.fullName}, congratulations! Your EduHub membership is approved.`
+                        ? `مرحباً ${application.fullName}، نبارك لك قبول عضويتك في مساحة EduHub غزة! يرجى تعيين كلمة المرور لحسابك عبر: {set_password_url}`
+                        : `Hello ${application.fullName}, set your password at: {set_password_url}`
                     }
                   />
+
+                  {/* Dynamic Token Badge */}
+                  <p className="text-[11px] text-emerald-800 bg-emerald-50/90 p-2.5 rounded-xl border border-emerald-200/80 flex items-center gap-2 font-medium">
+                    <span className="text-sm">🔑</span>
+                    <span>
+                      {isRTL
+                        ? "سيتم استبدال الرمز {set_password_url} تلقائياً برابط صفحة تعيين كلمة المرور المباشر والمشفر الخاص بالعضو."
+                        : "The {set_password_url} placeholder will automatically be replaced with the member's secure password setup link."}
+                    </span>
+                  </p>
                   <div className="flex items-center justify-between text-[11px] text-slate-500">
                     <span>
                       {isRTL
@@ -702,7 +712,7 @@ export default function ApplicationDetailModal({
                       type="button"
                       onClick={() =>
                         setCustomSmsMessage(
-                          `مرحباً ${application.fullName}، نبارك لك قبول عضويتك في مساحة EduHub غزة! يمكنك الآن تسجيل الدخول وحجز مقعدك عبر: https://edu-hub-six-umber.vercel.app/login`
+                          `مرحباً ${application.fullName}، نبارك لك قبول عضويتك في مساحة EduHub غزة! يرجى تعيين كلمة المرور لحسابك وحجز مقعدك عبر الرابط: {set_password_url}`
                         )
                       }
                       className="text-emerald-700 hover:underline font-semibold cursor-pointer"

@@ -175,8 +175,8 @@ function SetPasswordForm() {
                   <AlertCircle className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
                   <span>
                     {isRTL
-                      ? "تنبيه: لم يتم العثور على رمز التحقق بالرابط. يرجى الضغط على زر 'تعيين كلمة المرور' المرفق في البريد الإلكتروني."
-                      : "Notice: Verification token is missing from the URL. Please click the button inside your invitation email."}
+                      ? "تنبيه: لم يتم العثور على رمز التحقق بالرابط. يرجى الضغط على الرابط المرفق في رسالة الـ SMS أو البريد الإلكتروني."
+                      : "Notice: Verification token is missing from the URL. Please click the link inside your SMS or invitation email."}
                   </span>
                 </div>
               )}
