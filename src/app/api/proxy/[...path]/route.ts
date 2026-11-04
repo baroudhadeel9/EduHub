@@ -1,10 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 
+const CLOUD_FALLBACK = "https://eduhub-api-uz1z.onrender.com/api";
+
 const BACKEND_TARGET =
   process.env.BACKEND_API_URL ||
   (process.env.NODE_ENV === "development"
     ? "http://127.0.0.1:8000/api"
-    : "https://eduhub-api-uz1z.onrender.com/api");
+    : CLOUD_FALLBACK);
 
 async function handleProxy(
   req: NextRequest,
@@ -45,15 +47,50 @@ async function handleProxy(
     }
   }
 
+  let upstreamRes: Response | null = null;
+
   try {
-    const upstreamRes = await fetch(targetUrl, {
+    upstreamRes = await fetch(targetUrl, {
       method,
       headers: forwardHeaders,
       body,
       cache: "no-store",
     });
+  } catch (err: unknown) {
+    // If local development backend is unreachable, automatically fallback to live cloud API
+    if (targetUrl.includes("127.0.0.1") || targetUrl.includes("localhost")) {
+      try {
+        const fallbackUrl = `${CLOUD_FALLBACK}/${pathStr}${search}`;
+        upstreamRes = await fetch(fallbackUrl, {
+          method,
+          headers: forwardHeaders,
+          body,
+          cache: "no-store",
+        });
+      } catch (fallbackErr) {
+        console.error("Cloud fallback error:", fallbackErr);
+      }
+    }
 
-    const resData = await upstreamRes.arrayBuffer();
+    if (!upstreamRes) {
+      console.error("Next.js Proxy upstream error:", err);
+      return NextResponse.json(
+        {
+          success: false,
+          message:
+            "تعذر الاتصال بسيرفر الباك إند حالياً. يرجى الانتظار ثوانٍ حتى يستيقظ السيرفر من وضع الخمول.",
+        },
+        {
+          status: 502,
+          headers: {
+            "Access-Control-Allow-Origin": "*",
+          },
+        }
+      );
+    }
+  }
+
+  const resData = await upstreamRes.arrayBuffer();
 
     const resHeaders = new Headers();
     const upContentType = upstreamRes.headers.get("content-type");
@@ -74,22 +111,6 @@ async function handleProxy(
       status: upstreamRes.status,
       headers: resHeaders,
     });
-  } catch (err: unknown) {
-    console.error("Next.js Proxy upstream error:", err);
-    return NextResponse.json(
-      {
-        success: false,
-        message:
-          "تعذر الاتصال بسيرفر الباك إند حالياً. يرجى الانتظار ثوانٍ حتى يستيقظ السيرفر من وضع الخمول.",
-      },
-      {
-        status: 502,
-        headers: {
-          "Access-Control-Allow-Origin": "*",
-        },
-      }
-    );
-  }
 }
 
 export async function GET(
