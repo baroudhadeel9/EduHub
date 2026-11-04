@@ -132,10 +132,19 @@ export default function ApplicationsTable() {
     id: string,
     newStatus: ApplicationStatus,
     note?: string,
-    quota?: number
+    quota?: number,
+    notificationChannel?: "email" | "sms" | "both" | "none",
+    customSmsMessage?: string
   ) => {
     try {
-      const updated = await updateApplicationStatusApi(id, newStatus, note, quota);
+      const updated = await updateApplicationStatusApi(
+        id,
+        newStatus,
+        note,
+        quota,
+        notificationChannel,
+        customSmsMessage
+      );
       // When approved or rejected, remove from membership applications list
       if (newStatus === "approved" || newStatus === "rejected") {
         setApplications((prev) => prev.filter((app) => app.id !== id));

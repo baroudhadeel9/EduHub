@@ -23,6 +23,7 @@ import {
   Image as ImageIcon,
   Loader2,
   AlertCircle,
+  Send,
 } from "lucide-react";
 
 interface ApplicationDetailModalProps {
@@ -33,7 +34,9 @@ interface ApplicationDetailModalProps {
     id: string,
     status: MembershipApplication["status"],
     note?: string,
-    quota?: number
+    quota?: number,
+    notificationChannel?: "email" | "sms" | "both" | "none",
+    customSmsMessage?: string
   ) => Promise<{ temporaryPassword?: string } | null | void> | void;
 }
 
@@ -53,6 +56,17 @@ export default function ApplicationDetailModal({
   const [createdAccount, setCreatedAccount] = useState<{
     email: string;
   } | null>(null);
+
+  const [notificationChannel, setNotificationChannel] = useState<"both" | "email" | "sms" | "none">("both");
+  const [customSmsMessage, setCustomSmsMessage] = useState<string>("");
+
+  useEffect(() => {
+    if (initialApplication?.fullName) {
+      setCustomSmsMessage(
+        `مرحباً ${initialApplication.fullName}، نبارك لك قبول عضويتك في مساحة EduHub غزة! يمكنك الآن تسجيل الدخول وحجز مقعدك عبر: https://edu-hub-six-umber.vercel.app/login`
+      );
+    }
+  }, [initialApplication?.fullName]);
 
   // Sync state when initialApplication changes or modal opens
   useEffect(() => {
@@ -251,21 +265,42 @@ export default function ApplicationDetailModal({
   };
 
   const handleApprove = async () => {
+    if (!application) return;
     const quota = application.category.includes("طالب") ? 25 : 35;
-    await onUpdateStatus(application.id, "approved", "تم اعتماد العضوية", quota);
+    await onUpdateStatus(
+      application.id,
+      "approved",
+      "تم اعتماد العضوية",
+      quota,
+      notificationChannel,
+      customSmsMessage
+    );
     setCreatedAccount({
       email: application.email,
     });
-    setMessage(
-      isRTL
-        ? "تم اعتماد العضوية بنجاح وإرسال رابط تعيين كلمة المرور إلى البريد الإلكتروني! جاري تحويلك لسجل الأعضاء..."
-        : "Membership approved! Password setup link sent to member's email. Redirecting to Members..."
-    );
+    const feedback =
+      notificationChannel === "both"
+        ? (isRTL
+            ? "تم اعتماد العضوية بنجاح وإرسال الإشعار عبر البريد الإلكتروني ورسالة SMS!"
+            : "Membership approved! Sent via Email & SMS.")
+        : notificationChannel === "sms"
+        ? (isRTL
+            ? "تم اعتماد العضوية وإرسال رسالة SMS للعضو بنجاح!"
+            : "Membership approved! SMS sent.")
+        : notificationChannel === "email"
+        ? (isRTL
+            ? "تم اعتماد العضوية وإرسال بريد تعيين كلمة المرور بنجاح!"
+            : "Membership approved! Password setup email sent.")
+        : (isRTL
+            ? "تم اعتماد العضوية بنجاح بدون إرسال إشعارات."
+            : "Membership approved without notifications.");
+
+    setMessage(feedback);
     setTimeout(() => {
       setMessage("");
       onClose();
       router.push("/admin/members");
-    }, 1500);
+    }, 1800);
   };
 
   const handleReject = () => {
@@ -553,6 +588,132 @@ export default function ApplicationDetailModal({
           </div>
 
         </div>
+
+          {/* ── Notification Channel & Custom SMS (Admin Controls) ── */}
+          {application?.status === "pending" && (
+            <div className="bg-emerald-50/60 rounded-2xl p-4 sm:p-5 border border-emerald-200/80 space-y-3.5 mb-2 animate-in fade-in">
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-lg bg-emerald-100 text-emerald-700 flex items-center justify-center shrink-0">
+                  <Send className="w-4 h-4" />
+                </div>
+                <div>
+                  <h4 className="text-xs sm:text-sm font-extrabold text-slate-900">
+                    {isRTL ? "طريقة إشعار العضو بالقبول" : "Acceptance Notification Channel"}
+                  </h4>
+                  <p className="text-[11px] text-slate-500">
+                    {isRTL
+                      ? "حدد كيف ترغب في إعلام العضو باعتماد عضويته:"
+                      : "Choose how the member will be notified:"}
+                  </p>
+                </div>
+              </div>
+
+              {/* Channel Selector Pills */}
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs font-bold">
+                <button
+                  type="button"
+                  onClick={() => setNotificationChannel("both")}
+                  className={`p-2.5 rounded-xl border text-center transition-all cursor-pointer ${
+                    notificationChannel === "both"
+                      ? "bg-emerald-600 text-white border-emerald-600 shadow-xs"
+                      : "bg-white text-slate-700 border-slate-200 hover:bg-slate-50"
+                  }`}
+                >
+                  ⚡ {isRTL ? "كلاهما (إيميل + SMS)" : "Both"}
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setNotificationChannel("sms")}
+                  className={`p-2.5 rounded-xl border text-center transition-all cursor-pointer ${
+                    notificationChannel === "sms"
+                      ? "bg-emerald-600 text-white border-emerald-600 shadow-xs"
+                      : "bg-white text-slate-700 border-slate-200 hover:bg-slate-50"
+                  }`}
+                >
+                  📱 {isRTL ? "عبر SMS فقط" : "SMS Only"}
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setNotificationChannel("email")}
+                  className={`p-2.5 rounded-xl border text-center transition-all cursor-pointer ${
+                    notificationChannel === "email"
+                      ? "bg-emerald-600 text-white border-emerald-600 shadow-xs"
+                      : "bg-white text-slate-700 border-slate-200 hover:bg-slate-50"
+                  }`}
+                >
+                  ✉️ {isRTL ? "عبر البريد فقط" : "Email Only"}
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setNotificationChannel("none")}
+                  className={`p-2.5 rounded-xl border text-center transition-all cursor-pointer ${
+                    notificationChannel === "none"
+                      ? "bg-slate-800 text-white border-slate-800 shadow-xs"
+                      : "bg-white text-slate-700 border-slate-200 hover:bg-slate-50"
+                  }`}
+                >
+                  🔕 {isRTL ? "بدون إشعار" : "None"}
+                </button>
+              </div>
+
+              {/* Password setup notice (strictly email) */}
+              <div className="text-[11px] text-slate-600 bg-white/90 p-2.5 rounded-xl border border-emerald-200/60 flex items-center gap-2">
+                <span className="text-emerald-600 font-bold shrink-0">ℹ️</span>
+                <span>
+                  {isRTL
+                    ? "رابط تعيين كلمة المرور لأول مرة مرتبط دائماً ببريد العضو الإلكتروني لضمان أمان حسابه."
+                    : "Password setup link is securely routed to member's email."}
+                </span>
+              </div>
+
+              {/* Custom SMS Content Box (shown when SMS or Both is selected) */}
+              {(notificationChannel === "sms" || notificationChannel === "both") && (
+                <div className="space-y-1.5 pt-1">
+                  <div className="flex items-center justify-between text-xs">
+                    <label className="font-bold text-slate-800">
+                      {isRTL ? "نص رسالة الـ SMS (يمكنك تعديله بالكامل):" : "SMS Message (Fully Editable):"}
+                    </label>
+                    <span className="text-[11px] font-mono text-slate-500">
+                      {customSmsMessage.length} {isRTL ? "حرف" : "chars"}
+                    </span>
+                  </div>
+
+                  <textarea
+                    rows={3}
+                    value={customSmsMessage}
+                    onChange={(e) => setCustomSmsMessage(e.target.value)}
+                    className="w-full p-3 rounded-xl border border-slate-300 bg-white text-xs text-slate-800 focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 leading-relaxed font-sans"
+                    placeholder={
+                      isRTL
+                        ? `مرحباً ${application.fullName}، نبارك لك قبول عضويتك في مساحة EduHub غزة! يمكنك الآن تسجيل الدخول وحجز مقعدك.`
+                        : `Hello ${application.fullName}, congratulations! Your EduHub membership is approved.`
+                    }
+                  />
+                  <div className="flex items-center justify-between text-[11px] text-slate-500">
+                    <span>
+                      {isRTL
+                        ? `رقم الجوال المستلم: ${application.phone || "غير محدد"}`
+                        : `Recipient: ${application.phone}`}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setCustomSmsMessage(
+                          `مرحباً ${application.fullName}، نبارك لك قبول عضويتك في مساحة EduHub غزة! يمكنك الآن تسجيل الدخول وحجز مقعدك عبر: https://edu-hub-six-umber.vercel.app/login`
+                        )
+                      }
+                      className="text-emerald-700 hover:underline font-semibold cursor-pointer"
+                    >
+                      {isRTL ? "استعادة النص الافتراضي" : "Reset text"}
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
 
         {/* ── Footer Actions ── */}
         <div className="p-4 border-t border-slate-100 bg-slate-50 flex items-center justify-between gap-3">

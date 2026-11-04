@@ -455,8 +455,10 @@ export async function updateApplicationStatusApi(
   id: string,
   status: ApplicationStatus,
   statusNote?: string,
-  assignedQuota?: number
-): Promise<MembershipApplication> {
+  assignedQuota?: number,
+  notificationChannel?: "email" | "sms" | "both" | "none",
+  customSmsMessage?: string
+): Promise<MembershipApplication & { apiMessage?: string }> {
   const response = await fetch(
     `${API_BASE_URL}/admin/membership-applications/${id}/status`,
     {
@@ -466,8 +468,10 @@ export async function updateApplicationStatusApi(
       }),
       body: JSON.stringify({
         status,
-        statusNote,
-        assignedQuota,
+        status_note: statusNote,
+        assigned_quota: assignedQuota,
+        notification_channel: notificationChannel,
+        custom_sms_message: customSmsMessage,
       }),
     }
   );
@@ -478,10 +482,87 @@ export async function updateApplicationStatusApi(
     throw new Error(result.message || "فشل تحديث حالة الطلب في الخادم.");
   }
 
-  return normalizeMembershipApplication({
+  const app = normalizeMembershipApplication({
     ...(result.data || {}),
     temporaryPassword: result.temporaryPassword,
   });
+
+  return {
+    ...app,
+    apiMessage: result.message,
+  };
+}
+
+export interface SmsBalanceInfo {
+  success: boolean;
+  balance: number;
+  sender: string;
+  senders: Array<{ id: string; text: string; status: string; default?: string }>;
+  total_sent_in_db: number;
+}
+
+export interface SmsLogItem {
+  id: number;
+  recipient_phone: string;
+  recipient_name: string | null;
+  message: string;
+  sender_name: string;
+  type: string;
+  status: "sent" | "failed";
+  response_code: string | null;
+  created_at: string;
+}
+
+export async function getSmsBalanceApi(): Promise<SmsBalanceInfo> {
+  const response = await fetch(`${API_BASE_URL}/admin/sms/balance`, {
+    headers: getAdminHeaders(),
+    cache: "no-store",
+  });
+  if (!response.ok) throw new Error("تعذر جلب رصيد الـ SMS.");
+  return response.json();
+}
+
+export async function getSmsLogsApi(type?: string): Promise<{ success: boolean; data: SmsLogItem[]; pagination: any }> {
+  const url = type ? `${API_BASE_URL}/admin/sms/logs?type=${type}` : `${API_BASE_URL}/admin/sms/logs`;
+  const response = await fetch(url, {
+    headers: getAdminHeaders(),
+    cache: "no-store",
+  });
+  if (!response.ok) throw new Error("تعذر جلب سجل رسائل الـ SMS.");
+  return response.json();
+}
+
+export async function sendSingleSmsApi(
+  phone: string,
+  message: string,
+  recipientName?: string
+): Promise<{ success: boolean; message: string }> {
+  const response = await fetch(`${API_BASE_URL}/admin/sms/send`, {
+    method: "POST",
+    headers: getAdminHeaders({ "Content-Type": "application/json" }),
+    body: JSON.stringify({ phone, message, recipient_name: recipientName }),
+  });
+  const data = await response.json();
+  if (!response.ok || !data.success) {
+    throw new Error(data.message || "فشل إرسال رسالة الـ SMS.");
+  }
+  return data;
+}
+
+export async function broadcastSmsApi(
+  target: "all" | "male" | "female" | "students" | "freelancers",
+  message: string
+): Promise<{ success: boolean; message: string; recipients_count: number }> {
+  const response = await fetch(`${API_BASE_URL}/admin/sms/broadcast`, {
+    method: "POST",
+    headers: getAdminHeaders({ "Content-Type": "application/json" }),
+    body: JSON.stringify({ target, message }),
+  });
+  const data = await response.json();
+  if (!response.ok || !data.success) {
+    throw new Error(data.message || "فشل إرسال التعميم الجماعي.");
+  }
+  return data;
 }
 
 export interface MemberBookingItem {

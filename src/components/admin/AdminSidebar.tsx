@@ -16,6 +16,7 @@ import {
   X,
   UserPlus,
   LogOut,
+  MessageSquareText,
 } from "lucide-react";
 
 interface AdminSidebarProps {
@@ -123,6 +124,13 @@ export default function AdminSidebar({
           ? { text: String(realCounts.pendingVisitors), bg: "bg-orange-100 text-orange-800" }
           : null,
       href: "/admin/visitor-requests",
+    },
+    {
+      id: "sms",
+      label: isRTL ? "إرسال SMS والتعميمات" : "SMS & Broadcasts",
+      icon: MessageSquareText,
+      badge: null,
+      href: "/admin/sms",
     },
   ];
 
