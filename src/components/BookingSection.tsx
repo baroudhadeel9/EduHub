@@ -42,7 +42,7 @@ export default function BookingSection() {
             id="booking-title"
             className="text-3xl sm:text-4xl lg:text-5xl font-black text-brand-navy tracking-tight mb-4"
           >
-            {isRTL ? "احجز مقعدك في أيديو هب" : "Reserve Your Seat at EduHub"}
+            {isRTL ? "احجز مقعدك في إديو هب" : "Reserve Your Seat at EduHub"}
           </h2>
 
           <p className="text-sm sm:text-base text-slate-600 leading-relaxed font-normal max-w-2xl mx-auto">

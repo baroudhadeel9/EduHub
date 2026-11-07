@@ -159,7 +159,7 @@ export default function VisitorPassPage() {
         <div className="max-w-6xl mx-auto px-4">
           <p>
             {isRTL
-              ? "© 2026 مساحة أيديو هب غزة (Gaza Edu Hub) — مبادرة مجتمعية غير ربحية لدعم التعليم والعمل الرقمي في قطاع غزة."
+              ? "© 2026 مساحة إديو هب غزة (Gaza Edu Hub) — مبادرة مجتمعية غير ربحية لدعم التعليم والعمل الرقمي في قطاع غزة."
               : "© 2026 Gaza Edu Hub — A non-profit community initiative supporting education and digital work in Gaza."}
           </p>
         </div>

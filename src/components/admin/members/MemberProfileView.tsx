@@ -979,7 +979,7 @@ export default function MemberProfileView({ memberId }: MemberProfileViewProps) 
                   <AlertCircle className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
                   <span>
                     {isRTL
-                      ? "وفق لائحة تشغيل أيديو هب غزة، تُمنح الساعات الأساسية مجاناً بالكامل. في حال تجاوز العضو للحصة المعتمدة ورغب بساعات إضافية لدواعي تسليم مشاريع عاجلة، يتم فرض رسم رمزي قدره 2 شيكل لكل ساعة لدعم تكاليف السولار وصيانة المنظومة."
+                      ? "وفق لائحة تشغيل إديو هب غزة، تُمنح الساعات الأساسية مجاناً بالكامل. في حال تجاوز العضو للحصة المعتمدة ورغب بساعات إضافية لدواعي تسليم مشاريع عاجلة، يتم فرض رسم رمزي قدره 2 شيكل لكل ساعة لدعم تكاليف السولار وصيانة المنظومة."
                       : "Core hours are 100% free. Any extra hours requested beyond monthly allocation for critical project delivery cost 2 NIS / hour to offset generator fuel."}
                   </span>
                 </div>

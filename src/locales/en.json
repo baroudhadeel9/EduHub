@@ -294,7 +294,7 @@
           "amount": 600,
           "percentage": 24,
           "desc": "Solar energy backup system",
-          "details": "Hybrid solar array, lithium storage, and emergency generators guaranteeing 24/7 power."
+          "details": "Hybrid solar array, lithium storage, and renewable power systems guaranteeing reliable energy."
         },
         {
           "id": "repairs",
@@ -618,7 +618,7 @@
     ],
     "galleryBadge": "Live Field Verification from Gaza",
     "galleryTitle": "Where Do Donations Go? Our Infrastructure on the Ground",
-    "gallerySubtitle": "Every dollar donated translates into clean power, high-speed connectivity, and real equipment operating 24/7 for our students and youth.",
+    "gallerySubtitle": "Every dollar donated translates into clean power, high-speed connectivity, and real equipment operating reliably from renewable energy sources for our students and youth.",
     "galleryItems": [
       {
         "id": "electricity_meter",

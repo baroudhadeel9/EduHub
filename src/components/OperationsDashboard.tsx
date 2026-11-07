@@ -49,6 +49,17 @@ function AnimatedNumber({
   return <span>{count}</span>;
 }
 
+interface DashboardCard {
+  id: string;
+  title: string;
+  customValue?: string;
+  numericTarget?: number;
+  displayPrefix?: string;
+  displaySuffix?: string;
+  icon: React.ElementType;
+  iconBg: string;
+}
+
 export default function OperationsDashboard() {
   const { t, locale } = useLanguage();
   const isRTL = locale === "ar";
@@ -78,13 +89,11 @@ export default function OperationsDashboard() {
     };
   }, []);
 
-  const cards = [
+  const cards: DashboardCard[] = [
     {
       id: "power",
       title: t.dashboard.powerTitle || (isRTL ? "الطاقة الشمسية" : "Solar Power"),
-      numericTarget: stats.powerHours,
-      displayPrefix: "",
-      displaySuffix: "/7",
+      customValue: isRTL ? "كهرباء من مصادر متجددة" : "Renewable Energy Sources",
       icon: Zap,
       iconBg: "bg-amber-500/10 text-amber-600 group-hover:bg-amber-500 group-hover:text-white",
     },
@@ -167,22 +176,30 @@ export default function OperationsDashboard() {
                   </div>
                 </div>
 
-                {/* Main Metric Value with Animated Counter */}
-                <div className="flex items-baseline gap-1 font-mono">
-                  {item.displayPrefix && (
-                    <span className="text-2xl sm:text-3xl font-black text-brand-navy">
-                      {item.displayPrefix}
+                {/* Main Metric Value with Animated Counter or Custom Text */}
+                {item.customValue ? (
+                  <div className="flex items-center min-h-[3rem] py-1">
+                    <span className="text-lg sm:text-xl lg:text-2xl font-black text-brand-navy tracking-tight leading-snug">
+                      {item.customValue}
                     </span>
-                  )}
-                  <span className="text-4xl sm:text-[2.6rem] font-black text-brand-navy tracking-tight">
-                    <AnimatedNumber target={item.numericTarget} duration={1300} />
-                  </span>
-                  {item.displaySuffix && (
-                    <span className="text-xl sm:text-2xl font-extrabold text-slate-500">
-                      {item.displaySuffix}
+                  </div>
+                ) : (
+                  <div className="flex items-baseline gap-1 font-mono min-h-[3rem] items-center">
+                    {item.displayPrefix && (
+                      <span className="text-2xl sm:text-3xl font-black text-brand-navy">
+                        {item.displayPrefix}
+                      </span>
+                    )}
+                    <span className="text-4xl sm:text-[2.6rem] font-black text-brand-navy tracking-tight">
+                      <AnimatedNumber target={item.numericTarget ?? 0} duration={1300} />
                     </span>
-                  )}
-                </div>
+                    {item.displaySuffix && (
+                      <span className="text-xl sm:text-2xl font-extrabold text-slate-500">
+                        {item.displaySuffix}
+                      </span>
+                    )}
+                  </div>
+                )}
               </div>
             );
           })}
