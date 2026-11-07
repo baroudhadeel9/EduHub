@@ -27,7 +27,51 @@ export default function MemberLoginForm({
   const bp = t.bookingPortal;
 
   const [password, setPassword] = useState("");
-  const [forgotSent, setForgotSent] = useState(false);
+  const [forgotLoading, setForgotLoading] = useState(false);
+  const [forgotFeedback, setForgotFeedback] = useState<{ type: "success" | "error"; message: string } | null>(null);
+
+  const handleForgotPassword = async () => {
+    if (!email || !email.trim()) {
+      setForgotFeedback({
+        type: "error",
+        message: isRTL ? "يرجى كتابة بريدك الإلكتروني أو رقم هاتفك في الحقل أعلاه أولاً." : "Please enter your email or phone number in the field above first.",
+      });
+      return;
+    }
+
+    setForgotLoading(true);
+    setForgotFeedback(null);
+
+    try {
+      const res = await fetch("/api/proxy/auth/forgot-password", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+        body: JSON.stringify({ email: email.trim() }),
+      });
+
+      const data = await res.json().catch(() => null);
+
+      if (!res.ok) {
+        throw new Error(data?.message || (isRTL ? "تعذر إرسال رابط إعادة التعيين." : "Failed to send reset link."));
+      }
+
+      setForgotFeedback({
+        type: "success",
+        message: data?.message || (isRTL ? "تم إرسال رابط إعادة تعيين كلمة المرور إلى بريدك الإلكتروني بنجاح!" : "Reset link sent to your email."),
+      });
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "";
+      setForgotFeedback({
+        type: "error",
+        message: msg || (isRTL ? "حدث خطأ أثناء إرسال الرابط. يرجى المحاولة لاحقاً." : "An error occurred."),
+      });
+    } finally {
+      setForgotLoading(false);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -81,10 +125,13 @@ export default function MemberLoginForm({
             </label>
             <button
               type="button"
-              onClick={() => setForgotSent(true)}
-              className="text-xs font-semibold text-emerald-600 hover:underline cursor-pointer"
+              disabled={forgotLoading}
+              onClick={handleForgotPassword}
+              className="text-xs font-semibold text-emerald-600 hover:underline cursor-pointer disabled:opacity-50"
             >
-              {bp?.forgotPassword || (isRTL ? "نسيت كلمة المرور؟" : "Forgot Password?")}
+              {forgotLoading
+                ? isRTL ? "جاري الإرسال..." : "Sending..."
+                : bp?.forgotPassword || (isRTL ? "نسيت كلمة المرور؟" : "Forgot Password?")}
             </button>
           </div>
           <input
@@ -96,16 +143,21 @@ export default function MemberLoginForm({
             placeholder="••••••••"
             className="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-sm outline-none focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition-all font-mono"
           />
-          {forgotSent && (
-            <p className="mt-1.5 text-xs font-semibold text-emerald-600 flex items-center gap-1 animate-in fade-in">
-              <CheckCircle2 className="w-3.5 h-3.5" />
-              <span>
-                {bp?.forgotPasswordAlert ||
-                  (isRTL
-                    ? "سيصلك رابط إعادة التعيين عبر الإيميل المسجل."
-                    : "Reset link sent to registered email.")}
-              </span>
-            </p>
+          {forgotFeedback && (
+            <div
+              className={`mt-2 p-2.5 rounded-xl border text-xs font-bold flex items-center gap-2 animate-in fade-in ${
+                forgotFeedback.type === "success"
+                  ? "bg-emerald-50 border-emerald-200 text-emerald-800"
+                  : "bg-rose-50 border-rose-200 text-rose-800"
+              }`}
+            >
+              {forgotFeedback.type === "success" ? (
+                <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+              ) : (
+                <AlertCircle className="w-4 h-4 text-rose-600 shrink-0" />
+              )}
+              <span>{forgotFeedback.message}</span>
+            </div>
           )}
         </div>
 

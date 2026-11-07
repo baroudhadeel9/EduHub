@@ -17,6 +17,7 @@ import {
   ClipboardList,
   ExternalLink,
   Settings2,
+  ChevronDown,
 } from "lucide-react";
 
 export default function MembershipIntakeModeControl() {
@@ -27,6 +28,7 @@ export default function MembershipIntakeModeControl() {
   const [loading, setLoading] = useState(true);
   const [updating, setUpdating] = useState(false);
   const [feedback, setFeedback] = useState<{ type: "success" | "error"; message: string } | null>(null);
+  const [isOpen, setIsOpen] = useState(false);
 
   // Load current mode on mount
   useEffect(() => {
@@ -88,6 +90,36 @@ export default function MembershipIntakeModeControl() {
     }
   };
 
+  const getActiveBadge = () => {
+    switch (currentMode) {
+      case "short":
+        return {
+          label: isRTL ? "النموذج السريع" : "Express Form",
+          icon: Zap,
+          style: "bg-amber-50 text-amber-800 border-amber-300/80",
+          iconColor: "text-amber-600",
+        };
+      case "closed":
+        return {
+          label: isRTL ? "التسجيل مغلق" : "Registration Closed",
+          icon: Lock,
+          style: "bg-rose-50 text-rose-800 border-rose-300/80",
+          iconColor: "text-rose-600",
+        };
+      case "full":
+      default:
+        return {
+          label: isRTL ? "النموذج الكامل" : "Full Application",
+          icon: ClipboardList,
+          style: "bg-emerald-50 text-emerald-800 border-emerald-300/80",
+          iconColor: "text-emerald-600",
+        };
+    }
+  };
+
+  const activeBadge = getActiveBadge();
+  const ActiveIcon = activeBadge.icon;
+
   const modesConfig = [
     {
       id: "full" as const,
@@ -122,18 +154,33 @@ export default function MembershipIntakeModeControl() {
   ];
 
   return (
-    <div className="bg-white rounded-2xl sm:rounded-3xl border border-slate-200 shadow-sm p-4 sm:p-6 space-y-5">
-      {/* Header bar */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pb-3 border-b border-slate-100">
-        <div className="flex items-center gap-2.5">
-          <div className="w-9 h-9 rounded-xl bg-slate-100 text-slate-700 flex items-center justify-center">
+    <div className="bg-white rounded-2xl sm:rounded-3xl border border-slate-200/90 shadow-xs transition-all overflow-hidden">
+      {/* Clickable Header Bar (Accordion Trigger) */}
+      <div
+        onClick={() => setIsOpen((prev) => !prev)}
+        className="p-3.5 sm:p-5 flex flex-wrap sm:flex-nowrap items-center justify-between gap-3 cursor-pointer hover:bg-slate-50/80 transition-colors select-none"
+      >
+        {/* Title and Icon */}
+        <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
+          <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-slate-100 text-slate-700 flex items-center justify-center shrink-0 border border-slate-200/60">
             <Settings2 className="w-5 h-5 text-emerald-700" />
           </div>
-          <div>
-            <h2 className="text-base sm:text-lg font-bold text-slate-900">
-              {isRTL ? "التحكم في نموذج استقبال العضويات" : "Membership Intake Control"}
-            </h2>
-            <p className="text-xs text-slate-500">
+          <div className="min-w-0">
+            <div className="flex flex-wrap items-center gap-2">
+              <h2 className="text-sm sm:text-base font-bold text-slate-900 truncate">
+                {isRTL ? "نموذج استقبال العضويات" : "Membership Intake Control"}
+              </h2>
+              {/* Active Mode Pill badge */}
+              {!loading && (
+                <span
+                  className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold border ${activeBadge.style}`}
+                >
+                  <ActiveIcon className={`w-3.5 h-3.5 ${activeBadge.iconColor}`} />
+                  <span>{activeBadge.label}</span>
+                </span>
+              )}
+            </div>
+            <p className="text-xs text-slate-500 hidden sm:block truncate mt-0.5">
               {isRTL
                 ? "حدد طريقة استقبال طلبات الانضمام المعروضة في صفحة التسجيل العامة (/join)."
                 : "Choose the registration mode active on the public join portal (/join)."}
@@ -141,104 +188,132 @@ export default function MembershipIntakeModeControl() {
           </div>
         </div>
 
-        {/* Live preview link */}
-        <div className="flex items-center gap-2 self-stretch sm:self-auto justify-end">
+        {/* Controls: Preview link & Toggle button */}
+        <div
+          className="flex items-center gap-2 shrink-0 ms-auto"
+          onClick={(e) => e.stopPropagation()}
+        >
           <Link
             href="/join"
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-slate-200 bg-slate-50 hover:bg-slate-100 text-xs font-bold text-slate-700 transition-colors cursor-pointer"
+            className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl border border-slate-200 bg-slate-50 hover:bg-slate-100 text-xs font-bold text-slate-700 transition-colors cursor-pointer"
             title={isRTL ? "فتح صفحة التسجيل في نافذة جديدة" : "Open join page in new tab"}
           >
-            <span>{isRTL ? "معاينة صفحة التسجيل" : "Preview /join"}</span>
-            <ExternalLink className="w-3.5 h-3.5 text-slate-400" />
+            <span className="hidden xs:inline">{isRTL ? "معاينة" : "Preview"}</span>
+            <ExternalLink className="w-3.5 h-3.5 text-slate-500" />
           </Link>
+
+          <button
+            type="button"
+            onClick={() => setIsOpen((prev) => !prev)}
+            aria-expanded={isOpen}
+            className="inline-flex items-center gap-1 px-2.5 sm:px-3 py-1.5 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-800 text-xs font-bold transition-all cursor-pointer border border-emerald-200/70"
+          >
+            <span>{isOpen ? (isRTL ? "إغلاق" : "Close") : (isRTL ? "تغيير" : "Change")}</span>
+            <ChevronDown
+              className={`w-4 h-4 text-emerald-700 transition-transform duration-300 ${
+                isOpen ? "rotate-180" : ""
+              }`}
+            />
+          </button>
         </div>
       </div>
 
-      {/* Loading state indicator */}
-      {loading ? (
-        <div className="py-8 flex items-center justify-center gap-2 text-slate-500 text-xs font-medium">
-          <Loader2 className="w-4 h-4 animate-spin text-emerald-600" />
-          <span>{isRTL ? "جاري تحميل الحالة الحالية من الخادم..." : "Fetching intake mode from server..."}</span>
-        </div>
-      ) : (
-        /* The 3 Selection Cards */
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5">
-          {modesConfig.map((item) => {
-            const isSelected = currentMode === item.id;
-            const Icon = item.icon;
+      {/* Expandable Body */}
+      {isOpen && (
+        <div className="p-3.5 sm:p-5 pt-1 border-t border-slate-100 space-y-4 bg-slate-50/30 animate-in fade-in slide-in-from-top-2 duration-200">
+          <p className="text-xs text-slate-500 sm:hidden">
+            {isRTL
+              ? "اختر النموذج الذي يظهر للمتقدمين عند الدخول لصفحة التسجيل (/join):"
+              : "Select which form visitors see on the registration page (/join):"}
+          </p>
 
-            return (
-              <button
-                key={item.id}
-                type="button"
-                onClick={() => handleSelectMode(item.id)}
-                disabled={updating}
-                className={`text-start p-4 sm:p-5 rounded-2xl border transition-all cursor-pointer relative flex flex-col justify-between gap-3 ${
-                  isSelected
-                    ? item.activeBorder
-                    : "border-slate-200 hover:border-slate-300 hover:bg-slate-50/70 bg-white"
-                } ${updating ? "opacity-60 cursor-wait" : ""}`}
-              >
-                {/* Top: Icon */}
-                <div className="flex items-center justify-between w-full">
-                  <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${item.iconColor}`}>
-                    <Icon className="w-5 h-5" />
-                  </div>
-                </div>
-
-                {/* Middle: Title & Description */}
-                <div className="space-y-1">
-                  <div className="flex items-center gap-2">
-                    <span className="font-extrabold text-sm text-slate-900">{item.title}</span>
-                    {isSelected && (
-                      <span className="w-2 h-2 rounded-full bg-emerald-500 ring-2 ring-emerald-200 animate-pulse" />
-                    )}
-                  </div>
-                  <p className="text-xs text-slate-500 leading-relaxed">{item.subtitle}</p>
-                </div>
-
-                {/* Bottom: Selection status radio pill */}
-                <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-xs">
-                  <span className={`font-bold ${isSelected ? "text-slate-900" : "text-slate-400"}`}>
-                    {isSelected
-                      ? isRTL
-                        ? "✓ مفعل حالياً"
-                        : "✓ Active Now"
-                      : isRTL
-                      ? "انقر للتفعيل"
-                      : "Click to activate"}
-                  </span>
-                  <div
-                    className={`w-4 h-4 rounded-full border flex items-center justify-center ${
-                      isSelected ? "border-emerald-600 bg-emerald-600" : "border-slate-300 bg-white"
-                    }`}
-                  >
-                    {isSelected && <div className="w-1.5 h-1.5 rounded-full bg-white" />}
-                  </div>
-                </div>
-              </button>
-            );
-          })}
-        </div>
-      )}
-
-      {/* Feedback Alert */}
-      {feedback && (
-        <div
-          className={`p-3.5 rounded-xl border text-xs font-bold flex items-center gap-2.5 animate-in fade-in ${
-            feedback.type === "success"
-              ? "bg-emerald-50 border-emerald-200 text-emerald-800"
-              : "bg-rose-50 border-rose-200 text-rose-800"
-          }`}
-        >
-          {feedback.type === "success" ? (
-            <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+          {/* Loading state indicator */}
+          {loading ? (
+            <div className="py-6 flex items-center justify-center gap-2 text-slate-500 text-xs font-medium">
+              <Loader2 className="w-4 h-4 animate-spin text-emerald-600" />
+              <span>{isRTL ? "جاري تحميل الحالة الحالية من الخادم..." : "Fetching intake mode from server..."}</span>
+            </div>
           ) : (
-            <AlertCircle className="w-4 h-4 text-rose-600 shrink-0" />
+            /* The 3 Selection Cards */
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+              {modesConfig.map((item) => {
+                const isSelected = currentMode === item.id;
+                const Icon = item.icon;
+
+                return (
+                  <button
+                    key={item.id}
+                    type="button"
+                    onClick={() => handleSelectMode(item.id)}
+                    disabled={updating}
+                    className={`text-start p-3.5 sm:p-4 rounded-2xl border transition-all cursor-pointer relative flex flex-col justify-between gap-3 ${
+                      isSelected
+                        ? item.activeBorder
+                        : "border-slate-200 hover:border-slate-300 hover:bg-white bg-white/80"
+                    } ${updating ? "opacity-60 cursor-wait" : ""}`}
+                  >
+                    {/* Top: Icon */}
+                    <div className="flex items-center justify-between w-full">
+                      <div className={`w-9 h-9 rounded-xl flex items-center justify-center ${item.iconColor}`}>
+                        <Icon className="w-4 h-4" />
+                      </div>
+                    </div>
+
+                    {/* Middle: Title & Description */}
+                    <div className="space-y-1">
+                      <div className="flex items-center gap-2">
+                        <span className="font-extrabold text-xs sm:text-sm text-slate-900">{item.title}</span>
+                        {isSelected && (
+                          <span className="w-2 h-2 rounded-full bg-emerald-500 ring-2 ring-emerald-200 animate-pulse" />
+                        )}
+                      </div>
+                      <p className="text-xs text-slate-500 leading-relaxed">{item.subtitle}</p>
+                    </div>
+
+                    {/* Bottom: Selection status radio pill */}
+                    <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-xs">
+                      <span className={`font-bold ${isSelected ? "text-slate-900" : "text-slate-400"}`}>
+                        {isSelected
+                          ? isRTL
+                            ? "✓ مفعل حالياً"
+                            : "✓ Active Now"
+                          : isRTL
+                          ? "انقر للتفعيل"
+                          : "Click to activate"}
+                      </span>
+                      <div
+                        className={`w-4 h-4 rounded-full border flex items-center justify-center ${
+                          isSelected ? "border-emerald-600 bg-emerald-600" : "border-slate-300 bg-white"
+                        }`}
+                      >
+                        {isSelected && <div className="w-1.5 h-1.5 rounded-full bg-white" />}
+                      </div>
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
           )}
-          <span className="flex-1">{feedback.message}</span>
+
+          {/* Feedback Alert */}
+          {feedback && (
+            <div
+              className={`p-3 rounded-xl border text-xs font-bold flex items-center gap-2 animate-in fade-in ${
+                feedback.type === "success"
+                  ? "bg-emerald-50 border-emerald-200 text-emerald-800"
+                  : "bg-rose-50 border-rose-200 text-rose-800"
+              }`}
+            >
+              {feedback.type === "success" ? (
+                <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+              ) : (
+                <AlertCircle className="w-4 h-4 text-rose-600 shrink-0" />
+              )}
+              <span className="flex-1">{feedback.message}</span>
+            </div>
+          )}
         </div>
       )}
     </div>
