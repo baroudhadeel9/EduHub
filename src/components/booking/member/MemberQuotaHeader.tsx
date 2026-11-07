@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { Clock, KeyRound, LogOut } from "lucide-react";
+import { Clock, KeyRound, LogOut, Trophy } from "lucide-react";
 import { useLanguage } from "@/context/LanguageContext";
 
 interface MemberQuotaHeaderProps {
@@ -11,9 +11,9 @@ interface MemberQuotaHeaderProps {
   monthlyLimit: number;
   hoursRemaining: number;
   dailyLimit: number;
-  memberSubView: "book" | "my_bookings";
+  memberSubView: "book" | "my_bookings" | "achievements";
   confirmedBookingsCount: number;
-  onSelectSubView: (view: "book" | "my_bookings") => void;
+  onSelectSubView: (view: "book" | "my_bookings" | "achievements") => void;
   onOpenChangePassword: () => void;
   onLogout: () => void;
 }
@@ -148,6 +148,18 @@ export default function MemberQuotaHeader({
           }`}>
             {confirmedBookingsCount}
           </span>
+        </button>
+        <button
+          type="button"
+          onClick={() => onSelectSubView("achievements")}
+          className={`flex-1 sm:flex-initial px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
+            memberSubView === "achievements"
+              ? "bg-brand-navy text-white shadow-xs"
+              : "text-slate-600 hover:text-slate-900 hover:bg-white/60"
+          }`}
+        >
+          <Trophy className="w-3.5 h-3.5 text-amber-400" />
+          <span>{isRTL ? "إنجازاتي" : "My Achievements"}</span>
         </button>
       </div>
     </div>

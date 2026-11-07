@@ -5,7 +5,23 @@ import Link from "next/link";
 import { useLanguage } from "@/context/LanguageContext";
 import AdminSidebar from "@/components/admin/AdminSidebar";
 import { MemberRecord } from "@/components/admin/members/data";
-import { getAdminMembersApi, getAdminMemberDetailsApi, updateAdminMemberApi } from "@/services/applications";
+import {
+  getAdminMembersApi,
+  getAdminMemberDetailsApi,
+  updateAdminMemberApi,
+  sendSingleSmsApi,
+} from "@/services/applications";
+import {
+  createAdminMemberAchievementApi,
+  deleteAdminMemberAchievementApi,
+  CreateAchievementPayload,
+  MemberAchievementItem,
+} from "@/services/achievements";
+import {
+  AchievementCard,
+  AchievementDetailsModal,
+  AchievementFormModal,
+} from "@/components/achievements/AchievementShowcase";
 import {
   ArrowLeft,
   ArrowRight,
@@ -20,19 +36,25 @@ import {
   AlertCircle,
   Menu,
   Send,
+  MessageSquare,
   UserCheck,
   UserX,
   GraduationCap,
   Briefcase,
   Zap,
-  Laptop,
-  FileText,
-  Camera,
-  User,
-  Sparkles,
-  FileCheck,
-  Printer,
   Loader2,
+  Trophy,
+  ExternalLink,
+  Lock,
+  Tag,
+  Code2,
+  Plus,
+  Trash2,
+  Filter,
+  Image as ImageIcon,
+  Upload,
+  X,
+  Sparkles,
 } from "lucide-react";
 
 interface MemberProfileViewProps {
@@ -63,6 +85,8 @@ export default function MemberProfileView({ memberId }: MemberProfileViewProps) 
             dueAmount: details.dueAmount || 0,
             lastBooking: details.lastBooking || (isRTL ? "لا يوجد حجز بعد" : "No bookings yet"),
             registration: details.registration || undefined,
+            achievements: details.achievements || [],
+            achievementsCount: details.achievementsCount || (details.achievements?.length ?? 0),
           });
         } else {
           // Fallback to list search if details endpoint was unreachable
@@ -77,6 +101,8 @@ export default function MemberProfileView({ memberId }: MemberProfileViewProps) 
               remainingHours: found.remainingHours ?? Math.max(0, (found.hoursLimit || 35) - (found.hoursUsed || 0)),
               dueAmount: found.dueAmount || 0,
               lastBooking: found.lastBooking || (isRTL ? "لا يوجد حجز بعد" : "No bookings yet"),
+              achievements: found.achievements || [],
+              achievementsCount: found.achievementsCount || (found.achievements?.length ?? 0),
             });
           } else {
             setMember(null);
@@ -92,11 +118,113 @@ export default function MemberProfileView({ memberId }: MemberProfileViewProps) 
     loadMember();
   }, [memberId, isRTL]);
 
-  // Active view tab: "bookings" | "dues" | "registration"
-  const [activeTab, setActiveTab] = useState<"bookings" | "dues" | "registration">("bookings");
+  // Active view tab: "achievements" | "bookings" | "dues"
+  const [activeTab, setActiveTab] = useState<"achievements" | "bookings" | "dues">("achievements");
   const [dueSettled, setDueSettled] = useState(false);
-  const [notificationSent, setNotificationSent] = useState(false);
   const [toggleLoading, setToggleLoading] = useState(false);
+
+  // SMS Modal State (Live TweetSMS Delivery)
+  const [smsModalOpen, setSmsModalOpen] = useState(false);
+  const [smsMessage, setSmsMessage] = useState("");
+  const [smsSending, setSmsSending] = useState(false);
+  const [smsFeedback, setSmsFeedback] = useState<{ type: "success" | "error"; text: string } | null>(null);
+
+  const handleOpenSmsModal = () => {
+    setSmsMessage(`مرحباً ${member?.name || ""}، نود إعلامك من مساحة إديو هب غزة: `);
+    setSmsFeedback(null);
+    setSmsModalOpen(true);
+  };
+
+  const handleSendSms = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!member || !smsMessage.trim()) return;
+
+    const phone = member.registration?.phone || member.phone;
+    if (!phone) {
+      setSmsFeedback({ type: "error", text: "لا يوجد رقم جوال مسجل لهذا العضو." });
+      return;
+    }
+
+    setSmsSending(true);
+    setSmsFeedback(null);
+
+    try {
+      const res = await sendSingleSmsApi(phone, smsMessage.trim(), member.name);
+      setSmsSending(false);
+      if (res.success) {
+        setSmsFeedback({ type: "success", text: `تم إرسال رسالة SMS إلى ${member.name} (${phone}) بنجاح!` });
+        setTimeout(() => {
+          setSmsModalOpen(false);
+          setSmsMessage("");
+          setSmsFeedback(null);
+        }, 2200);
+      } else {
+        setSmsFeedback({ type: "error", text: res.message || "فشل إرسال الرسالة." });
+      }
+    } catch (err: unknown) {
+      setSmsSending(false);
+      const errMsg = err instanceof Error ? err.message : "حدث خطأ أثناء إرسال الرسالة.";
+      setSmsFeedback({ type: "error", text: errMsg });
+    }
+  };
+
+  // Achievements State (Admin management)
+  const [achievementModalOpen, setAchievementModalOpen] = useState(false);
+  const [achievementSubmitting, setAchievementSubmitting] = useState(false);
+  const [achievementFilter, setAchievementFilter] = useState<string>("all");
+  const [achievementFeedback, setAchievementFeedback] = useState<{ type: "success" | "error"; message: string } | null>(null);
+  const [deletingAchievementId, setDeletingAchievementId] = useState<string | null>(null);
+  const [selectedAchievement, setSelectedAchievement] = useState<MemberAchievementItem | null>(null);
+
+  const handleSaveAchievement = async (payload: CreateAchievementPayload): Promise<boolean> => {
+    if (!member) return false;
+
+    setAchievementSubmitting(true);
+    setAchievementFeedback(null);
+
+    const res = await createAdminMemberAchievementApi(member.id, payload);
+    setAchievementSubmitting(false);
+
+    if (res.success && res.data) {
+      const updatedList = [res.data, ...(member.achievements || [])];
+      setMember({
+        ...member,
+        achievements: updatedList,
+        achievementsCount: updatedList.length,
+      });
+      setAchievementFeedback({ type: "success", message: "تم توثيق المشروع للعضو بنجاح!" });
+      setTimeout(() => setAchievementFeedback(null), 5000);
+      return true;
+    } else {
+      setAchievementFeedback({ type: "error", message: res.message || "فشل حفظ المشروع." });
+      return false;
+    }
+  };
+
+  const handleDeleteAchievement = async (id: string, itemTitle: string) => {
+    if (!member) return;
+    if (!window.confirm(`هل أنت متأكد من حذف إنجاز "${itemTitle}"؟`)) return;
+
+    setDeletingAchievementId(id);
+    const res = await deleteAdminMemberAchievementApi(id);
+    setDeletingAchievementId(null);
+
+    if (res.success) {
+      const updatedList = (member.achievements || []).filter((a) => a.id !== id);
+      setMember({
+        ...member,
+        achievements: updatedList,
+        achievementsCount: updatedList.length,
+      });
+      if (selectedAchievement?.id === id) {
+        setSelectedAchievement(null);
+      }
+      setAchievementFeedback({ type: "success", message: "تم حذف الإنجاز بنجاح." });
+      setTimeout(() => setAchievementFeedback(null), 4000);
+    } else {
+      setAchievementFeedback({ type: "error", message: res.message || "تعذر حذف الإنجاز." });
+    }
+  };
 
   if (loading) {
     return (
@@ -163,11 +291,6 @@ export default function MemberProfileView({ memberId }: MemberProfileViewProps) 
     setMember((prev) => (prev ? { ...prev, dueAmount: 0, extraHours: 0 } : prev));
   };
 
-  const handleSendNotification = () => {
-    setNotificationSent(true);
-    setTimeout(() => setNotificationSent(false), 4000);
-  };
-
   return (
     <div
       dir={dir}
@@ -188,75 +311,50 @@ export default function MemberProfileView({ memberId }: MemberProfileViewProps) 
       >
         <main className="p-4 sm:p-6 lg:p-8 max-w-6xl mx-auto space-y-6">
           
-          {/* ─── Top Bar Navigation & Actions ─── */}
+          {/* ─── Top Bar Navigation ─── */}
           <div className="flex items-center justify-between gap-4 flex-wrap">
             <Link
               href="/admin/members"
-              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white border border-slate-200 text-slate-700 hover:text-emerald-700 hover:border-emerald-300 text-xs sm:text-sm font-bold transition-all shadow-2xs group cursor-pointer"
+              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-white border border-slate-200/90 text-slate-700 hover:text-emerald-700 hover:border-emerald-300 text-xs sm:text-sm font-bold transition-all shadow-xs group cursor-pointer"
             >
               <ArrowBackIcon className="w-4 h-4 group-hover:-translate-x-0.5 rtl:group-hover:translate-x-0.5 transition-transform text-emerald-600" />
               <span>{isRTL ? "العودة إلى دليل الأعضاء" : "Back to Members Directory"}</span>
             </Link>
 
-            <div className="flex items-center gap-2.5">
-              <button
-                type="button"
-                onClick={() => window.print()}
-                className="hidden sm:inline-flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 text-xs font-bold transition-all shadow-2xs cursor-pointer"
-              >
-                <Printer className="w-3.5 h-3.5 text-slate-500" />
-                <span>{isRTL ? "طباعة الملف الرسمي" : "Print Profile"}</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => setMobileMenuOpen(true)}
-                className="p-2.5 rounded-xl bg-white border border-slate-200 text-slate-700 shadow-2xs hover:bg-slate-50 lg:hidden cursor-pointer"
-                aria-label="Open Navigation"
-              >
-                <Menu className="w-5 h-5" />
-              </button>
-            </div>
+            <button
+              type="button"
+              onClick={() => setMobileMenuOpen(true)}
+              className="p-2.5 rounded-2xl bg-white border border-slate-200 text-slate-700 shadow-xs hover:bg-slate-50 lg:hidden cursor-pointer"
+              aria-label="Open Navigation"
+            >
+              <Menu className="w-5 h-5" />
+            </button>
           </div>
 
-          {/* ─── Notification Sent Toast ─── */}
-          {notificationSent && (
-            <div className="bg-emerald-50 border border-emerald-200 text-emerald-900 px-4 py-3 rounded-2xl flex items-center justify-between text-xs sm:text-sm font-bold shadow-xs animate-in fade-in duration-200">
-              <div className="flex items-center gap-2">
-                <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-                <span>
-                  {isRTL
-                    ? `تم إرسال إشعار رسالة نصية SMS إلى جوال ${member.name} (${reg?.phone || member.phone}) بنجاح.`
-                    : `SMS notification sent to ${member.name} successfully.`}
-                </span>
-              </div>
-            </div>
-          )}
-
-          {/* ─── Member Hero Header Card ─── */}
-          <div className="bg-white rounded-3xl border border-slate-200/90 p-6 sm:p-8 shadow-xs">
-            <div className="flex flex-col md:flex-row md:items-start justify-between gap-6">
+          {/* ─── Member Hero Identity Card (Refined & Softened) ─── */}
+          <div className="bg-white rounded-3xl border border-slate-200/90 p-5 sm:p-6 shadow-xs space-y-4">
+            <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-5">
               
-              {/* Avatar & Primary Information */}
-              <div className="flex items-start gap-4 sm:gap-6">
+              {/* Avatar, Name & Category */}
+              <div className="flex items-start gap-4 sm:gap-5 min-w-0">
                 <div
-                  className={`w-18 h-18 sm:w-22 sm:h-22 rounded-3xl flex items-center justify-center font-black text-2xl sm:text-4xl shrink-0 border-2 shadow-xs ${member.avatarColor}`}
+                  className={`w-14 h-14 sm:w-16 sm:h-16 rounded-2xl flex items-center justify-center font-black text-xl sm:text-2xl shrink-0 shadow-xs border border-slate-200/80 ${member.avatarColor}`}
                 >
                   {member.avatarLetter}
                 </div>
 
-                <div className="space-y-2">
-                  <div className="flex items-center gap-2.5 flex-wrap">
-                    <h1 className="text-xl sm:text-2xl lg:text-3xl font-black text-[#0c2340] tracking-tight">
+                <div className="space-y-1.5 min-w-0">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <h1 className="text-lg sm:text-2xl font-black text-[#0c2340] tracking-tight truncate">
                       {reg?.fullName || member.name}
                     </h1>
 
                     {/* Member Category Badge */}
-                    <span className="px-3 py-1 rounded-full text-xs font-bold bg-emerald-50 text-emerald-800 border border-emerald-200 flex items-center gap-1.5">
+                    <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-50 text-emerald-800 border border-emerald-200 flex items-center gap-1">
                       {member.type === "freelancer" ? (
                         <>
                           <Briefcase className="w-3.5 h-3.5 text-emerald-600" />
-                          <span>{isRTL ? "فريلانسر Freelancer" : "Freelancer"}</span>
+                          <span>{isRTL ? "مستقل / Freelancer" : "Freelancer"}</span>
                         </>
                       ) : (
                         <>
@@ -267,19 +365,9 @@ export default function MemberProfileView({ memberId }: MemberProfileViewProps) 
                     </span>
 
                     {/* Status Badge */}
-                    {member.status === "extra_hours" && (
-                      <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-rose-50 text-rose-700 border border-rose-200">
-                        {isRTL ? "ساعات إضافية" : "Extra Hours"}
-                      </span>
-                    )}
                     {member.status === "active" && (
                       <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
                         {isRTL ? "عضوية نشطة" : "Active"}
-                      </span>
-                    )}
-                    {member.status === "near_limit" && (
-                      <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-50 text-amber-700 border border-amber-200">
-                        {isRTL ? "قارب على النهاية" : "Near Limit"}
                       </span>
                     )}
                     {member.status === "suspended" && (
@@ -290,58 +378,40 @@ export default function MemberProfileView({ memberId }: MemberProfileViewProps) 
                   </div>
 
                   {/* Specialty and University */}
-                  <p className="text-xs sm:text-sm font-semibold text-slate-600 leading-relaxed">
+                  <p className="text-xs sm:text-sm font-semibold text-slate-600 leading-relaxed truncate">
                     {reg?.specialty || member.specialty}
                     {reg?.university && (
                       <span className="text-slate-400 font-normal"> • {reg.university}</span>
                     )}
                   </p>
-
-                  {/* Identification Quick Metadata Strip */}
-                  <div className="flex items-center gap-3 sm:gap-4 text-xs text-slate-500 flex-wrap pt-1 font-medium">
-                    {/* National ID */}
-                    <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-100 text-slate-700 border border-slate-200">
-                      <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
-                      <span>{isRTL ? `رقم الهوية: ${reg?.nationalId || member.nationalId || "401982736"}` : `ID: ${reg?.nationalId || member.nationalId}`}</span>
-                    </div>
-
-                    {/* Email */}
-                    <div className="flex items-center gap-1.5">
-                      <Mail className="w-3.5 h-3.5 text-slate-400" />
-                      <span>{member.email}</span>
-                    </div>
-
-                    {/* Phone */}
-                    <div className="flex items-center gap-1.5" dir="ltr">
-                      <Phone className="w-3.5 h-3.5 text-emerald-600" />
-                      <span className="font-semibold text-slate-700">{reg?.phone ? `0${reg.phone.replace(/^0+/, '')}` : member.phone}</span>
-                      <span className="text-[10px] text-emerald-700 bg-emerald-50 px-1.5 py-0.2 rounded border border-emerald-200 font-bold">SMS</span>
-                    </div>
-
-                    {/* Governorate */}
-                    {reg?.governorate && (
-                      <div className="flex items-center gap-1.5">
-                        <MapPin className="w-3.5 h-3.5 text-emerald-600" />
-                        <span>{reg.governorate}</span>
-                      </div>
-                    )}
-
-                    {/* Joined Date */}
-                    <div className="flex items-center gap-1.5">
-                      <Calendar className="w-3.5 h-3.5 text-slate-400" />
-                      <span>{isRTL ? `تاريخ الانضمام: ${member.joinedDate}` : `Joined: ${member.joinedDate}`}</span>
-                    </div>
-                  </div>
                 </div>
               </div>
 
-              {/* Action Buttons */}
-              <div className="flex sm:flex-col gap-2 shrink-0 self-start md:self-center">
+              {/* Admin Action Toolbar */}
+              <div className="flex flex-wrap items-center gap-2 self-stretch sm:self-auto shrink-0 pt-2 lg:pt-0 border-t lg:border-t-0 border-slate-100">
+                <button
+                  type="button"
+                  onClick={() => setActiveTab("dues")}
+                  className="flex-1 sm:flex-initial inline-flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-xl bg-white border border-slate-200 hover:border-emerald-300 text-slate-700 hover:text-emerald-700 text-xs font-bold transition-all shadow-2xs active:scale-95 cursor-pointer"
+                >
+                  <Clock className="w-3.5 h-3.5 text-emerald-600" />
+                  <span>{isRTL ? "تعديل الحصة" : "Adjust Quota"}</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={handleOpenSmsModal}
+                  className="flex-1 sm:flex-initial inline-flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition-all shadow-xs active:scale-95 cursor-pointer"
+                >
+                  <MessageSquare className="w-3.5 h-3.5" />
+                  <span>{isRTL ? "إرسال رسالة SMS" : "Send SMS"}</span>
+                </button>
+
                 <button
                   type="button"
                   disabled={toggleLoading}
                   onClick={handleToggleStatus}
-                  className={`flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl border text-xs font-bold transition-all shadow-2xs active:scale-98 cursor-pointer ${
+                  className={`flex-1 sm:flex-initial inline-flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-xl border text-xs font-bold transition-all shadow-2xs active:scale-95 cursor-pointer ${
                     member.status === "suspended"
                       ? "bg-emerald-50 text-emerald-800 border-emerald-300 hover:bg-emerald-100"
                       : "bg-rose-50 text-rose-700 border-rose-200 hover:bg-rose-100"
@@ -356,487 +426,349 @@ export default function MemberProfileView({ memberId }: MemberProfileViewProps) 
                   )}
                   <span>
                     {member.status === "suspended"
-                      ? isRTL ? "تنشيط العضوية ✅" : "Activate Membership"
-                      : isRTL ? "توقيف العضوية 🚫" : "Suspend Membership"}
+                      ? isRTL ? "تنشيط العضوية" : "Activate"
+                      : isRTL ? "توقيف العضوية" : "Suspend"}
                   </span>
                 </button>
-                <button
-                  type="button"
-                  onClick={handleSendNotification}
-                  className="flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition-all shadow-sm shadow-emerald-700/20 active:scale-98 cursor-pointer"
-                >
-                  <Send className="w-3.5 h-3.5" />
-                  <span>{isRTL ? "إرسال إشعار SMS" : "Send SMS"}</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setActiveTab("dues")}
-                  className="flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 text-xs font-bold transition-all shadow-2xs cursor-pointer"
-                >
-                  <UserCheck className="w-3.5 h-3.5 text-slate-500" />
-                  <span>{isRTL ? "تعديل الحصة الشهرية" : "Adjust Quota"}</span>
-                </button>
               </div>
 
             </div>
-          </div>
 
-          {/* ─── 4 Fast Metric Stat Cards ─── */}
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-            
-            {/* 1. Hours Used */}
-            <div className="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-2xs space-y-2">
-              <div className="flex items-center justify-between text-xs font-semibold text-slate-400">
-                <span>{isRTL ? "الساعات هذا الشهر" : "Hours this Month"}</span>
-                <Clock className="w-4 h-4 text-emerald-600" />
+            {/* Quick Metadata Horizontal Chips */}
+            <div className="flex items-center gap-2 sm:gap-3 text-xs text-slate-500 flex-wrap pt-2 border-t border-slate-100 font-medium">
+              <div className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-slate-50 text-slate-700 border border-slate-200/70 font-mono text-[11px]">
+                <ShieldCheck className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                <span>{isRTL ? `الهوية: ${reg?.nationalId || member.nationalId || "401982736"}` : `ID: ${reg?.nationalId || member.nationalId}`}</span>
               </div>
-              <div className="text-2xl font-black text-[#0c2340]">
-                {member.hoursUsed}{" "}
-                <span className="text-xs font-normal text-slate-400">
-                  / {member.hoursLimit} س
-                </span>
-              </div>
-              <div className="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
-                <div
-                  className={`h-full rounded-full transition-all ${
-                    member.status === "extra_hours"
-                      ? "bg-rose-600"
-                      : member.status === "near_limit"
-                      ? "bg-amber-500"
-                      : "bg-emerald-600"
-                  }`}
-                  style={{ width: `${percentage}%` }}
-                />
-              </div>
-            </div>
 
-            {/* 2. Remaining Hours */}
-            <div className="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-2xs space-y-2">
-              <div className="flex items-center justify-between text-xs font-semibold text-slate-400">
-                <span>{isRTL ? "الرصيد المتبقي" : "Remaining Quota"}</span>
-                <ShieldCheck className="w-4 h-4 text-emerald-600" />
+              <div className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-slate-50 text-slate-700 border border-slate-200/70 font-mono text-[11px]" dir="ltr">
+                <Phone className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                <span>{reg?.phone ? `0${reg.phone.replace(/^0+/, '')}` : member.phone}</span>
+                <span className="text-[9px] text-emerald-700 bg-emerald-100/70 px-1 rounded font-bold">SMS</span>
               </div>
-              <div className="text-2xl font-black text-[#0c2340]">
-                {member.remainingHours}{" "}
-                <span className="text-xs font-normal text-slate-400">
-                  {isRTL ? "ساعة" : "hours"}
-                </span>
-              </div>
-              <div className="text-[11px] text-slate-400 font-medium">
-                {isRTL ? "يُجدّد في 1 من كل شهر" : "Resets 1st of month"}
-              </div>
-            </div>
 
-            {/* 3. Due Fees */}
-            <div className="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-2xs space-y-2">
-              <div className="flex items-center justify-between text-xs font-semibold text-slate-400">
-                <span>{isRTL ? "المستحقات المالية" : "Due Fees"}</span>
-                <CreditCard className="w-4 h-4 text-rose-500" />
+              <div className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-slate-50 text-slate-600 border border-slate-200/70 text-[11px]">
+                <Mail className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                <span className="truncate max-w-[200px]">{member.email}</span>
               </div>
-              <div className="text-2xl font-black text-[#0c2340] flex items-center gap-1">
-                <span>{member.dueAmount}</span>
-                <span className="text-base text-slate-500 font-bold">₪</span>
-              </div>
-              {member.dueAmount > 0 && !dueSettled ? (
-                <button
-                  type="button"
-                  onClick={handleSettleDues}
-                  className="text-[11px] font-bold text-rose-600 hover:text-rose-800 underline cursor-pointer"
-                >
-                  {isRTL ? "تسوية المبلغ الآن" : "Settle Dues"}
-                </button>
-              ) : (
-                <div className="text-[11px] text-emerald-600 font-semibold flex items-center gap-1">
-                  <CheckCircle2 className="w-3.5 h-3.5" />
-                  <span>{isRTL ? "لا توجد مستحقات" : "No pending dues"}</span>
+
+              {reg?.governorate && (
+                <div className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-slate-50 text-slate-600 border border-slate-200/70 text-[11px]">
+                  <MapPin className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                  <span>{reg.governorate}</span>
                 </div>
               )}
-            </div>
 
-            {/* 4. Last Booking / Status */}
-            <div className="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-2xs space-y-2">
-              <div className="flex items-center justify-between text-xs font-semibold text-slate-400">
-                <span>{isRTL ? "آخر حجز" : "Last Booking"}</span>
-                <Calendar className="w-4 h-4 text-emerald-600" />
-              </div>
-              <div className="text-xl font-black text-[#0c2340]">
-                {member.lastBooking}
-              </div>
-              <div className="text-[11px] text-slate-400 font-medium truncate">
-                {member.bookingNote || (isRTL ? "لا يوجد حجز مسجل" : "No booking")}
+              <div className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-slate-50 text-slate-500 border border-slate-200/70 text-[11px]">
+                <Calendar className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                <span>{isRTL ? `تاريخ الانضمام: ${member.joinedDate}` : `Joined: ${member.joinedDate}`}</span>
               </div>
             </div>
-
           </div>
 
-          {/* ─── Segmented Tabs Switcher (Brand Palette) ─── */}
-          <div className="border-b border-slate-200">
-            <div className="flex items-center gap-2 overflow-x-auto pb-1" role="tablist">
+          {/* ─── Harmonious Monthly Quota & Balance Card ─── */}
+          <div className="p-5 sm:p-6 rounded-3xl bg-gradient-to-br from-emerald-50/70 via-white to-slate-50 border border-emerald-100/90 shadow-2xs space-y-3.5">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div className="flex items-center gap-2.5">
+                <div className="w-9 h-9 rounded-xl bg-emerald-100 text-emerald-800 flex items-center justify-center shrink-0 border border-emerald-200/80 shadow-2xs">
+                  <Clock className="w-4 h-4 text-emerald-700" />
+                </div>
+                <div>
+                  <h3 className="text-sm sm:text-base font-black text-[#0c2340]">
+                    {isRTL
+                      ? `استخدم ${member.hoursUsed} من ${member.hoursLimit} ساعة هذا الشهر`
+                      : `Used ${member.hoursUsed} of ${member.hoursLimit} hours this month`}
+                  </h3>
+                  <p className="text-xs text-slate-500 font-medium mt-0.5">
+                    {isRTL
+                      ? `نسبة الاستهلاك ${percentage}% • أقصى حجز مسموح به 8 ساعات يومياً`
+                      : `Usage ${percentage}% • Daily limit: 8 hours`}
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2 self-start sm:self-auto">
+                <span className="text-xs sm:text-sm font-bold text-emerald-800 bg-white px-3.5 py-1.5 rounded-full border border-emerald-200/90 shadow-2xs">
+                  {isRTL
+                    ? `الرصيد المتبقي: ${member.remainingHours} ${member.remainingHours >= 3 && member.remainingHours <= 10 ? "ساعات" : "ساعة"}`
+                    : `Remaining: ${member.remainingHours} hours`}
+                </span>
+              </div>
+            </div>
+
+            {/* Quota Progress Bar */}
+            <div className="w-full bg-emerald-100/70 h-2.5 rounded-full overflow-hidden">
+              <div
+                className={`h-full rounded-full transition-all duration-500 ${
+                  member.status === "extra_hours"
+                    ? "bg-rose-500"
+                    : member.status === "near_limit"
+                    ? "bg-amber-500"
+                    : "bg-gradient-to-r from-emerald-500 via-teal-500 to-emerald-600"
+                }`}
+                style={{ width: `${percentage}%` }}
+              />
+            </div>
+
+            {/* Bottom 3-Metric Aligned Row */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 pt-2 border-t border-emerald-100/80 text-xs">
+              {/* Due Fees */}
+              <div className="flex items-center justify-between sm:justify-start gap-2 bg-white/80 px-3.5 py-2.5 rounded-xl border border-emerald-100">
+                <div className="flex items-center gap-1.5 text-slate-500 font-semibold">
+                  <CreditCard className="w-3.5 h-3.5 text-slate-400" />
+                  <span>{isRTL ? "المستحقات المالية:" : "Due Fees:"}</span>
+                </div>
+                {member.dueAmount > 0 && !dueSettled ? (
+                  <div className="flex items-center gap-1.5 font-bold text-rose-600">
+                    <span>{member.dueAmount} ₪</span>
+                    <button
+                      type="button"
+                      onClick={handleSettleDues}
+                      className="text-[11px] bg-rose-50 hover:bg-rose-100 text-rose-700 px-2 py-0.5 rounded border border-rose-200 transition-colors cursor-pointer"
+                    >
+                      {isRTL ? "تسوية الآن" : "Settle"}
+                    </button>
+                  </div>
+                ) : (
+                  <span className="font-bold text-emerald-700 flex items-center gap-1">
+                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                    <span>{isRTL ? "0 ₪ (لا توجد مستحقات)" : "0 NIS"}</span>
+                  </span>
+                )}
+              </div>
+
+              {/* Last Booking */}
+              <div className="flex items-center justify-between sm:justify-start gap-2 bg-white/80 px-3.5 py-2.5 rounded-xl border border-emerald-100">
+                <div className="flex items-center gap-1.5 text-slate-500 font-semibold">
+                  <Calendar className="w-3.5 h-3.5 text-slate-400" />
+                  <span>{isRTL ? "آخر حجز مسجل:" : "Last Booking:"}</span>
+                </div>
+                <span className="font-bold text-slate-800">{member.lastBooking}</span>
+              </div>
+
+              {/* Renewal Cycle */}
+              <div className="flex items-center justify-between sm:justify-start gap-2 bg-white/80 px-3.5 py-2.5 rounded-xl border border-emerald-100">
+                <div className="flex items-center gap-1.5 text-slate-500 font-semibold">
+                  <ShieldCheck className="w-3.5 h-3.5 text-slate-400" />
+                  <span>{isRTL ? "دورة التجديد:" : "Renewal:"}</span>
+                </div>
+                <span className="font-bold text-slate-800">{isRTL ? "تلقائياً في 1 من كل شهر" : "1st of every month"}</span>
+              </div>
+            </div>
+          </div>
+
+          {/* ─── Segmented Navigation Tabs Switcher (3 Tabs Only: Achievements, Bookings, Quota) ─── */}
+          <div className="p-1.5 bg-slate-100/90 rounded-2xl border border-slate-200/80">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-1.5" role="tablist">
               
-              {/* Tab 1: Bookings & Desk Logs */}
+              {/* Tab 1: Member Achievements */}
+              <button
+                type="button"
+                role="tab"
+                aria-selected={activeTab === "achievements"}
+                onClick={() => setActiveTab("achievements")}
+                className={`flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl font-bold text-xs sm:text-sm transition-all cursor-pointer ${
+                  activeTab === "achievements"
+                    ? "bg-[#0c2340] text-white shadow-xs ring-1 ring-[#0c2340]"
+                    : "text-slate-600 hover:text-[#0c2340] hover:bg-white/80"
+                }`}
+              >
+                <Trophy className={`w-4 h-4 ${activeTab === "achievements" ? "text-amber-400" : "text-amber-500"}`} />
+                <span>
+                  {isRTL
+                    ? `إنجازات ومشاريع العضو (${member.achievements?.length || 0})`
+                    : `Achievements (${member.achievements?.length || 0})`}
+                </span>
+              </button>
+
+              {/* Tab 2: Bookings & Visits */}
               <button
                 type="button"
                 role="tab"
                 aria-selected={activeTab === "bookings"}
                 onClick={() => setActiveTab("bookings")}
-                className={`flex items-center gap-2 px-5 py-3 rounded-xl font-bold text-xs sm:text-sm transition-all cursor-pointer whitespace-nowrap ${
+                className={`flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl font-bold text-xs sm:text-sm transition-all cursor-pointer ${
                   activeTab === "bookings"
-                    ? "bg-[#0c2340] text-white shadow-sm"
-                    : "bg-white text-slate-600 hover:text-[#0c2340] border border-slate-200 hover:bg-slate-50"
+                    ? "bg-[#0c2340] text-white shadow-xs ring-1 ring-[#0c2340]"
+                    : "text-slate-600 hover:text-[#0c2340] hover:bg-white/80"
                 }`}
               >
                 <Calendar className={`w-4 h-4 ${activeTab === "bookings" ? "text-emerald-400" : "text-slate-500"}`} />
-                <span>{isRTL ? `سجل الحجوزات والزيارات (${member.history.length})` : `Bookings History (${member.history.length})`}</span>
+                <span>
+                  {isRTL
+                    ? `سجل الحجوزات والزيارات (${member.history.length})`
+                    : `Bookings (${member.history.length})`}
+                </span>
               </button>
 
-              {/* Tab 2: Dues & Hours Policy */}
+              {/* Tab 3: Quota & Policy */}
               <button
                 type="button"
                 role="tab"
                 aria-selected={activeTab === "dues"}
                 onClick={() => setActiveTab("dues")}
-                className={`flex items-center gap-2 px-5 py-3 rounded-xl font-bold text-xs sm:text-sm transition-all cursor-pointer whitespace-nowrap ${
+                className={`flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl font-bold text-xs sm:text-sm transition-all cursor-pointer ${
                   activeTab === "dues"
-                    ? "bg-[#0c2340] text-white shadow-sm"
-                    : "bg-white text-slate-600 hover:text-[#0c2340] border border-slate-200 hover:bg-slate-50"
+                    ? "bg-[#0c2340] text-white shadow-xs ring-1 ring-[#0c2340]"
+                    : "text-slate-600 hover:text-[#0c2340] hover:bg-white/80"
                 }`}
               >
                 <CreditCard className={`w-4 h-4 ${activeTab === "dues" ? "text-emerald-400" : "text-slate-500"}`} />
                 <span>{isRTL ? "الرصيد والحصص التشغيلية" : "Quota & Policy"}</span>
               </button>
 
-              {/* Tab 3: Official Registration Application Profile */}
-              <button
-                type="button"
-                role="tab"
-                aria-selected={activeTab === "registration"}
-                onClick={() => setActiveTab("registration")}
-                className={`flex items-center gap-2 px-5 py-3 rounded-xl font-bold text-xs sm:text-sm transition-all cursor-pointer whitespace-nowrap ${
-                  activeTab === "registration"
-                    ? "bg-[#0c2340] text-white shadow-sm"
-                    : "bg-white text-slate-600 hover:text-[#0c2340] border border-slate-200 hover:bg-slate-50"
-                }`}
-              >
-                <FileCheck className={`w-4 h-4 ${activeTab === "registration" ? "text-emerald-400" : "text-emerald-600"}`} />
-                <span>{isRTL ? "بيانات استمارة التسجيل المعتمدة (21 حقلاً)" : "Verified Registration File"}</span>
-              </button>
-
             </div>
           </div>
 
           {/* ═════════════════════════════════════════════════════════════
-              TAB 1: OFFICIAL REGISTRATION APPLICATION PROFILE (21 Fields)
+              TAB 1: MEMBER ACHIEVEMENTS (Private & Verified)
              ═════════════════════════════════════════════════════════════ */}
-          {activeTab === "registration" && (
+          {activeTab === "achievements" && (
             <div className="space-y-6 animate-in fade-in duration-200">
               
-              {/* Application Top Summary Banner in Brand Navy / Emerald */}
-              <div className="bg-gradient-to-r from-emerald-50 via-white to-slate-50 rounded-2xl border border-emerald-200/80 p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+              {/* Header Banner */}
+              <div className="bg-gradient-to-r from-amber-500/10 via-emerald-500/5 to-transparent rounded-3xl border border-amber-200/70 p-5 sm:p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-2xs">
                 <div className="flex items-center gap-3">
-                  <div className="w-11 h-11 rounded-xl bg-emerald-100 text-emerald-800 flex items-center justify-center shrink-0 border border-emerald-200">
-                    <Sparkles className="w-5 h-5 text-emerald-700" />
+                  <div className="w-12 h-12 rounded-2xl bg-amber-100 text-amber-800 flex items-center justify-center shrink-0 border border-amber-200 shadow-2xs">
+                    <Trophy className="w-6 h-6 text-amber-600" />
                   </div>
                   <div>
-                    <h3 className="text-sm sm:text-base font-bold text-[#0c2340]">
-                      {isRTL ? "ملف التسجيل المعتمد لدى إدارة اديو هب غزة" : "Verified Gaza Edu Hub Membership Record"}
+                    <h3 className="text-base sm:text-lg font-black text-[#0c2340]">
+                      {isRTL ? "معرض إنجازات ومشاريع العضو المعتمدة" : "Verified Member Projects & Portfolio"}
                     </h3>
-                    <p className="text-xs text-slate-500">
-                      {isRTL
-                        ? `تم تقديم الطلب بتاريخ ${reg?.applicationDate || member.joinedDate} • وتم التدقيق والاعتماد بواسطة ${reg?.reviewedBy || "إدارة الحجز"}`
-                        : `Application date: ${reg?.applicationDate || member.joinedDate} • Audited by EduHub Board`}
+                    <p className="text-xs text-slate-500 flex items-center gap-1.5 mt-0.5">
+                      <Lock className="w-3.5 h-3.5 text-slate-400" />
+                      <span>{isRTL ? "سجل خاص: مرئي للعضو ولإدارة الحاضنة فقط لتوثيق الأثر والنجاحات المهنية." : "Private portfolio: visible only to this member and workspace administration."}</span>
                     </p>
                   </div>
                 </div>
 
-                <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-100/70 text-emerald-900 text-xs font-bold border border-emerald-300 shrink-0">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-700" />
-                  <span>{isRTL ? "مستندات متطابقة ومعتمدة" : "Verified & Approved"}</span>
+                <div className="flex items-center gap-2.5 self-stretch sm:self-auto">
+                  <span className="text-xs font-bold text-slate-600 bg-white px-3.5 py-2 rounded-xl border border-slate-200 shadow-2xs">
+                    {isRTL ? `إجمالي المشاريع: ${member.achievements?.length || 0}` : `Total: ${member.achievements?.length || 0}`}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => setAchievementModalOpen(true)}
+                    className="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition-all shadow-xs active:scale-95 cursor-pointer"
+                  >
+                    <Plus className="w-4 h-4" />
+                    <span>{isRTL ? "توثيق مشروع جديد" : "Add Project"}</span>
+                  </button>
                 </div>
               </div>
 
-              {/* 4 Balanced Cards in 2 Columns */}
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
-
-                {/* ─── 1. Personal & Contact Details ─── */}
-                <div className="bg-white rounded-2xl border border-slate-200/90 p-5 sm:p-6 shadow-2xs space-y-4">
-                  <div className="flex items-center gap-2.5 pb-3 border-b border-slate-100 text-emerald-800 font-bold text-sm">
-                    <div className="w-7 h-7 rounded-lg bg-emerald-50 text-emerald-700 flex items-center justify-center">
-                      <User className="w-4 h-4" />
-                    </div>
-                    <span>{isRTL ? "1. البيانات الشخصية ومكان التواجد" : "1. Personal & Location Details"}</span>
-                  </div>
-
-                  <div className="space-y-3.5 text-xs sm:text-sm">
-                    <div>
-                      <span className="block text-slate-400 text-xs font-semibold">{isRTL ? "الاسم رباعي" : "Full Name"}</span>
-                      <span className="font-bold text-[#0c2340] text-sm">{reg?.fullName || member.name}</span>
-                    </div>
-
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                      <div>
-                        <span className="block text-slate-400 text-xs font-semibold">{isRTL ? "رقم الهوية الشخصية" : "National ID"}</span>
-                        <span className="font-bold text-[#0c2340] font-mono tracking-wider">{reg?.nationalId || member.nationalId || "401982736"}</span>
-                      </div>
-                      <div>
-                        <span className="block text-slate-400 text-xs font-semibold">{isRTL ? "تاريخ الميلاد والعمر" : "Birth Date"}</span>
-                        <span className="font-bold text-slate-800">{reg?.birthDate || "14 مارس 2001 (25 عاماً)"}</span>
-                      </div>
-                    </div>
-
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                      <div>
-                        <span className="block text-slate-400 text-xs font-semibold">{isRTL ? "رقم الجوال (رسائل SMS)" : "Mobile (SMS Active)"}</span>
-                        <span className="font-bold text-[#0c2340] font-mono" dir="ltr">{reg?.phone || member.phone}</span>
-                      </div>
-                      <div>
-                        <span className="block text-slate-400 text-xs font-semibold">{isRTL ? "محافظة السكن الحالي" : "Governorate"}</span>
-                        <span className="font-bold text-slate-800">{reg?.governorate || "مدينة غزة"}</span>
-                      </div>
-                    </div>
-
-                    <div>
-                      <span className="block text-slate-400 text-xs font-semibold">{isRTL ? "عنوان البريد الإلكتروني" : "Email Address"}</span>
-                      <span className="font-bold text-slate-800">{member.email}</span>
-                    </div>
-
-                    <div>
-                      <span className="block text-slate-400 text-xs font-semibold">{isRTL ? "عنوان التواجد حالياً بالتفصيل" : "Detailed Current Residence / Shelter"}</span>
-                      <span className="font-medium text-slate-800 bg-slate-50 p-3 rounded-xl border border-slate-200/80 block mt-1 leading-relaxed">
-                        {reg?.detailedAddress || "حي الرمال الجنوبي - شارع الشهداء - بجوار مدرسة اليرموك"}
-                      </span>
-                    </div>
-                  </div>
+              {/* Feedback Alert */}
+              {achievementFeedback && (
+                <div
+                  className={`p-4 rounded-2xl text-xs sm:text-sm font-bold flex items-center gap-2.5 shadow-2xs ${
+                    achievementFeedback.type === "success"
+                      ? "bg-emerald-50 text-emerald-800 border border-emerald-200"
+                      : "bg-rose-50 text-rose-800 border border-rose-200"
+                  }`}
+                >
+                  {achievementFeedback.type === "success" ? (
+                    <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                  ) : (
+                    <AlertCircle className="w-4 h-4 text-rose-600 shrink-0" />
+                  )}
+                  <span>{achievementFeedback.message}</span>
                 </div>
+              )}
 
-                {/* ─── 2. Academic & Work Pathway ─── */}
-                <div className="bg-white rounded-2xl border border-slate-200/90 p-5 sm:p-6 shadow-2xs space-y-4">
-                  <div className="flex items-center gap-2.5 pb-3 border-b border-slate-100 text-emerald-800 font-bold text-sm">
-                    <div className="w-7 h-7 rounded-lg bg-emerald-50 text-emerald-700 flex items-center justify-center">
-                      <GraduationCap className="w-4 h-4" />
-                    </div>
-                    <span>{isRTL ? "2. المسار الأكاديمي والمهني والمستندات" : "2. Academic & Professional Track"}</span>
-                  </div>
-
-                  <div className="space-y-3.5 text-xs sm:text-sm">
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                      <div>
-                        <span className="block text-slate-400 text-xs font-semibold">{isRTL ? "تصنيف الفئة" : "Category"}</span>
-                        <span className="font-bold text-emerald-800">{reg?.category || (member.type === "freelancer" ? "فريلانسر Freelancer" : "طالب/ة")}</span>
-                      </div>
-                      <div>
-                        <span className="block text-slate-400 text-xs font-semibold">{isRTL ? "اسم الجامعة" : "University"}</span>
-                        <span className="font-bold text-slate-800">{reg?.university || "الجامعة الإسلامية بغزة"}</span>
-                      </div>
-                    </div>
-
-                    <div>
-                      <span className="block text-slate-400 text-xs font-semibold">{isRTL ? "التخصص الجامعي أو مجال العمل" : "Specialty / Work Field"}</span>
-                      <span className="font-bold text-[#0c2340]">{reg?.specialty || member.specialty}</span>
-                    </div>
-
-                    {/* Primary Purposes */}
-                    <div>
-                      <span className="block text-slate-400 text-xs font-semibold mb-1.5">
-                        {isRTL ? "الأغراض الأساسية من استخدام مساحة اديو هب" : "Primary Hub Purposes"}
-                      </span>
-                      <div className="flex flex-wrap gap-1.5">
-                        {(reg?.primaryPurposes || [
-                          "العمل الحر وتنفيذ مشاريع للعملاء",
-                          "حضور اجتماعات العمل عن بُعد",
-                        ]).map((pur, idx) => (
-                          <span
-                            key={idx}
-                            className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-bold bg-emerald-50 text-emerald-900 border border-emerald-200/80"
-                          >
-                            <span>•</span>
-                            <span>{pur}</span>
-                          </span>
-                        ))}
-                      </div>
-                    </div>
-
-                    {/* Duration / Semester Schedule */}
-                    <div>
-                      <span className="block text-slate-400 text-xs font-semibold">
-                        {isRTL ? "مدة الفصل الدراسي أو مدة المشروع" : "Semester Schedule / Project Duration"}
-                      </span>
-                      <span className="font-medium text-slate-800 bg-slate-50 p-3 rounded-xl border border-slate-200/80 block mt-1">
-                        {reg?.durationSchedule || "عقد مشروع منصة تجارة إلكترونية - مستمر 4 أشهر حتى نهاية نوفمبر 2026"}
-                      </span>
-                    </div>
-
-                    {/* Attached Proof Document Card */}
-                    <div>
-                      <span className="block text-slate-400 text-xs font-semibold mb-1">
-                        {isRTL ? "الإفادة الجامعية أو نموذج المشاريع المرفق" : "Attached Academic / Project Proof"}
-                      </span>
-                      <div className="flex items-center justify-between p-3 rounded-xl border border-emerald-200 bg-emerald-50/60">
-                        <div className="flex items-center gap-2.5">
-                          <FileText className="w-5 h-5 text-emerald-700 shrink-0" />
-                          <div>
-                            <div className="font-bold text-xs text-[#0c2340] truncate max-w-xs">
-                              {reg?.proofFileName || "إفادة_تسجيل_جامعية_معتمدة.pdf"}
-                            </div>
-                            <div className="text-[11px] text-slate-500">
-                              {reg?.proofFileSize || "2.4 MB"} • {isRTL ? "ملف سليم وموثق" : "Verified PDF"}
-                            </div>
-                          </div>
-                        </div>
-                        <span className="px-2.5 py-1 rounded-md text-[11px] font-bold bg-white text-emerald-800 border border-emerald-200 shadow-2xs">
-                          {isRTL ? "معتمد" : "Approved"}
-                        </span>
-                      </div>
-                    </div>
-
-                  </div>
+              {/* Filter Chips */}
+              {(member.achievements || []).length > 0 && (
+                <div className="flex items-center gap-2 overflow-x-auto pb-1 text-xs">
+                  <span className="text-slate-400 font-bold px-1 flex items-center gap-1.5 shrink-0">
+                    <Filter className="w-3.5 h-3.5" />
+                    <span>{isRTL ? "تصفية المشاريع:" : "Filter:"}</span>
+                  </span>
+                  {[
+                    { id: "all", label: isRTL ? "جميع المشاريع" : "All Projects" },
+                    { id: "project", label: isRTL ? "مشاريع برمجية" : "Software Projects" },
+                    { id: "freelance_job", label: isRTL ? "عقود عمل حر" : "Freelance" },
+                    { id: "certificate", label: isRTL ? "شهادات مهنية" : "Certificates" },
+                    { id: "employment", label: isRTL ? "توظيف" : "Employment" },
+                    { id: "competition", label: isRTL ? "جوائز ومسابقات" : "Awards" },
+                  ].map((f) => (
+                    <button
+                      key={f.id}
+                      type="button"
+                      onClick={() => setAchievementFilter(f.id)}
+                      className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
+                        achievementFilter === f.id
+                          ? "bg-[#0c2340] text-white shadow-xs ring-1 ring-[#0c2340]"
+                          : "bg-white text-slate-600 border border-slate-200 hover:bg-slate-50"
+                      }`}
+                    >
+                      {f.label}
+                    </button>
+                  ))}
                 </div>
+              )}
 
-                {/* ─── 3. Hardware, Charger & Power Requirements ─── */}
-                <div className="bg-white rounded-2xl border border-slate-200/90 p-5 sm:p-6 shadow-2xs space-y-4">
-                  <div className="flex items-center gap-2.5 pb-3 border-b border-slate-100 text-emerald-800 font-bold text-sm">
-                    <div className="w-7 h-7 rounded-lg bg-emerald-50 text-emerald-700 flex items-center justify-center">
-                      <Zap className="w-4 h-4" />
-                    </div>
-                    <span>{isRTL ? "3. مواصفات الجهاز، الشاحن وفحص الطاقة" : "3. Device, Charger & Power Audit"}</span>
-                  </div>
-
-                  <div className="space-y-3.5 text-xs sm:text-sm">
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                      <div>
-                        <span className="block text-slate-400 text-xs font-semibold">{isRTL ? "نوع الجهاز المستخدم" : "Device Type"}</span>
-                        <div className="font-bold text-[#0c2340] flex items-center gap-1.5 mt-0.5">
-                          <Laptop className="w-4 h-4 text-emerald-600" />
-                          <span>{reg?.deviceType || "لابتوب مخصص للتصميم أو الألعاب"}</span>
-                        </div>
-                      </div>
-                      <div>
-                        <span className="block text-slate-400 text-xs font-semibold">{isRTL ? "قدرة الشاحن الكهربائية" : "Charger Wattage"}</span>
-                        <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-amber-50 text-amber-900 border border-amber-200 font-bold text-xs mt-0.5">
-                          <Zap className="w-3.5 h-3.5 text-amber-600" />
-                          <span>{reg?.chargerWattage || "66–90 واط"}</span>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Charger Photo Preview Card */}
-                    <div>
-                      <span className="block text-slate-400 text-xs font-semibold mb-1">
-                        {isRTL ? "صورة شاحن الجهاز المرفقة" : "Attached Charger Photo"}
-                      </span>
-                      <div className="flex items-center justify-between p-3 rounded-xl border border-slate-200 bg-slate-50">
-                        <div className="flex items-center gap-2.5">
-                          <Camera className="w-5 h-5 text-emerald-700 shrink-0" />
-                          <div>
-                            <div className="font-bold text-xs text-[#0c2340] truncate">
-                              {reg?.chargerPhotoName || "charger_dell_65w_verified.jpg"}
-                            </div>
-                            <div className="text-[11px] text-emerald-700 font-semibold">
-                              {isRTL ? "تم الفحص الفني: متوافق مع منظومة الطاقة الشمسية" : "Solar System Compatible"}
-                            </div>
-                          </div>
-                        </div>
-                        <span className="px-2 py-0.5 rounded text-[11px] font-bold bg-emerald-100 text-emerald-800">
-                          {isRTL ? "تم الفحص" : "Verified"}
-                        </span>
-                      </div>
-                    </div>
-
-                    {/* External Connectivity Status */}
-                    <div>
-                      <span className="block text-slate-400 text-xs font-semibold">
-                        {isRTL ? "مدى توفر الإنترنت والكهرباء خارج المساحة" : "Outside Connectivity Status"}
-                      </span>
-                      <div className="bg-rose-50/70 border border-rose-200/80 p-2.5 rounded-xl text-rose-900 font-bold text-xs mt-1 flex items-center gap-2">
-                        <AlertCircle className="w-4 h-4 text-rose-600 shrink-0" />
-                        <span>{reg?.powerConnectivityStatus || "لا يتوفر لدي إنترنت أو كهرباء مناسبين للدراسة أو العمل"}</span>
-                      </div>
-                    </div>
-
-                    {/* Shift & Usage */}
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
-                      <div>
-                        <span className="block text-slate-400 text-xs font-semibold">{isRTL ? "الفترة المفضلة للحضور" : "Preferred Shift"}</span>
-                        <span className="font-bold text-slate-800 bg-slate-100 px-2.5 py-1 rounded-lg inline-block mt-0.5">
-                          {reg?.preferredShift || "الفترة الصباحية"}
-                        </span>
-                      </div>
-                      <div>
-                        <span className="block text-slate-400 text-xs font-semibold">{isRTL ? "الاستخدام الأسبوعي المتوقع" : "Expected Weekly Usage"}</span>
-                        <span className="font-bold text-slate-800 bg-slate-100 px-2.5 py-1 rounded-lg inline-block mt-0.5">
-                          {reg?.weeklyUsage || "يوميا"}
-                        </span>
-                      </div>
-                    </div>
-
-                  </div>
-                </div>
-
-                {/* ─── 4. Consents, Declarations & Administrative Audit ─── */}
-                <div className="bg-white rounded-2xl border border-slate-200/90 p-5 sm:p-6 shadow-2xs space-y-4">
-                  <div className="flex items-center gap-2.5 pb-3 border-b border-slate-100 text-emerald-800 font-bold text-sm">
-                    <div className="w-7 h-7 rounded-lg bg-emerald-50 text-emerald-700 flex items-center justify-center">
-                      <ShieldCheck className="w-4 h-4" />
-                    </div>
-                    <span>{isRTL ? "4. الموافقات، الإقرار القانوني والتدقيق" : "4. Consents & Legal Declaration"}</span>
-                  </div>
-
-                  <div className="space-y-4 text-xs sm:text-sm">
-                    
-                    {/* Photography Consent */}
-                    <div className="p-3.5 rounded-xl border border-slate-200 bg-slate-50/60 space-y-1.5">
-                      <div className="flex items-center justify-between">
-                        <span className="font-bold text-[#0c2340] text-xs flex items-center gap-1.5">
-                          <Camera className="w-3.5 h-3.5 text-slate-500" />
-                          <span>{isRTL ? "موافقة التصوير واستخدام الصور" : "Photography Consent"}</span>
-                        </span>
-                        <span className="px-2 py-0.5 rounded text-[11px] font-black bg-emerald-100 text-emerald-800">
-                          {reg?.photographyConsent || "أوافق"}
-                        </span>
-                      </div>
-                      <p className="text-[11px] text-slate-500 leading-relaxed">
-                        {isRTL
-                          ? "أوافق على قيام منسقي المشروع بالتقاط صور أثناء تواجدي واستخدامها في المواد الإعلامية للمشروع."
-                          : "Agreed to coordinators capturing photos for project reporting and media."}
-                      </p>
-                    </div>
-
-                    {/* Data Accuracy Legal Declaration */}
-                    <div className="p-3.5 rounded-xl border border-slate-200 bg-slate-50/60 space-y-1.5">
-                      <div className="flex items-center justify-between">
-                        <span className="font-bold text-[#0c2340] text-xs flex items-center gap-1.5">
-                          <FileCheck className="w-3.5 h-3.5 text-emerald-600" />
-                          <span>{isRTL ? "الإقرار بصحة ودقة البيانات" : "Legal Data Accuracy"}</span>
-                        </span>
-                        <span className="px-2 py-0.5 rounded text-[11px] font-black bg-emerald-100 text-emerald-800">
-                          {isRTL ? "مُقر وموافق" : "Declared & Accepted"}
-                        </span>
-                      </div>
-                      <p className="text-[11px] text-slate-500 leading-relaxed">
-                        {isRTL
-                          ? "أقرّ بأن جميع البيانات المقدمة صحيحة ودقيقة، وأتحمل مسؤولية صحتها مع حق إدارة المركز في التحقق منها."
-                          : "Declared that all information provided is accurate and subject to administrative verification."}
-                      </p>
-                    </div>
-
-                    {/* Administrative Review Log */}
-                    <div className="p-3.5 rounded-xl border border-emerald-200 bg-emerald-50/40 space-y-2">
-                      <div className="text-xs font-bold text-emerald-950 flex items-center gap-1.5">
-                        <ShieldCheck className="w-4 h-4 text-emerald-700" />
-                        <span>{isRTL ? "سجل التدقيق الإداري والاعتماد" : "Administrative Review Notes"}</span>
-                      </div>
-                      <p className="text-xs text-emerald-900 leading-relaxed font-medium">
-                        {reg?.reviewNotes || "تم تدقيق الهوية والشاحن وتوافق القدرة مع الألواح الشمسية، العضو مستقل نشط ومستحق للأولوية."}
-                      </p>
-                      <div className="text-[11px] text-slate-500 pt-1 flex items-center justify-between">
-                        <span>{isRTL ? `المراجع: ${reg?.reviewedBy || "لجنة التدقيق"}` : `Auditor: ${reg?.reviewedBy}`}</span>
-                        <span>{isRTL ? `تاريخ الاعتماد: ${member.joinedDate}` : `Approved: ${member.joinedDate}`}</span>
-                      </div>
-                    </div>
-
-                  </div>
-                </div>
-
+              {/* Professional Achievements Grid */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                {(member.achievements || [])
+                  .filter((item) => achievementFilter === "all" || item.category === achievementFilter)
+                  .map((item: MemberAchievementItem) => (
+                    <AchievementCard
+                      key={item.id}
+                      item={item}
+                      onOpenDetails={(ach) => setSelectedAchievement(ach)}
+                      onDelete={handleDeleteAchievement}
+                      isDeleting={deletingAchievementId === item.id}
+                      canDelete={true}
+                    />
+                  ))}
               </div>
+
+              {/* Empty State */}
+              {(member.achievements || []).length === 0 && (
+                <div className="bg-white rounded-3xl border-2 border-dashed border-slate-200 p-12 text-center space-y-4 shadow-2xs">
+                  <div className="w-16 h-16 rounded-3xl bg-amber-50 text-amber-600 flex items-center justify-center mx-auto border border-amber-100 shadow-2xs">
+                    <Trophy className="w-8 h-8" />
+                  </div>
+                  <div className="space-y-1">
+                    <h4 className="text-base sm:text-lg font-black text-[#0c2340]">
+                      {isRTL ? "لم يسجل العضو أي إنجازات أو مشاريع حتى الآن" : "No achievements recorded yet"}
+                    </h4>
+                    <p className="text-xs text-slate-500 max-w-md mx-auto leading-relaxed">
+                      {isRTL
+                        ? "يمكن للعضو توثيق مشاريعه البرمجية وصورها وعقود العمل والشهادات من حسابه الخاص، أو يمكنك كإدارة توثيقها هنا مع إمكانية رفع عدة صور واختيار صورة الغلاف."
+                        : "The member can document projects from their portal, or you can add them directly with multiple photos."}
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setAchievementModalOpen(true)}
+                    className="inline-flex items-center gap-2 px-5 py-2.5 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition-all shadow-xs active:scale-95 cursor-pointer"
+                  >
+                    <Plus className="w-4 h-4" />
+                    <span>{isRTL ? "توثيق أول مشروع للعضو" : "Add First Project"}</span>
+                  </button>
+                </div>
+              )}
+
+              {/* Lightbox / Details Modal */}
+              <AchievementDetailsModal
+                item={selectedAchievement}
+                isOpen={!!selectedAchievement}
+                onClose={() => setSelectedAchievement(null)}
+                onDelete={handleDeleteAchievement}
+                canDelete={true}
+              />
+
+              {/* Multi-Image Form Modal with Cover Picker */}
+              <AchievementFormModal
+                isOpen={achievementModalOpen}
+                onClose={() => setAchievementModalOpen(false)}
+                onSubmit={handleSaveAchievement}
+                targetName={member.name}
+                isSubmitting={achievementSubmitting}
+                feedback={achievementFeedback}
+              />
+
             </div>
           )}
 
@@ -985,6 +917,193 @@ export default function MemberProfileView({ memberId }: MemberProfileViewProps) 
                 </div>
               </div>
 
+            </div>
+          )}
+
+          {/* ═════════════════════════════════════════════════════════════
+              SMS LIVE DISPATCH MODAL (TweetSMS Gateway)
+             ═════════════════════════════════════════════════════════════ */}
+          {smsModalOpen && (
+            <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto animate-in fade-in duration-200">
+              <div
+                dir={dir}
+                className="bg-white rounded-3xl max-w-lg w-full p-6 shadow-2xl border border-slate-200 space-y-4 my-8 relative"
+              >
+                {/* Header */}
+                <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-2xl bg-emerald-50 text-emerald-700 flex items-center justify-center border border-emerald-100 shadow-2xs">
+                      <MessageSquare className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <h3 className="text-base font-black text-[#0c2340]">
+                        {isRTL ? "إرسال رسالة SMS للعضو" : "Send SMS to Member"}
+                      </h3>
+                      <p className="text-xs text-slate-500 font-medium">
+                        {isRTL
+                          ? `إلى: ${member.name} (${reg?.phone ? `0${reg.phone.replace(/^0+/, '')}` : member.phone})`
+                          : `To: ${member.name} (${member.phone})`}
+                      </p>
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (!smsSending) {
+                        setSmsModalOpen(false);
+                        setSmsFeedback(null);
+                      }
+                    }}
+                    className="w-8 h-8 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 flex items-center justify-center transition-colors cursor-pointer"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
+
+                {/* Feedback Toast */}
+                {smsFeedback && (
+                  <div
+                    className={`p-3.5 rounded-2xl text-xs font-bold flex items-center gap-2 ${
+                      smsFeedback.type === "success"
+                        ? "bg-emerald-50 text-emerald-800 border border-emerald-200"
+                        : "bg-rose-50 text-rose-800 border border-rose-200"
+                    }`}
+                  >
+                    {smsFeedback.type === "success" ? (
+                      <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                    ) : (
+                      <AlertCircle className="w-4 h-4 text-rose-600 shrink-0" />
+                    )}
+                    <span>{smsFeedback.text}</span>
+                  </div>
+                )}
+
+                <form onSubmit={handleSendSms} className="space-y-4">
+                  {/* Quick Preset Templates */}
+                  <div className="space-y-1.5">
+                    <span className="block text-xs font-bold text-slate-700">
+                      {isRTL ? "نماذج رسائل سريعة جاهزة للاستخدام:" : "Quick Templates:"}
+                    </span>
+                    <div className="flex flex-wrap gap-1.5">
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setSmsMessage(
+                            `مرحباً ${member.name}، نود تذكيرك بأن رصيدك من الساعات اقترب من الانتهاء، يمكنك تجديد الحصة عبر مراجعة الاستقبال.`
+                          )
+                        }
+                        className="text-[11px] font-bold px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-emerald-50 hover:text-emerald-800 hover:border-emerald-200 border border-slate-200 text-slate-700 transition-all cursor-pointer"
+                      >
+                        ⏱️ تذكير بتجديد الساعات
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setSmsMessage(
+                            `مرحباً ${member.name}، حجزك اليوم في مساحة العمل بإديو هب غزة مؤكد ونرحب بحضورك!`
+                          )
+                        }
+                        className="text-[11px] font-bold px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-emerald-50 hover:text-emerald-800 hover:border-emerald-200 border border-slate-200 text-slate-700 transition-all cursor-pointer"
+                      >
+                        📅 تأكيد حجز اليوم
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setSmsMessage(
+                            `مرحباً ${member.name}، يرجى التفضل بمراجعة إدارة مساحة إديو هب لتسوية المستحقات المالية المتبقية.`
+                          )
+                        }
+                        className="text-[11px] font-bold px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-emerald-50 hover:text-emerald-800 hover:border-emerald-200 border border-slate-200 text-slate-700 transition-all cursor-pointer"
+                      >
+                        💳 تسوية المستحقات
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setSmsMessage(
+                            `مرحباً ${member.name}، نتمنى لك يوماً موفقاً ومثمراً في مساحة العمل بإديو هب غزة.`
+                          )
+                        }
+                        className="text-[11px] font-bold px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-emerald-50 hover:text-emerald-800 hover:border-emerald-200 border border-slate-200 text-slate-700 transition-all cursor-pointer"
+                      >
+                        ✨ ترحيب عام
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Message Content Textarea */}
+                  <div className="space-y-1.5">
+                    <div className="flex items-center justify-between">
+                      <label className="block text-xs font-bold text-slate-700">
+                        {isRTL ? "نص الرسالة المرسلة:" : "Message Text:"}
+                      </label>
+                      <div className="text-[11px] font-mono text-slate-500 font-bold">
+                        <span>{smsMessage.length} حرف</span>
+                        <span className="text-slate-400 mx-1">•</span>
+                        <span className="text-emerald-700">
+                          {Math.max(1, Math.ceil(smsMessage.length / 70))} SMS
+                        </span>
+                      </div>
+                    </div>
+                    <textarea
+                      rows={4}
+                      required
+                      value={smsMessage}
+                      onChange={(e) => setSmsMessage(e.target.value)}
+                      placeholder={
+                        isRTL
+                          ? "اكتب نص الرسالة النصية القصيرة هنا..."
+                          : "Type the SMS message text here..."
+                      }
+                      className="w-full px-3.5 py-2.5 rounded-2xl border border-slate-200 text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 bg-slate-50/50 hover:bg-white resize-none transition-all leading-relaxed"
+                    />
+                  </div>
+
+                  {/* Gateway Notice */}
+                  <div className="p-3 rounded-xl bg-slate-50 border border-slate-200/70 text-[11px] text-slate-600 flex items-center justify-between">
+                    <div className="flex items-center gap-1.5">
+                      <ShieldCheck className="w-4 h-4 text-emerald-600 shrink-0" />
+                      <span>{isRTL ? "بوابة الإرسال: TweetSMS المعتمدة" : "Gateway: TweetSMS"}</span>
+                    </div>
+                    <span className="font-mono font-bold text-slate-700 bg-white px-2 py-0.5 rounded border border-slate-200">
+                      Sender: EDU HUB
+                    </span>
+                  </div>
+
+                  {/* Actions */}
+                  <div className="flex items-center justify-end gap-2.5 pt-2 border-t border-slate-100">
+                    <button
+                      type="button"
+                      disabled={smsSending}
+                      onClick={() => {
+                        setSmsModalOpen(false);
+                        setSmsFeedback(null);
+                      }}
+                      className="px-4 py-2.5 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-100 text-xs font-bold transition-all cursor-pointer"
+                    >
+                      {isRTL ? "إلغاء" : "Cancel"}
+                    </button>
+                    <button
+                      type="submit"
+                      disabled={smsSending || !smsMessage.trim()}
+                      className="px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white text-xs font-bold transition-all cursor-pointer shadow-xs active:scale-95 flex items-center gap-2"
+                    >
+                      {smsSending ? (
+                        <>
+                          <Loader2 className="w-4 h-4 animate-spin" />
+                          <span>{isRTL ? "جاري الإرسال الآن..." : "Sending..."}</span>
+                        </>
+                      ) : (
+                        <>
+                          <Send className="w-4 h-4" />
+                          <span>{isRTL ? "إرسال رسالة SMS الآن" : "Send SMS Now"}</span>
+                        </>
+                      )}
+                    </button>
+                  </div>
+                </form>
+              </div>
             </div>
           )}
 

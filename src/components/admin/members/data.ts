@@ -1,3 +1,5 @@
+import type { MemberAchievementItem } from "@/services/achievements";
+
 export type MemberType = "freelancer" | "student";
 
 export type MemberStatus =
@@ -65,6 +67,8 @@ export interface MemberRecord {
   status: MemberStatus;
   history: BookingHistoryItem[];
   registration?: MemberRegistrationDetails;
+  achievements?: MemberAchievementItem[];
+  achievementsCount?: number;
 }
 
 // All data is fetched live from the Laravel API
