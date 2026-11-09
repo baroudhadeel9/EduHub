@@ -6,11 +6,22 @@ export interface MemberBooking {
   startTime: string;
   endTime: string;
   durationHours: number;
-  status: "confirmed" | "cancelled";
+  status: "confirmed" | "cancelled" | "attended" | "inside" | "no_show" | string;
   notes?: string;
   canCancel: boolean;
   seatNumber?: number;
   seatLabel?: string;
   seatCode?: string;
   roomName?: string;
+  // Rich attendance details
+  dayName?: string;
+  bookingDateFormatted?: string;
+  attendanceStatus?: "attended" | "inside" | "no_show" | "cancelled" | "confirmed" | string;
+  statusBadge?: "attended" | "inside" | "no_show" | "cancelled" | "confirmed" | string;
+  statusLabel?: string;
+  attendanceSummary?: string;
+  checkInTime?: string;
+  checkOutTime?: string;
+  recordedHours?: number;
+  cancellationReason?: string;
 }

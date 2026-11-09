@@ -12,10 +12,18 @@ export type MemberStatus =
 export interface BookingHistoryItem {
   id: string;
   date: string;
+  day_name?: string;
+  date_formatted?: string;
   duration: string;
   desk: string;
+  room?: string;
   purpose: string;
-  status: "completed" | "active" | "cancelled";
+  status: "completed" | "active" | "cancelled" | "attended" | "inside" | "no_show" | "confirmed" | string;
+  status_label?: string;
+  attended_range?: string;
+  check_in_time?: string;
+  check_out_time?: string;
+  recorded_hours?: number;
 }
 
 export interface MemberRegistrationDetails {

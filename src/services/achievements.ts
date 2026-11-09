@@ -22,6 +22,8 @@ export interface MemberAchievementItem {
   images?: AchievementImageItem[];
   images_count?: number;
   skills_used?: string;
+  eduhub_impact_tags?: string | null;
+  eduhub_impact_note?: string | null;
   created_at?: string;
 }
 
@@ -32,6 +34,8 @@ export interface CreateAchievementPayload {
   date_achieved?: string;
   link_url?: string;
   skills_used?: string;
+  eduhub_impact_tags?: string;
+  eduhub_impact_note?: string;
   cover_index?: number;
   image?: File | null;
   images?: File[];
@@ -109,6 +113,8 @@ function buildAchievementBody(payload: CreateAchievementPayload): { body: BodyIn
     if (payload.date_achieved) formData.append("date_achieved", payload.date_achieved);
     if (payload.link_url) formData.append("link_url", payload.link_url);
     if (payload.skills_used) formData.append("skills_used", payload.skills_used);
+    if (payload.eduhub_impact_tags) formData.append("eduhub_impact_tags", payload.eduhub_impact_tags);
+    if (payload.eduhub_impact_note) formData.append("eduhub_impact_note", payload.eduhub_impact_note);
     formData.append("cover_index", String(payload.cover_index ?? 0));
 
     if (payload.images && payload.images.length > 0) {

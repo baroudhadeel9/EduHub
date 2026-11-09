@@ -75,6 +75,52 @@ const getFormattedRoomName = (nameAr: string, roomKey?: string) => {
   return "صالة الشباب";
 };
 
+const mapRawBookingToMemberBooking = (b: Record<string, unknown>): MemberBooking => {
+  const bId = String(b.id || b.booking_code || "");
+  const startRaw = String(b.startTime || b.start_time || "08:00");
+  const endRaw = String(b.endTime || b.end_time || "16:00");
+  const duration = Number(b.hours_count ?? b.durationHours ?? b.duration_hours ?? 8);
+  const rawDate = String(b.date || b.booking_date || "");
+  const cleanDate = rawDate.length >= 10 ? rawDate.substring(0, 10) : rawDate;
+
+  const seatNum = (b.seatNumber ?? b.seat_number ?? (b.seat as Record<string, unknown>)?.seat_number) as number | undefined;
+  const seatLbl = (b.seatLabel ?? b.seat_label ?? (b.seat as Record<string, unknown>)?.label) as string | undefined;
+  const seatCd = (b.seatCode ?? b.seat_code ?? (b.seat as Record<string, unknown>)?.code) as string | undefined;
+  const rmName = (b.roomName ?? b.room_name ?? (b.room as Record<string, unknown>)?.name_ar) as string | undefined;
+
+  const rawStatus = String(b.status || "confirmed");
+  const attStatus = String(
+    b.attendance_status ||
+    b.attendanceStatus ||
+    (rawStatus === "attended" ? "attended" : rawStatus === "inside" ? "inside" : rawStatus === "no_show" ? "no_show" : rawStatus === "cancelled" ? "cancelled" : "confirmed")
+  );
+
+  return {
+    id: bId,
+    date: cleanDate,
+    startTime: startRaw.substring(0, 5),
+    endTime: endRaw.substring(0, 5),
+    durationHours: duration,
+    status: attStatus,
+    notes: String(b.notes || ""),
+    canCancel: b.can_cancel !== undefined ? Boolean(b.can_cancel) : (rawStatus === "confirmed" && attStatus === "confirmed"),
+    seatNumber: seatNum ? Number(seatNum) : undefined,
+    seatLabel: seatLbl ? String(seatLbl) : undefined,
+    seatCode: seatCd ? String(seatCd) : undefined,
+    roomName: rmName ? String(rmName) : undefined,
+    dayName: (b.day_name || b.dayName) as string | undefined,
+    bookingDateFormatted: (b.booking_date_formatted || b.bookingDateFormatted) as string | undefined,
+    attendanceStatus: attStatus,
+    statusBadge: (b.status_badge || b.statusBadge || attStatus) as string,
+    statusLabel: (b.status_label || b.statusLabel) as string | undefined,
+    attendanceSummary: (b.attendance_summary || b.attendanceSummary) as string | undefined,
+    checkInTime: (b.check_in_time || b.checkInTime) as string | undefined,
+    checkOutTime: (b.check_out_time || b.checkOutTime) as string | undefined,
+    recordedHours: b.recorded_hours !== undefined ? Number(b.recorded_hours) : (b.recordedHours !== undefined ? Number(b.recordedHours) : undefined),
+    cancellationReason: (b.cancellation_reason || b.cancellationReason) as string | undefined,
+  };
+};
+
 export default function MemberBookingTab({ onApplyNewMember }: MemberBookingTabProps) {
   const router = useRouter();
   const { t, locale } = useLanguage();
@@ -147,63 +193,20 @@ export default function MemberBookingTab({ onApplyNewMember }: MemberBookingTabP
 
         if (session.member.bookings && session.member.bookings.length > 0) {
           setBookings(
-            session.member.bookings.map((b) => {
-              const bId = String(b.id || b.booking_code || "");
-              const startRaw = b.startTime || b.start_time || "08:00";
-              const endRaw = b.endTime || b.end_time || "16:00";
-              const duration = Number(b.durationHours ?? b.duration_hours ?? 8);
-              const seatNum = (b.seatNumber ?? b.seat_number ?? (b.seat as Record<string, unknown>)?.seat_number) as number | undefined;
-              const seatLbl = (b.seatLabel ?? b.seat_label ?? (b.seat as Record<string, unknown>)?.label) as string | undefined;
-              const seatCd = (b.seatCode ?? b.seat_code ?? (b.seat as Record<string, unknown>)?.code) as string | undefined;
-              const rmName = (b.roomName ?? b.room_name ?? (b.room as Record<string, unknown>)?.name_ar) as string | undefined;
-              return {
-                id: bId,
-                date: b.date,
-                startTime: startRaw.substring(0, 5),
-                endTime: endRaw.substring(0, 5),
-                durationHours: duration,
-                status: (b.status as "confirmed" | "cancelled") || "confirmed",
-                notes: b.notes || "",
-                canCancel: b.can_cancel !== undefined ? Boolean(b.can_cancel) : (b.status === "confirmed"),
-                seatNumber: seatNum ? Number(seatNum) : undefined,
-                seatLabel: seatLbl ? String(seatLbl) : undefined,
-                seatCode: seatCd ? String(seatCd) : undefined,
-                roomName: rmName ? String(rmName) : undefined,
-              };
-            })
+            session.member.bookings.map((b) =>
+              mapRawBookingToMemberBooking(b as unknown as Record<string, unknown>)
+            )
           );
         }
 
-        // Silently sync latest bookings from backend
+        // Silently sync latest bookings with full attendance from backend
         getMemberBookingsApi(session.token)
           .then((freshBookings) => {
             if (!isMounted || !Array.isArray(freshBookings) || freshBookings.length === 0) return;
             setBookings(
-              freshBookings.map((b: Record<string, unknown>) => {
-                const bId = String(b.id || b.booking_code || "");
-                const startRaw = String(b.startTime || b.start_time || "08:00");
-                const endRaw = String(b.endTime || b.end_time || "16:00");
-                const duration = Number(b.hours_count ?? b.durationHours ?? b.duration_hours ?? 8);
-                const bDate = String(b.date || b.booking_date || "");
-                const seatNum = (b.seat_number ?? (b.seat as Record<string, unknown>)?.seat_number) as number | undefined;
-                const seatLbl = (b.seat_label ?? (b.seat as Record<string, unknown>)?.label) as string | undefined;
-                const seatCd = (b.seat_code ?? (b.seat as Record<string, unknown>)?.code) as string | undefined;
-                const rmName = (b.room_name ?? (b.room as Record<string, unknown>)?.name_ar) as string | undefined;
-                return {
-                  id: bId,
-                  date: bDate.length >= 10 ? bDate.substring(0, 10) : bDate,
-                  startTime: startRaw.substring(0, 5),
-                  endTime: endRaw.substring(0, 5),
-                  durationHours: duration,
-                  status: (b.status as "confirmed" | "cancelled") || "confirmed",
-                  notes: String(b.notes || ""),
-                  canCancel: b.can_cancel !== undefined ? Boolean(b.can_cancel) : (b.status === "confirmed"),
-                  seatNumber: seatNum ? Number(seatNum) : undefined,
-                  seatLabel: seatLbl ? String(seatLbl) : undefined,
-                  seatCode: seatCd ? String(seatCd) : undefined,
-                  roomName: rmName ? String(rmName) : undefined,
-                };
-              })
+              freshBookings.map((b: Record<string, unknown>) =>
+                mapRawBookingToMemberBooking(b)
+              )
             );
           })
           .catch(() => {});
@@ -318,30 +321,9 @@ export default function MemberBookingTab({ onApplyNewMember }: MemberBookingTabP
 
       if (res.member.bookings && res.member.bookings.length > 0) {
         setBookings(
-          res.member.bookings.map((b) => {
-            const bId = String(b.id || b.booking_code || "");
-            const startRaw = b.startTime || b.start_time || "09:00";
-            const endRaw = b.endTime || b.end_time || "13:00";
-            const duration = Number(b.durationHours ?? b.duration_hours ?? 0);
-            const seatNum = (b.seatNumber ?? b.seat_number ?? (b.seat as Record<string, unknown>)?.seat_number) as number | undefined;
-            const seatLbl = (b.seatLabel ?? b.seat_label ?? (b.seat as Record<string, unknown>)?.label) as string | undefined;
-            const seatCd = (b.seatCode ?? b.seat_code ?? (b.seat as Record<string, unknown>)?.code) as string | undefined;
-            const rmName = (b.roomName ?? b.room_name ?? (b.room as Record<string, unknown>)?.name_ar) as string | undefined;
-            return {
-              id: bId,
-              date: b.date,
-              startTime: startRaw.substring(0, 5),
-              endTime: endRaw.substring(0, 5),
-              durationHours: duration,
-              status: (b.status as "confirmed" | "cancelled") || "confirmed",
-              notes: b.notes || "",
-              canCancel: b.can_cancel !== undefined ? Boolean(b.can_cancel) : (b.status === "confirmed"),
-              seatNumber: seatNum ? Number(seatNum) : undefined,
-              seatLabel: seatLbl ? String(seatLbl) : undefined,
-              seatCode: seatCd ? String(seatCd) : undefined,
-              roomName: rmName ? String(rmName) : undefined,
-            };
-          })
+          res.member.bookings.map((b) =>
+            mapRawBookingToMemberBooking(b as unknown as Record<string, unknown>)
+          )
         );
       } else {
         setBookings([]);
@@ -426,6 +408,10 @@ export default function MemberBookingTab({ onApplyNewMember }: MemberBookingTabP
           seatLabel: assignedSeatLabel,
           seatCode: assignedSeatCode,
           roomName: assignedRoomName,
+          attendanceStatus: "confirmed",
+          statusBadge: "confirmed",
+          statusLabel: isRTL ? "حجز مؤكد — بانتظار حضورك" : "Confirmed — Awaiting Visit",
+          attendanceSummary: isRTL ? "حجز مقعد مجدول وبانتظار تسجيل الوصول لدى الاستقبال" : "Scheduled desk reservation",
         };
 
         setBookings((prev) => [newBooking, ...prev]);
@@ -486,7 +472,19 @@ export default function MemberBookingTab({ onApplyNewMember }: MemberBookingTabP
         }
       }
       setBookings((prev) =>
-        prev.map((b) => (b.id === bookingId ? { ...b, status: "cancelled", canCancel: false } : b))
+        prev.map((b) =>
+          b.id === bookingId
+            ? {
+                ...b,
+                status: "cancelled",
+                attendanceStatus: "cancelled",
+                statusBadge: "cancelled",
+                statusLabel: isRTL ? "ملغي" : "Cancelled",
+                attendanceSummary: isRTL ? "تم إلغاء الحجز بواسطة العضو" : "Cancelled by member",
+                canCancel: false,
+              }
+            : b
+        )
       );
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : "";

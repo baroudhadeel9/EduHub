@@ -22,6 +22,32 @@ export function cleanBookingDate(dateStr?: string): string {
   return s.replace(/\.0+Z?$/i, "").replace(/Z$/i, "");
 }
 
+// Helper to format booking date with day name in Arabic (e.g., "الثلاثاء، 2026-11-03")
+export function formatBookingDayAndDate(dateStr?: string, isRTL: boolean = true): {
+  dayName: string;
+  cleanDate: string;
+  formattedWithDay: string;
+} {
+  const clean = cleanBookingDate(dateStr);
+  if (!clean) return { dayName: "", cleanDate: "", formattedWithDay: "" };
+
+  try {
+    const parts = clean.split("-");
+    const d = new Date(parseInt(parts[0], 10), parseInt(parts[1], 10) - 1, parseInt(parts[2], 10));
+    const dayOfWeek = d.getDay();
+    const arDayNames = ["الأحد", "الاثنين", "الثلاثاء", "الأربعاء", "الخميس", "الجمعة", "السبت"];
+    const enDayNames = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+    const dayName = isRTL ? arDayNames[dayOfWeek] : enDayNames[dayOfWeek];
+    return {
+      dayName: dayName || "",
+      cleanDate: clean,
+      formattedWithDay: dayName ? (isRTL ? `${dayName}، ${clean}` : `${dayName}, ${clean}`) : clean,
+    };
+  } catch {
+    return { dayName: "", cleanDate: clean, formattedWithDay: clean };
+  }
+}
+
 // Helper to format time into 12-hour format with Arabic AM/PM (e.g., "13:00" -> "1 م", "08:00" -> "8 ص")
 export function formatHour12(timeStr?: string): string {
   if (!timeStr) return "";
