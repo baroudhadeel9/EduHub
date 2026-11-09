@@ -17,6 +17,7 @@ import {
   UserPlus,
   LogOut,
   MessageSquareText,
+  LifeBuoy,
 } from "lucide-react";
 
 interface AdminSidebarProps {
@@ -131,6 +132,13 @@ export default function AdminSidebar({
       icon: MessageSquareText,
       badge: null,
       href: "/admin/sms",
+    },
+    {
+      id: "tickets",
+      label: isRTL ? "الدعم ومشاكل الطلاب" : "Support Tickets",
+      icon: LifeBuoy,
+      badge: null,
+      href: "/admin/tickets",
     },
   ];
 

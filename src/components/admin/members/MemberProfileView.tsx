@@ -18,6 +18,13 @@ import {
   MemberAchievementItem,
 } from "@/services/achievements";
 import {
+  getAdminMemberSupportTicketsApi,
+  updateAdminSupportTicketApi,
+  deleteAdminSupportTicketApi,
+  SupportTicketItem,
+  SupportTicketStatus,
+} from "@/services/supportTickets";
+import {
   AchievementCard,
   AchievementDetailsModal,
   AchievementFormView,
@@ -55,6 +62,13 @@ import {
   Upload,
   X,
   Sparkles,
+  LifeBuoy,
+  HelpCircle,
+  Wifi,
+  Armchair,
+  Building2,
+  Check,
+  RefreshCw,
 } from "lucide-react";
 
 interface MemberProfileViewProps {
@@ -118,10 +132,37 @@ export default function MemberProfileView({ memberId }: MemberProfileViewProps) 
     loadMember();
   }, [memberId, isRTL]);
 
-  // Active view tab: "achievements" | "bookings" | "dues"
-  const [activeTab, setActiveTab] = useState<"achievements" | "bookings" | "dues">("achievements");
+  // Active view tab: "achievements" | "bookings" | "dues" | "tickets"
+  const [activeTab, setActiveTab] = useState<"achievements" | "bookings" | "dues" | "tickets">("achievements");
   const [dueSettled, setDueSettled] = useState(false);
   const [toggleLoading, setToggleLoading] = useState(false);
+
+  // Member Support Tickets & Complaints State
+  const [memberTickets, setMemberTickets] = useState<SupportTicketItem[]>([]);
+  const [ticketsLoading, setTicketsLoading] = useState(false);
+  const [ticketReplyingId, setTicketReplyingId] = useState<number | null>(null);
+  const [ticketReplyText, setTicketReplyText] = useState("");
+  const [ticketSelectedStatus, setTicketSelectedStatus] = useState<SupportTicketStatus>("resolved");
+  const [ticketSavingId, setTicketSavingId] = useState<number | null>(null);
+
+  const loadMemberTickets = async () => {
+    if (!memberId) return;
+    try {
+      setTicketsLoading(true);
+      const res = await getAdminMemberSupportTicketsApi(memberId);
+      if (res.success) {
+        setMemberTickets(res.data);
+      }
+    } catch (err) {
+      console.error("Failed to load member tickets:", err);
+    } finally {
+      setTicketsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadMemberTickets();
+  }, [memberId]);
 
   // SMS Modal State (Live TweetSMS Delivery)
   const [smsModalOpen, setSmsModalOpen] = useState(false);
@@ -223,6 +264,46 @@ export default function MemberProfileView({ memberId }: MemberProfileViewProps) 
       setTimeout(() => setAchievementFeedback(null), 4000);
     } else {
       setAchievementFeedback({ type: "error", message: res.message || "تعذر حذف الإنجاز." });
+    }
+  };
+
+  const handleOpenTicketReply = (ticket: SupportTicketItem) => {
+    setTicketReplyingId(ticket.id);
+    setTicketReplyText(ticket.admin_reply || "");
+    setTicketSelectedStatus(ticket.status === "open" ? "resolved" : ticket.status);
+  };
+
+  const handleSaveTicketReply = async (ticketId: number) => {
+    setTicketSavingId(ticketId);
+    try {
+      const res = await updateAdminSupportTicketApi(ticketId, {
+        status: ticketSelectedStatus,
+        admin_reply: ticketReplyText.trim(),
+      });
+      if (res.success) {
+        setTicketReplyingId(null);
+        loadMemberTickets();
+      } else {
+        alert(res.message || "تعذر حفظ رد المشكلة.");
+      }
+    } catch {
+      alert("حدث خطأ في الاتصال بالخادم.");
+    } finally {
+      setTicketSavingId(null);
+    }
+  };
+
+  const handleDeleteTicket = async (ticketId: number) => {
+    if (!confirm("هل أنت متأكد من حذف هذه التذكرة؟")) return;
+    try {
+      const res = await deleteAdminSupportTicketApi(ticketId);
+      if (res.success) {
+        setMemberTickets((prev) => prev.filter((t) => t.id !== ticketId));
+      } else {
+        alert(res.message || "تعذر حذف التذكرة.");
+      }
+    } catch {
+      alert("حدث خطأ في الاتصال بالخادم.");
     }
   };
 
@@ -557,9 +638,9 @@ export default function MemberProfileView({ memberId }: MemberProfileViewProps) 
             </div>
           </div>
 
-          {/* ─── Segmented Navigation Tabs Switcher (3 Tabs Only: Achievements, Bookings, Quota) ─── */}
+          {/* ─── Segmented Navigation Tabs Switcher (4 Tabs: Achievements, Bookings, Quota, Tickets) ─── */}
           <div className="p-1.5 bg-slate-100/90 rounded-2xl border border-slate-200/80">
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-1.5" role="tablist">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5" role="tablist">
               
               {/* Tab 1: Member Achievements */}
               <button
@@ -576,7 +657,7 @@ export default function MemberProfileView({ memberId }: MemberProfileViewProps) 
                 <Trophy className={`w-4 h-4 ${activeTab === "achievements" ? "text-amber-400" : "text-amber-500"}`} />
                 <span>
                   {isRTL
-                    ? `إنجازات ومشاريع العضو (${member.achievements?.length || 0})`
+                    ? `إنجازات العضو (${member.achievements?.length || 0})`
                     : `Achievements (${member.achievements?.length || 0})`}
                 </span>
               </button>
@@ -596,7 +677,7 @@ export default function MemberProfileView({ memberId }: MemberProfileViewProps) 
                 <Calendar className={`w-4 h-4 ${activeTab === "bookings" ? "text-emerald-400" : "text-slate-500"}`} />
                 <span>
                   {isRTL
-                    ? `سجل الحجوزات والزيارات (${member.history.length})`
+                    ? `سجل الحجوزات (${member.history.length})`
                     : `Bookings (${member.history.length})`}
                 </span>
               </button>
@@ -614,7 +695,30 @@ export default function MemberProfileView({ memberId }: MemberProfileViewProps) 
                 }`}
               >
                 <CreditCard className={`w-4 h-4 ${activeTab === "dues" ? "text-emerald-400" : "text-slate-500"}`} />
-                <span>{isRTL ? "الرصيد والحصص التشغيلية" : "Quota & Policy"}</span>
+                <span>{isRTL ? "الرصيد والحصص" : "Quota & Policy"}</span>
+              </button>
+
+              {/* Tab 4: Member Support Tickets & Issues */}
+              <button
+                type="button"
+                role="tab"
+                aria-selected={activeTab === "tickets"}
+                onClick={() => setActiveTab("tickets")}
+                className={`flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl font-bold text-xs sm:text-sm transition-all cursor-pointer ${
+                  activeTab === "tickets"
+                    ? "bg-[#0c2340] text-white shadow-xs ring-1 ring-[#0c2340]"
+                    : "text-slate-600 hover:text-[#0c2340] hover:bg-white/80"
+                }`}
+              >
+                <LifeBuoy className={`w-4 h-4 ${activeTab === "tickets" ? "text-rose-400" : "text-rose-500"}`} />
+                <span>
+                  {isRTL
+                    ? `تذاكر الدعم والشكاوى (${memberTickets.length})`
+                    : `Support Tickets (${memberTickets.length})`}
+                </span>
+                {memberTickets.some((t) => t.status === "open" || t.status === "in_progress") && (
+                  <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span>
+                )}
               </button>
 
             </div>
@@ -917,6 +1021,214 @@ export default function MemberProfileView({ memberId }: MemberProfileViewProps) 
                   </span>
                 </div>
               </div>
+
+            </div>
+          )}
+
+          {/* ═════════════════════════════════════════════════════════════
+              TAB 4: MEMBER SUPPORT TICKETS & COMPLAINTS
+             ═════════════════════════════════════════════════════════════ */}
+          {activeTab === "tickets" && (
+            <div className="space-y-6 animate-in fade-in duration-200">
+              
+              {/* Header Box */}
+              <div className="bg-white rounded-2xl border border-slate-200/90 p-5 sm:p-6 shadow-xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-11 h-11 rounded-2xl bg-rose-50 text-rose-600 flex items-center justify-center border border-rose-100 shrink-0">
+                    <LifeBuoy className="w-6 h-6" />
+                  </div>
+                  <div>
+                    <h3 className="text-base font-bold text-[#0c2340]">
+                      {isRTL ? `سجل مشاكل وتذاكر الدعم الخاصة بـ (${member.name})` : `Support Tickets for (${member.name})`}
+                    </h3>
+                    <p className="text-xs text-slate-500 mt-0.5">
+                      {isRTL
+                        ? "كافة المشاكل والاستفسارات التي قدمها هذا الطالب من حسابه مع إمكانية الرد والحل المباشر."
+                        : "All tickets submitted by this member with direct resolution tools."}
+                    </p>
+                  </div>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={loadMemberTickets}
+                  disabled={ticketsLoading}
+                  className="flex items-center gap-2 px-3 py-1.5 rounded-xl border border-slate-200 hover:bg-slate-50 text-slate-600 text-xs font-bold transition-all cursor-pointer"
+                >
+                  <RefreshCw className={`w-3.5 h-3.5 ${ticketsLoading ? "animate-spin" : ""}`} />
+                  <span>تحديث</span>
+                </button>
+              </div>
+
+              {/* Tickets List */}
+              {ticketsLoading ? (
+                <div className="p-8 text-center bg-white rounded-2xl border border-slate-200">
+                  <Loader2 className="w-6 h-6 animate-spin mx-auto text-emerald-600 mb-2" />
+                  <p className="text-xs font-bold text-slate-500">جاري تحميل تذاكر الطالب...</p>
+                </div>
+              ) : memberTickets.length === 0 ? (
+                <div className="p-8 text-center bg-white rounded-2xl border border-slate-200 space-y-2">
+                  <div className="w-10 h-10 rounded-full bg-slate-100 text-slate-500 flex items-center justify-center mx-auto text-lg">
+                    ✨
+                  </div>
+                  <h4 className="text-sm font-bold text-slate-800">لا توجد أي مشاكل أو شكاوى مسجلة لهذا العضو</h4>
+                  <p className="text-xs text-slate-400">لم يقم هذا العضو بتقديم أي تذاكر دعم فني بعد.</p>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {memberTickets.map((t) => {
+                    const isResolved = t.status === "resolved";
+                    const isInProgress = t.status === "in_progress";
+                    const isUrgent = t.priority === "urgent";
+                    const isReplying = ticketReplyingId === t.id;
+
+                    return (
+                      <div
+                        key={t.id}
+                        className={`p-4 sm:p-5 rounded-2xl border transition-all space-y-3 shadow-2xs ${
+                          isResolved
+                            ? "bg-white border-slate-200"
+                            : isInProgress
+                            ? "bg-blue-50/20 border-blue-200"
+                            : "bg-amber-50/20 border-amber-200"
+                        }`}
+                      >
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-100 pb-2">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <span className="font-bold text-slate-900 text-sm">{t.subject}</span>
+                            <span className="px-2 py-0.5 rounded-full text-[11px] font-semibold bg-slate-100 text-slate-700">
+                              {t.category_label}
+                            </span>
+                            {isUrgent && (
+                              <span className="px-2 py-0.5 rounded-full text-[11px] font-bold bg-rose-100 text-rose-700">
+                                عاجل 🔴
+                              </span>
+                            )}
+                          </div>
+
+                          <div className="flex items-center gap-2 self-start sm:self-auto">
+                            <span className="text-[11px] font-mono text-slate-400">#{t.id}</span>
+                            <span
+                              className={`px-2.5 py-1 rounded-xl text-xs font-black border ${
+                                isResolved
+                                  ? "bg-emerald-50 text-emerald-800 border-emerald-200"
+                                  : isInProgress
+                                  ? "bg-blue-50 text-blue-800 border-blue-200"
+                                  : "bg-amber-50 text-amber-800 border-amber-200"
+                              }`}
+                            >
+                              {isResolved ? "تم الحل ✅" : isInProgress ? "جاري المتابعة 🔵" : "قيد الانتظار 🟡"}
+                            </span>
+
+                            <button
+                              type="button"
+                              onClick={() => handleOpenTicketReply(t)}
+                              className="px-2.5 py-1 rounded-lg border border-slate-200 hover:border-emerald-500 bg-white hover:bg-emerald-50 text-slate-700 hover:text-emerald-800 text-xs font-bold transition-all"
+                            >
+                              {t.admin_reply ? "تعديل الرد" : "حل والرد"}
+                            </button>
+
+                            <button
+                              type="button"
+                              onClick={() => handleDeleteTicket(t.id)}
+                              className="p-1 rounded-lg hover:bg-red-50 text-slate-400 hover:text-red-600 transition-all"
+                              title="حذف"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
+                        </div>
+
+                        {/* Description */}
+                        <div className="text-xs sm:text-sm text-slate-700 bg-slate-50/60 p-3 rounded-xl border border-slate-200/60 font-medium">
+                          {t.description}
+                        </div>
+
+                        {/* Existing Admin Reply */}
+                        {t.admin_reply && !isReplying && (
+                          <div className="p-3.5 rounded-xl bg-gradient-to-br from-emerald-50 to-teal-50 border border-emerald-200 text-emerald-950 space-y-1">
+                            <div className="flex items-center justify-between text-xs font-bold text-emerald-800">
+                              <span>رد المشرف:</span>
+                              {t.admin_name && <span className="font-normal text-[11px]">{t.admin_name}</span>}
+                            </div>
+                            <p className="text-xs sm:text-sm font-semibold text-emerald-900">{t.admin_reply}</p>
+                            {t.resolved_at_human && (
+                              <div className="text-[10px] text-emerald-700/70 pt-0.5">تاريخ الحل: {t.resolved_at_human}</div>
+                            )}
+                          </div>
+                        )}
+
+                        {/* Reply Form */}
+                        {isReplying && (
+                          <div className="p-4 rounded-xl bg-white border-2 border-emerald-500 shadow-sm space-y-3">
+                            <div className="flex items-center justify-between text-xs font-bold text-slate-800">
+                              <span>تحديث حالة التذكرة وكتابة رد للطالب:</span>
+                            </div>
+                            <div className="grid grid-cols-3 gap-2">
+                              {[
+                                { id: "resolved", label: "تم الحل ✅" },
+                                { id: "in_progress", label: "جاري المتابعة 🔵" },
+                                { id: "open", label: "قيد الانتظار 🟡" },
+                              ].map((st) => (
+                                <button
+                                  key={st.id}
+                                  type="button"
+                                  onClick={() => setTicketSelectedStatus(st.id as SupportTicketStatus)}
+                                  className={`p-1.5 rounded-lg text-xs font-bold border transition-all text-center ${
+                                    ticketSelectedStatus === st.id
+                                      ? "bg-emerald-50 border-emerald-500 text-emerald-800"
+                                      : "bg-slate-50 border-slate-200 text-slate-600"
+                                  }`}
+                                >
+                                  {st.label}
+                                </button>
+                              ))}
+                            </div>
+                            <textarea
+                              rows={2}
+                              value={ticketReplyText}
+                              onChange={(e) => setTicketReplyText(e.target.value)}
+                              placeholder="اكتب ردك وتوضيحك للطالب..."
+                              className="w-full p-2.5 rounded-lg border border-slate-200 text-xs sm:text-sm resize-none focus:border-emerald-500"
+                            />
+                            <div className="flex items-center justify-end gap-2">
+                              <button
+                                type="button"
+                                onClick={() => setTicketReplyingId(null)}
+                                className="px-3 py-1 text-xs font-bold text-slate-600 border border-slate-200 rounded-lg hover:bg-slate-50"
+                              >
+                                إلغاء
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => handleSaveTicketReply(t.id)}
+                                disabled={ticketSavingId === t.id}
+                                className="px-3.5 py-1 text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg flex items-center gap-1.5 disabled:opacity-50"
+                              >
+                                {ticketSavingId === t.id ? (
+                                  <>
+                                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                                    <span>جاري الحفظ...</span>
+                                  </>
+                                ) : (
+                                  <>
+                                    <Check className="w-3.5 h-3.5" />
+                                    <span>حفظ الرد والحالة</span>
+                                  </>
+                                )}
+                              </button>
+                            </div>
+                          </div>
+                        )}
+
+                        <div className="flex items-center justify-between text-[11px] text-slate-400 pt-0.5">
+                          <span>تاريخ التقديم: {t.created_at_human || t.created_at}</span>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
 
             </div>
           )}

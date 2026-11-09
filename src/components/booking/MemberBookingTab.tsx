@@ -20,6 +20,7 @@ import MemberBookingsList from "./member/MemberBookingsList";
 import MemberLoginForm from "./member/MemberLoginForm";
 import MemberQuotaHeader from "./member/MemberQuotaHeader";
 import MemberAchievementsTab from "./member/MemberAchievementsTab";
+import MemberSupportTab from "./member/MemberSupportTab";
 import {
   memberLoginApi,
   createMemberBookingApi,
@@ -148,7 +149,7 @@ export default function MemberBookingTab({ onApplyNewMember }: MemberBookingTabP
   const hoursRemaining = memberData?.hoursRemaining ?? Math.max(0, monthlyLimit - hoursUsed);
 
   // Day-based Booking Form State for Active Member
-  const [memberSubView, setMemberSubView] = useState<"book" | "my_bookings" | "achievements">("book");
+  const [memberSubView, setMemberSubView] = useState<"book" | "my_bookings" | "achievements" | "support">("book");
   const [todayStr, setTodayStr] = useState<string>("");
   const [bookingDate, setBookingDate] = useState<string>("");
   const [bookingNotes, setBookingNotes] = useState("");
@@ -1036,6 +1037,11 @@ export default function MemberBookingTab({ onApplyNewMember }: MemberBookingTabP
           {/* ── Sub-View 3: Member Achievements (Private to Member & Admin) ── */}
           {memberSubView === "achievements" && (
             <MemberAchievementsTab />
+          )}
+
+          {/* ── Sub-View 4: Member Technical Support & Issues ── */}
+          {memberSubView === "support" && (
+            <MemberSupportTab />
           )}
 
         </div>
