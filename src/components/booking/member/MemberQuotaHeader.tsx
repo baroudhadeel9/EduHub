@@ -11,6 +11,9 @@ interface MemberQuotaHeaderProps {
   monthlyLimit: number;
   hoursRemaining: number;
   dailyLimit: number;
+  renewalDate?: string;
+  renewalDay?: number;
+  daysUntilRenewal?: number;
   memberSubView: "book" | "my_bookings" | "achievements" | "support";
   confirmedBookingsCount: number;
   onSelectSubView: (view: "book" | "my_bookings" | "achievements" | "support") => void;
@@ -25,6 +28,9 @@ export default function MemberQuotaHeader({
   monthlyLimit,
   hoursRemaining,
   dailyLimit,
+  renewalDate,
+  renewalDay,
+  daysUntilRenewal,
   memberSubView,
   confirmedBookingsCount,
   onSelectSubView,
@@ -85,8 +91,8 @@ export default function MemberQuotaHeader({
             <Clock className="w-4 h-4 text-emerald-700 shrink-0" />
             <span className="text-xs sm:text-sm font-extrabold text-brand-navy">
               {isRTL
-                ? `استخدمت ${hoursUsed} من ${monthlyLimit} ساعة هذا الشهر`
-                : `Used ${hoursUsed} of ${monthlyLimit} hours this month`}
+                ? `استخدمت ${hoursUsed} من ${monthlyLimit} ساعة في الدورة الشهرية الحالية`
+                : `Used ${hoursUsed} of ${monthlyLimit} hours in current cycle`}
             </span>
           </div>
           <span className="text-xs sm:text-sm font-bold text-emerald-800 bg-white/95 px-3 py-1 rounded-full border border-emerald-200/80 shadow-2xs self-start sm:self-auto">
@@ -110,11 +116,21 @@ export default function MemberQuotaHeader({
               ? `الحد اليومي المسموح: حتى ${dailyLimit} ساعات يومياً`
               : `Daily limit: up to ${dailyLimit}h/day`}
           </span>
-          <span>
-            {isRTL
-              ? "ساعات العمل: 08:00 صباحاً – 04:00 مساءً"
-              : "Working hours: 08:00 – 16:00"}
-          </span>
+          {renewalDate ? (
+            <span className="text-emerald-800 font-bold flex items-center gap-1">
+              <span>
+                {isRTL
+                  ? `يتجدد الرصيد: ${renewalDate} ${daysUntilRenewal !== undefined ? `(متبقي ${daysUntilRenewal} ${daysUntilRenewal === 1 ? "يوم" : "أيام"})` : ""}`
+                  : `Renews on: ${renewalDate} ${daysUntilRenewal !== undefined ? `(${daysUntilRenewal} days left)` : ""}`}
+              </span>
+            </span>
+          ) : (
+            <span>
+              {isRTL
+                ? "ساعات العمل: 08:00 صباحاً – 04:00 مساءً"
+                : "Working hours: 08:00 – 16:00"}
+            </span>
+          )}
         </div>
       </div>
 

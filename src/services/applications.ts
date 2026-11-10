@@ -640,6 +640,11 @@ export interface MemberData {
   dailyLimit: number;
   extraHours?: number;
   dueAmount?: number;
+  renewalDate?: string;
+  renewalDay?: number;
+  daysUntilRenewal?: number;
+  cycleStartDate?: string;
+  cycleEndDate?: string;
   bookings: MemberBookingItem[];
 }
 

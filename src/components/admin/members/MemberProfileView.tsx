@@ -512,8 +512,8 @@ export default function MemberProfileView({ memberId }: MemberProfileViewProps) 
                 <div>
                   <h3 className="text-sm sm:text-base font-black text-[#0c2340]">
                     {isRTL
-                      ? `استخدم ${member.hoursUsed} من ${member.hoursLimit} ساعة هذا الشهر`
-                      : `Used ${member.hoursUsed} of ${member.hoursLimit} hours this month`}
+                      ? `استخدم ${member.hoursUsed} من ${member.hoursLimit} ساعة في الدورة الحالية`
+                      : `Used ${member.hoursUsed} of ${member.hoursLimit} hours in current cycle`}
                   </h3>
                   <p className="text-xs text-slate-500 font-medium mt-0.5">
                     {isRTL
@@ -588,7 +588,13 @@ export default function MemberProfileView({ memberId }: MemberProfileViewProps) 
                   <ShieldCheck className="w-3.5 h-3.5 text-slate-400" />
                   <span>{isRTL ? "دورة التجديد:" : "Renewal:"}</span>
                 </div>
-                <span className="font-bold text-slate-800">{isRTL ? "تلقائياً في 1 من كل شهر" : "1st of every month"}</span>
+                <span className="font-bold text-slate-800">
+                  {(member as any).renewalDate
+                    ? (isRTL
+                        ? `يتجدد في ${(member as any).renewalDate} (متبقي ${(member as any).daysUntilRenewal ?? ''} يوم)`
+                        : `Renews on ${(member as any).renewalDate}`)
+                    : (isRTL ? "شهرياً من تاريخ اعتماد العضوية" : "Monthly on activation date")}
+                </span>
               </div>
             </div>
           </div>

@@ -514,6 +514,9 @@ export default function MemberBookingTab({ onApplyNewMember }: MemberBookingTabP
             monthlyLimit={monthlyLimit}
             hoursRemaining={hoursRemaining}
             dailyLimit={dailyLimit}
+            renewalDate={memberData?.renewalDate}
+            renewalDay={memberData?.renewalDay}
+            daysUntilRenewal={memberData?.daysUntilRenewal}
             memberSubView={memberSubView}
             confirmedBookingsCount={bookings.filter((b) => b.status === "confirmed").length}
             onSelectSubView={setMemberSubView}

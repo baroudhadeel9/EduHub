@@ -159,6 +159,18 @@ export default function MemberDetailDrawer({
                   {percentage}% {isRTL ? "مستهلك" : "consumed"}
                 </div>
               </div>
+
+              {(member as any).renewalDate && (
+                <div className="pt-2 border-t border-slate-200/80 text-[11px] text-emerald-800 font-bold flex items-center justify-between">
+                  <span>{isRTL ? "تاريخ تجديد الرصيد:" : "Quota Renewal Date:"}</span>
+                  <span className="font-mono">
+                    {(member as any).renewalDate}{" "}
+                    {(member as any).daysUntilRenewal !== undefined
+                      ? `(${isRTL ? `متبقي ${(member as any).daysUntilRenewal} يوم` : `${(member as any).daysUntilRenewal}d left`})`
+                      : ""}
+                  </span>
+                </div>
+              )}
             </div>
 
             {/* Contact Details */}
