@@ -1,10 +1,11 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useMemo } from "react";
 import { useLanguage } from "@/context/LanguageContext";
 import {
   X,
   Calendar,
+  CalendarDays,
   Clock,
   Armchair,
   AlertCircle,
@@ -18,7 +19,7 @@ import {
 } from "lucide-react";
 import { getAdminMembersApi, createAdminBookingForMemberApi } from "@/services/applications";
 import { getRoomsOverviewApi, RoomItem, SeatItem } from "@/services/roomSeats";
-import { getLocalDateString } from "@/utils/dateTime";
+import { getLocalDateString, getAllowedWeekDates } from "@/utils/dateTime";
 
 interface AdminQuickBookingModalProps {
   isOpen: boolean;
@@ -73,8 +74,12 @@ export default function AdminQuickBookingModal({
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  const todayStr = getLocalDateString(0);
-  const [bookingDate, setBookingDate] = useState(todayStr);
+  const todayStr = useMemo(() => getLocalDateString(0), []);
+  const weekInfo = useMemo(() => getAllowedWeekDates(undefined, true), []);
+  const [bookingDate, setBookingDate] = useState<string>(() => {
+    const isTodayAllowed = weekInfo.allAllowed.some((d) => d.date === todayStr);
+    return isTodayAllowed ? todayStr : weekInfo.defaultDate;
+  });
   const [startTime, setStartTime] = useState("09:00");
   const [endTime, setEndTime] = useState("13:00");
 
@@ -446,20 +451,41 @@ export default function AdminQuickBookingModal({
             )}
           </div>
 
-          {/* 2. Date Picker */}
+          {/* 2. Date Picker (Weekdays: Saturday to Thursday) */}
           <div>
-            <label className="block text-xs font-bold text-slate-700 mb-1 flex items-center gap-1.5">
-              <Calendar className="w-3.5 h-3.5 text-slate-400" />
-              <span>{isRTL ? "تاريخ الحجز:" : "Booking Date:"}</span>
+            <label className="block text-xs font-bold text-slate-700 mb-1 flex items-center justify-between">
+              <span className="flex items-center gap-1.5">
+                <CalendarDays className="w-3.5 h-3.5 text-emerald-600" />
+                <span>{isRTL ? "تاريخ الحجز:" : "Booking Date:"}</span>
+              </span>
+              <span className="text-[10px] text-slate-400 font-medium">
+                {isRTL ? "الدوام: السبت – الخميس (الجمعة عطلة)" : "Sat – Thu (Fri Closed)"}
+              </span>
             </label>
-            <input
-              type="date"
-              min={todayStr}
+            <select
               value={bookingDate}
               onChange={(e) => setBookingDate(e.target.value)}
-              className="w-full px-3.5 py-2.5 rounded-2xl border border-slate-200 bg-white font-medium text-xs sm:text-sm outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/10"
+              className="w-full px-3.5 py-2.5 rounded-2xl border border-slate-200 bg-white font-bold text-xs sm:text-sm outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/10 cursor-pointer text-slate-800"
               required
-            />
+            >
+              <optgroup label={isRTL ? "الأسبوع الحالي (السبت – الخميس)" : "Current Week (Sat – Thu)"}>
+                {weekInfo.currentWeek.map((item) => (
+                  <option key={item.date} value={item.date}>
+                    {isRTL ? item.fullLabelAr : item.fullLabelEn}{" "}
+                    {item.isToday ? (isRTL ? "— (اليوم)" : "— (Today)") : ""}
+                  </option>
+                ))}
+              </optgroup>
+              {weekInfo.nextWeek.length > 0 && (
+                <optgroup label={isRTL ? "الأسبوع القادم (السبت – الخميس)" : "Next Week (Sat – Thu)"}>
+                  {weekInfo.nextWeek.map((item) => (
+                    <option key={item.date} value={item.date}>
+                      {isRTL ? item.fullLabelAr : item.fullLabelEn}
+                    </option>
+                  ))}
+                </optgroup>
+              )}
+            </select>
           </div>
 
           {/* 3. Start Time & End Time (Side by Side) */}

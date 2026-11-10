@@ -107,7 +107,10 @@ export interface AllowedWeekDate {
  * EduHub working days: Saturday to Thursday (Friday is day-off / closed).
  * If today is Thursday after 16:00 or Friday, next week's allowed days are also unlocked.
  */
-export function getAllowedWeekDates(referenceDate?: Date): {
+export function getAllowedWeekDates(
+  referenceDate?: Date,
+  alwaysIncludeNextWeek: boolean = false
+): {
   currentWeek: AllowedWeekDate[];
   nextWeek: AllowedWeekDate[];
   allAllowed: AllowedWeekDate[];
@@ -168,10 +171,10 @@ export function getAllowedWeekDates(referenceDate?: Date): {
 
   const currentWeek = buildWeekDays(currentSaturday, false);
 
-  // Check if next week is unlocked: Thursday after 16:00 or Friday
+  // Check if next week is unlocked: Thursday after 16:00 or Friday (or explicitly enabled for admin)
   const isThursdayAfter4 = dayOfWeek === 4 && currentTimeStr >= "16:00";
   const isFriday = dayOfWeek === 5;
-  const isNextWeekUnlocked = isThursdayAfter4 || isFriday;
+  const isNextWeekUnlocked = alwaysIncludeNextWeek || isThursdayAfter4 || isFriday;
 
   let nextWeek: AllowedWeekDate[] = [];
   if (isNextWeekUnlocked) {
