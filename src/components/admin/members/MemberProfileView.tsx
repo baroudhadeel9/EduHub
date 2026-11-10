@@ -26,6 +26,8 @@ import MemberProfileSmsModal from "@/components/admin/members/profile/MemberProf
 import MemberProfileAchievementsTab from "@/components/admin/members/profile/MemberProfileAchievementsTab";
 import MemberProfileBookingsTab from "@/components/admin/members/profile/MemberProfileBookingsTab";
 import MemberProfileDuesTab from "@/components/admin/members/profile/MemberProfileDuesTab";
+import { MemberResendActivationModal } from "@/components/admin/members/MemberResendActivationModal";
+import { MemberWhatsAppModal } from "@/components/admin/members/MemberWhatsAppModal";
 import {
   ArrowLeft,
   ArrowRight,
@@ -41,6 +43,7 @@ import {
   Menu,
   Send,
   MessageSquare,
+  KeyRound,
   UserCheck,
   UserX,
   GraduationCap,
@@ -162,6 +165,12 @@ export default function MemberProfileView({ memberId }: MemberProfileViewProps) 
   const [smsMessage, setSmsMessage] = useState("");
   const [smsSending, setSmsSending] = useState(false);
   const [smsFeedback, setSmsFeedback] = useState<{ type: "success" | "error"; text: string } | null>(null);
+
+  // Activation Link & Password Setup Modal State
+  const [activationModalOpen, setActivationModalOpen] = useState(false);
+
+  // WhatsApp Messaging Modal State
+  const [whatsAppModalOpen, setWhatsAppModalOpen] = useState(false);
 
   const handleOpenSmsModal = () => {
     setSmsMessage(`مرحباً ${member?.name || ""}، نود إعلامك من مساحة إديو هب غزة: `);
@@ -430,6 +439,38 @@ export default function MemberProfileView({ memberId }: MemberProfileViewProps) 
                 >
                   <Clock className="w-3.5 h-3.5 text-emerald-600" />
                   <span>{isRTL ? "تعديل الحصة" : "Adjust Quota"}</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setWhatsAppModalOpen(true)}
+                  className="flex-1 sm:flex-initial inline-flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-xl bg-[#25D366] hover:bg-[#1EBE5D] text-white text-xs font-bold transition-all shadow-xs active:scale-95 cursor-pointer"
+                  title={isRTL ? "مراسلة العضو عبر واتساب" : "Message on WhatsApp"}
+                >
+                  <MessageSquare className="w-3.5 h-3.5" />
+                  <span>{isRTL ? "مراسلة واتساب" : "WhatsApp"}</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setActivationModalOpen(true)}
+                  className={`flex-1 sm:flex-initial inline-flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-xl text-white text-xs font-bold transition-all shadow-xs active:scale-95 cursor-pointer ${
+                    (member.status === "active" || member.hasPassword)
+                      ? "bg-blue-600 hover:bg-blue-700"
+                      : "bg-amber-500 hover:bg-amber-600"
+                  }`}
+                  title={
+                    (member.status === "active" || member.hasPassword)
+                      ? isRTL ? "إعادة تعيين كلمة المرور للعضو" : "Reset Password"
+                      : isRTL ? "إرسال رابط التفعيل وتعيين كلمة المرور" : "Send Activation Link"
+                  }
+                >
+                  <KeyRound className="w-3.5 h-3.5" />
+                  <span>
+                    {(member.status === "active" || member.hasPassword)
+                      ? isRTL ? "إعادة تعيين كلمة المرور" : "Reset Password"
+                      : isRTL ? "إرسال رابط التفعيل" : "Send Activation"}
+                  </span>
                 </button>
 
                 <button
@@ -784,6 +825,58 @@ export default function MemberProfileView({ memberId }: MemberProfileViewProps) 
             smsFeedback={smsFeedback}
             onSend={handleSendSms}
           />
+
+          {/* Activation & Password Setup Modal */}
+          {member && (
+            <MemberResendActivationModal
+              isOpen={activationModalOpen}
+              onClose={() => setActivationModalOpen(false)}
+              member={{
+                id: member.id,
+                name: member.name,
+                email: member.email,
+                phone: member.registration?.phone || member.phone,
+                hasPassword: member.status === "active" || Boolean(member.hasPassword),
+                status: member.status,
+              }}
+              isRTL={isRTL}
+              onSuccess={(updated) => {
+                setMember((prev) =>
+                  prev
+                    ? {
+                        ...prev,
+                        email: updated.email,
+                        phone: updated.phone || prev.phone,
+                        registration: prev.registration
+                          ? {
+                              ...prev.registration,
+                              email: updated.email,
+                              phone: updated.phone || prev.registration.phone,
+                            }
+                          : prev.registration,
+                      }
+                    : prev
+                );
+              }}
+            />
+          )}
+
+          {/* WhatsApp Direct Messaging Modal */}
+          {member && (
+            <MemberWhatsAppModal
+              isOpen={whatsAppModalOpen}
+              onClose={() => setWhatsAppModalOpen(false)}
+              member={{
+                id: member.id,
+                name: member.name,
+                phone: member.registration?.phone || member.phone,
+                email: member.email,
+                allocatedHours: member.hoursLimit,
+                usedHours: member.hoursUsed,
+              }}
+              isRTL={isRTL}
+            />
+          )}
         </main>
       </div>
     </div>

@@ -13,8 +13,11 @@ import {
   History,
   ShieldCheck,
   Trash2,
+  KeyRound,
 } from "lucide-react";
 import { MemberRecord } from "./data";
+import { MemberResendActivationModal } from "./MemberResendActivationModal";
+import { MemberWhatsAppModal } from "./MemberWhatsAppModal";
 
 interface MemberDetailDrawerProps {
   member: MemberRecord | null;
@@ -36,6 +39,8 @@ export default function MemberDetailDrawer({
   const { dir, locale } = useLanguage();
   const isRTL = dir === "rtl" || locale === "ar";
   const [copiedPhone, setCopiedPhone] = useState(false);
+  const [activationModalOpen, setActivationModalOpen] = useState(false);
+  const [whatsAppModalOpen, setWhatsAppModalOpen] = useState(false);
 
   if (!isOpen || !member) return null;
 
@@ -47,6 +52,7 @@ export default function MemberDetailDrawer({
 
   const cleanPhoneForWa = member.phone.replace(/[^0-9]/g, "");
   const percentage = Math.min(100, Math.round((member.hoursUsed / member.hoursLimit) * 100));
+  const isAccountActive = member.status === "active" || Boolean(member.hasPassword) || Boolean(member.isPasswordSet);
 
   return (
     <div
@@ -198,15 +204,15 @@ export default function MemberDetailDrawer({
 
                   <div className="flex items-center gap-1.5">
                     {cleanPhoneForWa && (
-                      <a
-                        href={`https://wa.me/${cleanPhoneForWa}`}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-800 text-xs font-semibold transition-colors"
+                      <button
+                        type="button"
+                        onClick={() => setWhatsAppModalOpen(true)}
+                        className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-800 text-xs font-semibold transition-colors cursor-pointer"
+                        title={isRTL ? "مراسلة العضو عبر واتساب" : "Message on WhatsApp"}
                       >
                         <MessageSquare className="w-3.5 h-3.5" />
-                        <span>واتساب</span>
-                      </a>
+                        <span>{isRTL ? "واتساب" : "WhatsApp"}</span>
+                      </button>
                     )}
                     <button
                       type="button"
@@ -273,6 +279,30 @@ export default function MemberDetailDrawer({
                       </div>
                     </div>
                   </div>
+
+                  <button
+                    type="button"
+                    onClick={() => setActivationModalOpen(true)}
+                    className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border text-xs font-bold transition-colors cursor-pointer ${
+                      isAccountActive
+                        ? "bg-blue-50 hover:bg-blue-100 text-blue-800 border-blue-200"
+                        : "bg-amber-50 hover:bg-amber-100 text-amber-800 border-amber-200"
+                    }`}
+                    title={
+                      isAccountActive
+                        ? isRTL ? "إعادة تعيين كلمة المرور للعضو" : "Reset Password"
+                        : isRTL ? "إرسال رابط التفعيل وتعيين كلمة المرور" : "Send Activation Link"
+                    }
+                  >
+                    <KeyRound
+                      className={`w-3.5 h-3.5 ${isAccountActive ? "text-blue-600" : "text-amber-600"}`}
+                    />
+                    <span>
+                      {isAccountActive
+                        ? isRTL ? "إعادة تعيين كلمة المرور" : "Reset Password"
+                        : isRTL ? "رابط التفعيل الأول" : "Activation"}
+                    </span>
+                  </button>
                 </div>
               </div>
             </div>
@@ -355,6 +385,39 @@ export default function MemberDetailDrawer({
           </div>
         </div>
       </div>
+
+      {/* Activation & Password Setup Modal */}
+      <MemberResendActivationModal
+        isOpen={activationModalOpen}
+        onClose={() => setActivationModalOpen(false)}
+        member={{
+          id: member.id,
+          name: member.name,
+          email: member.email,
+          phone: member.phone,
+          hasPassword: isAccountActive,
+          status: member.status,
+        }}
+        isRTL={isRTL}
+        onSuccess={() => {
+          if (onMemberUpdated) onMemberUpdated();
+        }}
+      />
+
+      {/* WhatsApp Messaging Modal */}
+      <MemberWhatsAppModal
+        isOpen={whatsAppModalOpen}
+        onClose={() => setWhatsAppModalOpen(false)}
+        member={{
+          id: member.id,
+          name: member.name,
+          phone: member.phone,
+          email: member.email,
+          allocatedHours: member.hoursLimit,
+          usedHours: member.hoursUsed,
+        }}
+        isRTL={isRTL}
+      />
     </div>
   );
 }

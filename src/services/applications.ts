@@ -1177,6 +1177,7 @@ export async function updateAdminMemberApi(
     type?: "student" | "freelancer";
     status?: "active" | "inactive" | "suspended";
     name?: string;
+    email?: string;
     phone?: string;
     specialty?: string;
   }
@@ -1192,6 +1193,45 @@ export async function updateAdminMemberApi(
   const result = await safeJsonParse<{ success: boolean; message: string; data?: unknown }>(response);
   if (!response.ok || !result) {
     throw new Error(extractErrorMessage(result, response, "فشل تحديث بيانات العضو."));
+  }
+  return result;
+}
+
+/**
+ * Resend password setup / activation link for a member (Admin only)
+ */
+export async function resendMemberActivationApi(
+  id: string | number,
+  data?: { email?: string; phone?: string }
+): Promise<{
+  success: boolean;
+  message: string;
+  email_sent: boolean;
+  email: string;
+  phone?: string;
+  set_password_url: string;
+  expires_at?: string;
+}> {
+  const response = await fetch(`${API_BASE_URL}/admin/members/${id}/resend-activation`, {
+    method: "POST",
+    headers: getAdminHeaders({
+      "Content-Type": "application/json",
+    }),
+    body: JSON.stringify(data || {}),
+  });
+
+  const result = await safeJsonParse<{
+    success: boolean;
+    message: string;
+    email_sent: boolean;
+    email: string;
+    phone?: string;
+    set_password_url: string;
+    expires_at?: string;
+  }>(response);
+
+  if (!response.ok || !result || !result.success) {
+    throw new Error(extractErrorMessage(result, response, "فشل إعادة إرسال رابط التفعيل."));
   }
   return result;
 }

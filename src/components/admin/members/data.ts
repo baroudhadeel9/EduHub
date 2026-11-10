@@ -73,6 +73,8 @@ export interface MemberRecord {
   dueAmount: number;
   lastBooking: string;
   status: MemberStatus;
+  hasPassword?: boolean;
+  isPasswordSet?: boolean;
   history: BookingHistoryItem[];
   registration?: MemberRegistrationDetails;
   achievements?: MemberAchievementItem[];

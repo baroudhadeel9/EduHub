@@ -107,6 +107,8 @@ export default function MembersTable({ onOpenMobileMenu }: MembersTableProps = {
             dueAmount,
             lastBooking: d.lastBooking && d.lastBooking !== "اليوم" ? String(d.lastBooking) : (isRTL ? "لا يوجد حجز بعد" : "No bookings yet"),
             status: (d.status as MemberStatus) || "active",
+            hasPassword: Boolean(d.hasPassword ?? d.has_password ?? d.is_password_set ?? (d.status === "active")),
+            isPasswordSet: Boolean(d.hasPassword ?? d.has_password ?? d.is_password_set ?? (d.status === "active")),
             renewalDate: d.renewalDate || d.renewal_date,
             renewalDay: d.renewalDay || d.renewal_day,
             daysUntilRenewal: d.daysUntilRenewal || d.days_until_renewal,
