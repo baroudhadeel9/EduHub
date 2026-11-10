@@ -199,7 +199,6 @@ export default function SupportTicketsView() {
           {[
             { id: "all", label: "الكل" },
             { id: "open", label: "لم يتم الرد" },
-            { id: "in_progress", label: "جاري المتابعة" },
             { id: "resolved", label: "تم الحل" },
           ].map((st) => (
             <button
@@ -236,7 +235,6 @@ export default function SupportTicketsView() {
         ) : (
           tickets.map((ticket) => {
             const isResolved = ticket.status === "resolved";
-            const isInProgress = ticket.status === "in_progress";
             const isReplying = replyingTicketId === ticket.id;
             const memberProfileUrl = ticket.user?.id ? `/admin/members/${ticket.user.id}` : null;
 
@@ -246,8 +244,6 @@ export default function SupportTicketsView() {
                 className={`p-4 sm:p-6 rounded-2xl sm:rounded-3xl border transition-all space-y-3.5 sm:space-y-4 shadow-2xs ${
                   isResolved
                     ? "bg-white border-slate-100 hover:border-slate-200"
-                    : isInProgress
-                    ? "bg-gradient-to-br from-blue-50/20 via-white to-white border-blue-200/80 hover:border-blue-300"
                     : "bg-gradient-to-br from-amber-50/20 via-white to-white border-amber-200/80 hover:border-amber-300"
                 }`}
               >
@@ -343,8 +339,6 @@ export default function SupportTicketsView() {
                       className={`px-2.5 py-1 rounded-xl text-[11px] sm:text-xs font-black flex items-center gap-1.5 border shadow-2xs ${
                         isResolved
                           ? "bg-emerald-50 text-emerald-800 border-emerald-200"
-                          : isInProgress
-                          ? "bg-blue-50 text-blue-800 border-blue-200"
                           : "bg-amber-50 text-amber-800 border-amber-200"
                       }`}
                     >
@@ -352,11 +346,6 @@ export default function SupportTicketsView() {
                         <>
                           <CheckCircle2 className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-emerald-600 shrink-0" />
                           <span>تم الحل ✅</span>
-                        </>
-                      ) : isInProgress ? (
-                        <>
-                          <Loader2 className="w-3 h-3 sm:w-3.5 sm:h-3.5 animate-spin text-blue-600 shrink-0" />
-                          <span>جاري المتابعة</span>
                         </>
                       ) : (
                         <>
@@ -447,7 +436,7 @@ export default function SupportTicketsView() {
                     {/* Status Options */}
                     <div className="space-y-1.5">
                       <label className="block text-[11px] sm:text-xs font-bold text-slate-700">تحديث الحالة إلى:</label>
-                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-1.5 sm:gap-2">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 sm:gap-2">
                         <button
                           type="button"
                           onClick={() => setSelectedStatus("resolved")}
@@ -463,19 +452,6 @@ export default function SupportTicketsView() {
 
                         <button
                           type="button"
-                          onClick={() => setSelectedStatus("in_progress")}
-                          className={`p-2 sm:p-2.5 rounded-xl text-xs font-bold border transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
-                            selectedStatus === "in_progress"
-                              ? "bg-blue-600 text-white border-blue-600 shadow-xs"
-                              : "bg-white border-slate-200 text-slate-700 hover:bg-blue-50"
-                          }`}
-                        >
-                          <Clock className="w-3.5 h-3.5" />
-                          <span>جاري المتابعة ⏳</span>
-                        </button>
-
-                        <button
-                          type="button"
                           onClick={() => setSelectedStatus("open")}
                           className={`p-2 sm:p-2.5 rounded-xl text-xs font-bold border transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
                             selectedStatus === "open"
@@ -484,7 +460,7 @@ export default function SupportTicketsView() {
                           }`}
                         >
                           <AlertCircle className="w-3.5 h-3.5" />
-                          <span>قيد الانتظار 🟡</span>
+                          <span>إبقاء قيد الانتظار 🟡</span>
                         </button>
                       </div>
                     </div>

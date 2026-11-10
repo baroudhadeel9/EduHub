@@ -281,7 +281,6 @@ export default function MemberSupportTab() {
           <div className="space-y-3">
             {tickets.map((ticket) => {
               const isResolved = ticket.status === "resolved";
-              const isInProgress = ticket.status === "in_progress";
 
               return (
                 <div
@@ -289,8 +288,6 @@ export default function MemberSupportTab() {
                   className={`p-4 sm:p-4.5 rounded-2xl border transition-all space-y-3 shadow-2xs ${
                     isResolved
                       ? "bg-white border-slate-200 hover:border-slate-300"
-                      : isInProgress
-                      ? "bg-blue-50/20 border-blue-200/80 hover:border-blue-300"
                       : "bg-amber-50/20 border-amber-200/80 hover:border-amber-300"
                   }`}
                 >
@@ -311,8 +308,6 @@ export default function MemberSupportTab() {
                         className={`px-2.5 py-0.5 rounded-lg text-[11px] font-bold flex items-center gap-1.5 border ${
                           isResolved
                             ? "bg-emerald-50 text-emerald-800 border-emerald-200/80"
-                            : isInProgress
-                            ? "bg-blue-50 text-blue-800 border-blue-200/80"
                             : "bg-amber-50 text-amber-800 border-amber-200/80"
                         }`}
                       >
@@ -320,11 +315,6 @@ export default function MemberSupportTab() {
                           <>
                             <CheckCircle2 className="w-3 h-3 text-emerald-600" />
                             <span>{bp?.statusResolved || (isRTL ? "تم الحل ✅" : "Resolved ✅")}</span>
-                          </>
-                        ) : isInProgress ? (
-                          <>
-                            <Loader2 className="w-3 h-3 animate-spin text-blue-600" />
-                            <span>{bp?.statusInProgress || (isRTL ? "جاري المتابعة والحل" : "In Progress")}</span>
                           </>
                         ) : (
                           <>

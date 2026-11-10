@@ -14,7 +14,7 @@ export type SupportTicketCategory =
 
 export type SupportTicketPriority = "normal" | "urgent";
 
-export type SupportTicketStatus = "open" | "in_progress" | "resolved" | "closed";
+export type SupportTicketStatus = "open" | "resolved" | "closed";
 
 export interface SupportTicketUser {
   id: number;
@@ -50,7 +50,6 @@ export interface SupportTicketItem {
 export interface SupportTicketStats {
   total: number;
   open: number;
-  in_progress: number;
   resolved: number;
   urgent_pending: number;
   filtered_count: number;

@@ -716,7 +716,7 @@ export default function MemberProfileView({ memberId }: MemberProfileViewProps) 
                     ? `تذاكر الدعم والشكاوى (${memberTickets.length})`
                     : `Support Tickets (${memberTickets.length})`}
                 </span>
-                {memberTickets.some((t) => t.status === "open" || t.status === "in_progress") && (
+                {memberTickets.some((t) => t.status === "open") && (
                   <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span>
                 )}
               </button>
@@ -1078,7 +1078,6 @@ export default function MemberProfileView({ memberId }: MemberProfileViewProps) 
                 <div className="space-y-3">
                   {memberTickets.map((t) => {
                     const isResolved = t.status === "resolved";
-                    const isInProgress = t.status === "in_progress";
                     const isUrgent = t.priority === "urgent";
                     const isReplying = ticketReplyingId === t.id;
 
@@ -1088,8 +1087,6 @@ export default function MemberProfileView({ memberId }: MemberProfileViewProps) 
                         className={`p-4 sm:p-5 rounded-2xl border transition-all space-y-3 shadow-2xs ${
                           isResolved
                             ? "bg-white border-slate-200"
-                            : isInProgress
-                            ? "bg-blue-50/20 border-blue-200"
                             : "bg-amber-50/20 border-amber-200"
                         }`}
                       >
@@ -1112,12 +1109,10 @@ export default function MemberProfileView({ memberId }: MemberProfileViewProps) 
                               className={`px-2.5 py-1 rounded-xl text-xs font-black border ${
                                 isResolved
                                   ? "bg-emerald-50 text-emerald-800 border-emerald-200"
-                                  : isInProgress
-                                  ? "bg-blue-50 text-blue-800 border-blue-200"
                                   : "bg-amber-50 text-amber-800 border-amber-200"
                               }`}
                             >
-                              {isResolved ? "تم الحل ✅" : isInProgress ? "جاري المتابعة 🔵" : "قيد الانتظار 🟡"}
+                              {isResolved ? "تم الحل ✅" : "قيد الانتظار 🟡"}
                             </span>
 
                             <button
@@ -1164,10 +1159,9 @@ export default function MemberProfileView({ memberId }: MemberProfileViewProps) 
                             <div className="flex items-center justify-between text-xs font-bold text-slate-800">
                               <span>تحديث حالة التذكرة وكتابة رد للطالب:</span>
                             </div>
-                            <div className="grid grid-cols-3 gap-2">
+                            <div className="grid grid-cols-2 gap-2">
                               {[
                                 { id: "resolved", label: "تم الحل ✅" },
-                                { id: "in_progress", label: "جاري المتابعة 🔵" },
                                 { id: "open", label: "قيد الانتظار 🟡" },
                               ].map((st) => (
                                 <button
