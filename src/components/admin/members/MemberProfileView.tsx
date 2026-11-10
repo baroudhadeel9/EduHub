@@ -19,11 +19,10 @@ import {
 } from "@/services/achievements";
 import {
   getAdminMemberSupportTicketsApi,
-  updateAdminSupportTicketApi,
-  deleteAdminSupportTicketApi,
   SupportTicketItem,
-  SupportTicketStatus,
 } from "@/services/supportTickets";
+import MemberProfileTicketsTab from "@/components/admin/members/profile/MemberProfileTicketsTab";
+import MemberProfileSmsModal from "@/components/admin/members/profile/MemberProfileSmsModal";
 import {
   AchievementCard,
   AchievementDetailsModal,
@@ -140,10 +139,6 @@ export default function MemberProfileView({ memberId }: MemberProfileViewProps) 
   // Member Support Tickets & Complaints State
   const [memberTickets, setMemberTickets] = useState<SupportTicketItem[]>([]);
   const [ticketsLoading, setTicketsLoading] = useState(false);
-  const [ticketReplyingId, setTicketReplyingId] = useState<number | null>(null);
-  const [ticketReplyText, setTicketReplyText] = useState("");
-  const [ticketSelectedStatus, setTicketSelectedStatus] = useState<SupportTicketStatus>("resolved");
-  const [ticketSavingId, setTicketSavingId] = useState<number | null>(null);
 
   const loadMemberTickets = async () => {
     if (!memberId) return;
@@ -264,46 +259,6 @@ export default function MemberProfileView({ memberId }: MemberProfileViewProps) 
       setTimeout(() => setAchievementFeedback(null), 4000);
     } else {
       setAchievementFeedback({ type: "error", message: res.message || "تعذر حذف الإنجاز." });
-    }
-  };
-
-  const handleOpenTicketReply = (ticket: SupportTicketItem) => {
-    setTicketReplyingId(ticket.id);
-    setTicketReplyText(ticket.admin_reply || "");
-    setTicketSelectedStatus(ticket.status === "open" ? "resolved" : ticket.status);
-  };
-
-  const handleSaveTicketReply = async (ticketId: number) => {
-    setTicketSavingId(ticketId);
-    try {
-      const res = await updateAdminSupportTicketApi(ticketId, {
-        status: "resolved",
-        admin_reply: ticketReplyText.trim(),
-      });
-      if (res.success) {
-        setTicketReplyingId(null);
-        loadMemberTickets();
-      } else {
-        alert(res.message || "تعذر حفظ رد المشكلة.");
-      }
-    } catch {
-      alert("حدث خطأ في الاتصال بالخادم.");
-    } finally {
-      setTicketSavingId(null);
-    }
-  };
-
-  const handleDeleteTicket = async (ticketId: number) => {
-    if (!confirm("هل أنت متأكد من حذف هذه التذكرة؟")) return;
-    try {
-      const res = await deleteAdminSupportTicketApi(ticketId);
-      if (res.success) {
-        setMemberTickets((prev) => prev.filter((t) => t.id !== ticketId));
-      } else {
-        alert(res.message || "تعذر حذف التذكرة.");
-      }
-    } catch {
-      alert("حدث خطأ في الاتصال بالخادم.");
     }
   };
 
@@ -1060,341 +1015,32 @@ export default function MemberProfileView({ memberId }: MemberProfileViewProps) 
                 </button>
               </div>
 
-              {/* Tickets List */}
-              {ticketsLoading ? (
-                <div className="p-8 text-center bg-white rounded-2xl border border-slate-200">
-                  <Loader2 className="w-6 h-6 animate-spin mx-auto text-emerald-600 mb-2" />
-                  <p className="text-xs font-bold text-slate-500">جاري تحميل تذاكر الطالب...</p>
-                </div>
-              ) : memberTickets.length === 0 ? (
-                <div className="p-8 text-center bg-white rounded-2xl border border-slate-200 space-y-2">
-                  <div className="w-10 h-10 rounded-full bg-slate-100 text-slate-500 flex items-center justify-center mx-auto text-lg">
-                    ✨
-                  </div>
-                  <h4 className="text-sm font-bold text-slate-800">لا توجد أي مشاكل أو شكاوى مسجلة لهذا العضو</h4>
-                  <p className="text-xs text-slate-400">لم يقم هذا العضو بتقديم أي تذاكر دعم فني بعد.</p>
-                </div>
-              ) : (
-                <div className="space-y-3">
-                  {memberTickets.map((t) => {
-                    const isResolved = t.status === "resolved";
-                    const isUrgent = t.priority === "urgent";
-                    const isReplying = ticketReplyingId === t.id;
-
-                    return (
-                      <div
-                        key={t.id}
-                        className={`p-4 sm:p-5 rounded-2xl border transition-all space-y-3 shadow-2xs ${
-                          isResolved
-                            ? "bg-white border-slate-200"
-                            : "bg-amber-50/20 border-amber-200"
-                        }`}
-                      >
-                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-100 pb-2">
-                          <div className="flex items-center gap-2 flex-wrap">
-                            <span className="font-bold text-slate-900 text-sm">{t.subject}</span>
-                            <span className="px-2 py-0.5 rounded-full text-[11px] font-semibold bg-slate-100 text-slate-700">
-                              {t.category_label}
-                            </span>
-                            {isUrgent && (
-                              <span className="px-2 py-0.5 rounded-full text-[11px] font-bold bg-rose-100 text-rose-700">
-                                عاجل 🔴
-                              </span>
-                            )}
-                          </div>
-
-                          <div className="flex items-center gap-2 self-start sm:self-auto">
-                            <span className="text-[11px] font-mono text-slate-400">#{t.id}</span>
-                            <span
-                              className={`px-2.5 py-1 rounded-xl text-xs font-black border ${
-                                isResolved
-                                  ? "bg-emerald-50 text-emerald-800 border-emerald-200"
-                                  : "bg-amber-50 text-amber-800 border-amber-200"
-                              }`}
-                            >
-                              {isResolved ? "تم الحل ✅" : "قيد الانتظار 🟡"}
-                            </span>
-
-                            <button
-                              type="button"
-                              onClick={() => handleOpenTicketReply(t)}
-                              className="px-2.5 py-1 rounded-lg border border-slate-200 hover:border-emerald-500 bg-white hover:bg-emerald-50 text-slate-700 hover:text-emerald-800 text-xs font-bold transition-all"
-                            >
-                              {t.admin_reply ? "تعديل الرد" : "حل والرد"}
-                            </button>
-
-                            <button
-                              type="button"
-                              onClick={() => handleDeleteTicket(t.id)}
-                              className="p-1 rounded-lg hover:bg-red-50 text-slate-400 hover:text-red-600 transition-all"
-                              title="حذف"
-                            >
-                              <Trash2 className="w-3.5 h-3.5" />
-                            </button>
-                          </div>
-                        </div>
-
-                        {/* Description */}
-                        <div className="text-xs sm:text-sm text-slate-700 bg-slate-50/60 p-3 rounded-xl border border-slate-200/60 font-medium">
-                          {t.description}
-                        </div>
-
-                        {/* Existing Admin Reply */}
-                        {t.admin_reply && !isReplying && (
-                          <div className="p-3.5 rounded-xl bg-gradient-to-br from-emerald-50 to-teal-50 border border-emerald-200 text-emerald-950 space-y-1">
-                            <div className="flex items-center justify-between text-xs font-bold text-emerald-800">
-                              <span>رد المشرف:</span>
-                              {t.admin_name && <span className="font-normal text-[11px]">{t.admin_name}</span>}
-                            </div>
-                            <p className="text-xs sm:text-sm font-semibold text-emerald-900">{t.admin_reply}</p>
-                            {t.resolved_at_human && (
-                              <div className="text-[10px] text-emerald-700/70 pt-0.5">تاريخ الحل: {t.resolved_at_human}</div>
-                            )}
-                          </div>
-                        )}
-
-                        {/* Reply Form */}
-                        {isReplying && (
-                          <div className="p-4 rounded-xl bg-white border-2 border-emerald-500 shadow-sm space-y-3">
-                            <div className="flex items-center justify-between text-xs font-bold text-slate-800">
-                              <span>كتابة رد المشرف للطالب:</span>
-                            </div>
-                            <textarea
-                              rows={2}
-                              value={ticketReplyText}
-                              onChange={(e) => setTicketReplyText(e.target.value)}
-                              placeholder="اكتب ردك وتوضيحك للطالب..."
-                              className="w-full p-2.5 rounded-lg border border-slate-200 text-xs sm:text-sm resize-none focus:border-emerald-500"
-                            />
-                            <div className="flex items-center justify-end gap-2">
-                              <button
-                                type="button"
-                                onClick={() => setTicketReplyingId(null)}
-                                className="px-3 py-1 text-xs font-bold text-slate-600 border border-slate-200 rounded-lg hover:bg-slate-50"
-                              >
-                                إلغاء
-                              </button>
-                              <button
-                                type="button"
-                                onClick={() => handleSaveTicketReply(t.id)}
-                                disabled={ticketSavingId === t.id}
-                                className="px-3.5 py-1 text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg flex items-center gap-1.5 disabled:opacity-50"
-                              >
-                                {ticketSavingId === t.id ? (
-                                  <>
-                                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                                    <span>جاري الحفظ...</span>
-                                  </>
-                                ) : (
-                                  <>
-                                    <Check className="w-3.5 h-3.5" />
-                                    <span>حفظ الرد والحالة</span>
-                                  </>
-                                )}
-                              </button>
-                            </div>
-                          </div>
-                        )}
-
-                        <div className="flex items-center justify-between text-[11px] text-slate-400 pt-0.5">
-                          <span>تاريخ التقديم: {t.created_at_human || t.created_at}</span>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
-
+              {/* Tickets Component */}
+              <MemberProfileTicketsTab
+                tickets={memberTickets}
+                loading={ticketsLoading}
+                onRefresh={loadMemberTickets}
+              />
             </div>
           )}
 
-          {/* ═════════════════════════════════════════════════════════════
-              SMS LIVE DISPATCH MODAL (TweetSMS Gateway)
-             ═════════════════════════════════════════════════════════════ */}
-          {smsModalOpen && (
-            <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto animate-in fade-in duration-200">
-              <div
-                dir={dir}
-                className="bg-white rounded-3xl max-w-lg w-full p-6 shadow-2xl border border-slate-200 space-y-4 my-8 relative"
-              >
-                {/* Header */}
-                <div className="flex items-center justify-between pb-3 border-b border-slate-100">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-2xl bg-emerald-50 text-emerald-700 flex items-center justify-center border border-emerald-100 shadow-2xs">
-                      <MessageSquare className="w-5 h-5" />
-                    </div>
-                    <div>
-                      <h3 className="text-base font-black text-[#0c2340]">
-                        {isRTL ? "إرسال رسالة SMS للعضو" : "Send SMS to Member"}
-                      </h3>
-                      <p className="text-xs text-slate-500 font-medium">
-                        {isRTL
-                          ? `إلى: ${member.name} (${reg?.phone ? `0${reg.phone.replace(/^0+/, '')}` : member.phone})`
-                          : `To: ${member.name} (${member.phone})`}
-                      </p>
-                    </div>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      if (!smsSending) {
-                        setSmsModalOpen(false);
-                        setSmsFeedback(null);
-                      }
-                    }}
-                    className="w-8 h-8 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 flex items-center justify-center transition-colors cursor-pointer"
-                  >
-                    <X className="w-4 h-4" />
-                  </button>
-                </div>
-
-                {/* Feedback Toast */}
-                {smsFeedback && (
-                  <div
-                    className={`p-3.5 rounded-2xl text-xs font-bold flex items-center gap-2 ${
-                      smsFeedback.type === "success"
-                        ? "bg-emerald-50 text-emerald-800 border border-emerald-200"
-                        : "bg-rose-50 text-rose-800 border border-rose-200"
-                    }`}
-                  >
-                    {smsFeedback.type === "success" ? (
-                      <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-                    ) : (
-                      <AlertCircle className="w-4 h-4 text-rose-600 shrink-0" />
-                    )}
-                    <span>{smsFeedback.text}</span>
-                  </div>
-                )}
-
-                <form onSubmit={handleSendSms} className="space-y-4">
-                  {/* Quick Preset Templates */}
-                  <div className="space-y-1.5">
-                    <span className="block text-xs font-bold text-slate-700">
-                      {isRTL ? "نماذج رسائل سريعة جاهزة للاستخدام:" : "Quick Templates:"}
-                    </span>
-                    <div className="flex flex-wrap gap-1.5">
-                      <button
-                        type="button"
-                        onClick={() =>
-                          setSmsMessage(
-                            `مرحباً ${member.name}، نود تذكيرك بأن رصيدك من الساعات اقترب من الانتهاء، يمكنك تجديد الحصة عبر مراجعة الاستقبال.`
-                          )
-                        }
-                        className="text-[11px] font-bold px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-emerald-50 hover:text-emerald-800 hover:border-emerald-200 border border-slate-200 text-slate-700 transition-all cursor-pointer"
-                      >
-                        ⏱️ تذكير بتجديد الساعات
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() =>
-                          setSmsMessage(
-                            `مرحباً ${member.name}، حجزك اليوم في مساحة العمل بإديو هب غزة مؤكد ونرحب بحضورك!`
-                          )
-                        }
-                        className="text-[11px] font-bold px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-emerald-50 hover:text-emerald-800 hover:border-emerald-200 border border-slate-200 text-slate-700 transition-all cursor-pointer"
-                      >
-                        📅 تأكيد حجز اليوم
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() =>
-                          setSmsMessage(
-                            `مرحباً ${member.name}، يرجى التفضل بمراجعة إدارة مساحة إديو هب لتسوية المستحقات المالية المتبقية.`
-                          )
-                        }
-                        className="text-[11px] font-bold px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-emerald-50 hover:text-emerald-800 hover:border-emerald-200 border border-slate-200 text-slate-700 transition-all cursor-pointer"
-                      >
-                        💳 تسوية المستحقات
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() =>
-                          setSmsMessage(
-                            `مرحباً ${member.name}، نتمنى لك يوماً موفقاً ومثمراً في مساحة العمل بإديو هب غزة.`
-                          )
-                        }
-                        className="text-[11px] font-bold px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-emerald-50 hover:text-emerald-800 hover:border-emerald-200 border border-slate-200 text-slate-700 transition-all cursor-pointer"
-                      >
-                        ✨ ترحيب عام
-                      </button>
-                    </div>
-                  </div>
-
-                  {/* Message Content Textarea */}
-                  <div className="space-y-1.5">
-                    <div className="flex items-center justify-between">
-                      <label className="block text-xs font-bold text-slate-700">
-                        {isRTL ? "نص الرسالة المرسلة:" : "Message Text:"}
-                      </label>
-                      <div className="text-[11px] font-mono text-slate-500 font-bold">
-                        <span>{smsMessage.length} حرف</span>
-                        <span className="text-slate-400 mx-1">•</span>
-                        <span className="text-emerald-700">
-                          {Math.max(1, Math.ceil(smsMessage.length / 70))} SMS
-                        </span>
-                      </div>
-                    </div>
-                    <textarea
-                      rows={4}
-                      required
-                      value={smsMessage}
-                      onChange={(e) => setSmsMessage(e.target.value)}
-                      placeholder={
-                        isRTL
-                          ? "اكتب نص الرسالة النصية القصيرة هنا..."
-                          : "Type the SMS message text here..."
-                      }
-                      className="w-full px-3.5 py-2.5 rounded-2xl border border-slate-200 text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 bg-slate-50/50 hover:bg-white resize-none transition-all leading-relaxed"
-                    />
-                  </div>
-
-                  {/* Gateway Notice */}
-                  <div className="p-3 rounded-xl bg-slate-50 border border-slate-200/70 text-[11px] text-slate-600 flex items-center justify-between">
-                    <div className="flex items-center gap-1.5">
-                      <ShieldCheck className="w-4 h-4 text-emerald-600 shrink-0" />
-                      <span>{isRTL ? "بوابة الإرسال: TweetSMS المعتمدة" : "Gateway: TweetSMS"}</span>
-                    </div>
-                    <span className="font-mono font-bold text-slate-700 bg-white px-2 py-0.5 rounded border border-slate-200">
-                      Sender: EDU HUB
-                    </span>
-                  </div>
-
-                  {/* Actions */}
-                  <div className="flex items-center justify-end gap-2.5 pt-2 border-t border-slate-100">
-                    <button
-                      type="button"
-                      disabled={smsSending}
-                      onClick={() => {
-                        setSmsModalOpen(false);
-                        setSmsFeedback(null);
-                      }}
-                      className="px-4 py-2.5 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-100 text-xs font-bold transition-all cursor-pointer"
-                    >
-                      {isRTL ? "إلغاء" : "Cancel"}
-                    </button>
-                    <button
-                      type="submit"
-                      disabled={smsSending || !smsMessage.trim()}
-                      className="px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white text-xs font-bold transition-all cursor-pointer shadow-xs active:scale-95 flex items-center gap-2"
-                    >
-                      {smsSending ? (
-                        <>
-                          <Loader2 className="w-4 h-4 animate-spin" />
-                          <span>{isRTL ? "جاري الإرسال الآن..." : "Sending..."}</span>
-                        </>
-                      ) : (
-                        <>
-                          <Send className="w-4 h-4" />
-                          <span>{isRTL ? "إرسال رسالة SMS الآن" : "Send SMS Now"}</span>
-                        </>
-                      )}
-                    </button>
-                  </div>
-                </form>
-              </div>
-            </div>
-          )}
-
+          {/* SMS Live Dispatch Modal Component */}
+          <MemberProfileSmsModal
+            isOpen={smsModalOpen}
+            onClose={() => {
+              if (!smsSending) {
+                setSmsModalOpen(false);
+                setSmsFeedback(null);
+              }
+            }}
+            member={member}
+            isRTL={isRTL}
+            smsMessage={smsMessage}
+            setSmsMessage={setSmsMessage}
+            smsSending={smsSending}
+            smsFeedback={smsFeedback}
+            onSend={handleSendSms}
+          />
         </main>
       </div>
     </div>

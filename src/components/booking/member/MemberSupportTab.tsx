@@ -55,12 +55,31 @@ export default function MemberSupportTab() {
 
   useEffect(() => {
     fetchTickets();
-    // Auto-refresh every 12 seconds so admin replies appear automatically
+
+    // Smart polling: only poll when tab is visible and there are tickets awaiting response
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === "visible") {
+        fetchTickets(false);
+      }
+    };
+
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+
     const interval = setInterval(() => {
-      fetchTickets(false);
-    }, 12000);
-    return () => clearInterval(interval);
-  }, [fetchTickets]);
+      // Pause polling if document is hidden or all tickets are already resolved
+      if (
+        document.visibilityState === "visible" &&
+        (tickets.length === 0 || tickets.some((t) => t.status !== "resolved"))
+      ) {
+        fetchTickets(false);
+      }
+    }, 18000);
+
+    return () => {
+      clearInterval(interval);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+    };
+  }, [fetchTickets, tickets]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

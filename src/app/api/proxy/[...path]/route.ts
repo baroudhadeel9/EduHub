@@ -8,6 +8,17 @@ const BACKEND_TARGET =
     ? "http://127.0.0.1:8000/api"
     : CLOUD_FALLBACK);
 
+// Background Keep-Alive tracker to prevent Render free-tier sleep
+let lastKeepAlive = 0;
+
+function triggerBackgroundKeepAlive() {
+  const now = Date.now();
+  if (now - lastKeepAlive > 7 * 60 * 1000) {
+    lastKeepAlive = now;
+    fetch(`${CLOUD_FALLBACK}/health`, { cache: "no-store" }).catch(() => {});
+  }
+}
+
 async function handleProxy(
   req: NextRequest,
   { params }: { params: Promise<{ path: string[] }> }
@@ -34,6 +45,9 @@ async function handleProxy(
   if (contentType) forwardHeaders.set("Content-Type", contentType);
 
   const method = req.method;
+
+  // Trigger non-blocking keep-alive ping to keep the cloud server warm
+  triggerBackgroundKeepAlive();
 
   let body: BodyInit | null = null;
   if (method !== "GET" && method !== "HEAD") {
@@ -69,6 +83,24 @@ async function handleProxy(
         });
       } catch (fallbackErr) {
         console.error("Cloud fallback error:", fallbackErr);
+      }
+    }
+
+    // If server was cold/sleeping, wait 2 seconds and retry once before giving up
+    if (!upstreamRes) {
+      try {
+        await new Promise((r) => setTimeout(r, 2000));
+        const retryUrl = targetUrl.includes("127.0.0.1") || targetUrl.includes("localhost")
+          ? `${CLOUD_FALLBACK}/${pathStr}${search}`
+          : targetUrl;
+        upstreamRes = await fetch(retryUrl, {
+          method,
+          headers: forwardHeaders,
+          body,
+          cache: "no-store",
+        });
+      } catch (retryErr) {
+        console.error("Wake-up retry failed:", retryErr);
       }
     }
 
