@@ -48,7 +48,6 @@ interface AvailableSeatOption {
 }
 
 const ALL_TIME_SLOTS = [
-  "08:00",
   "09:00",
   "10:00",
   "11:00",
@@ -194,7 +193,7 @@ export default function AdminQuickBookingModal({
     );
   });
 
-  // Calculate start time options (08:00 to 15:00)
+  // Calculate start time options (09:00 to 15:00)
   const startTimeOptions = ALL_TIME_SLOTS.slice(0, ALL_TIME_SLOTS.length - 1);
 
   // End time options: only slots strictly after startTime

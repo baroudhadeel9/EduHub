@@ -30,8 +30,6 @@ export default function VisitorPassTab() {
   const [todayStr, setTodayStr] = useState("");
 
   const allSlots = [
-    { hour24: 8, labelAr: "08:00 صباحاً", labelEn: "08:00 AM" },
-    { hour24: 8.5, labelAr: "08:30 صباحاً", labelEn: "08:30 AM" },
     { hour24: 9, labelAr: "09:00 صباحاً", labelEn: "09:00 AM" },
     { hour24: 9.5, labelAr: "09:30 صباحاً", labelEn: "09:30 AM" },
     { hour24: 10, labelAr: "10:00 صباحاً", labelEn: "10:00 AM" },
@@ -49,7 +47,7 @@ export default function VisitorPassTab() {
     { hour24: 16, labelAr: "04:00 عصراً (موعد الإغلاق)", labelEn: "04:00 PM (Closing)" },
   ];
 
-  // Arrival slots: strictly before 4:00 PM (8:00 AM to 3:30 PM)
+  // Arrival slots: strictly before 4:00 PM (9:00 AM to 3:30 PM)
   const arrivalSlots = allSlots.filter((s) => s.hour24 < 16);
 
   // Departure slots: strictly after the selected arrival time up to 4:00 PM
@@ -238,7 +236,7 @@ export default function VisitorPassTab() {
             <div className="flex items-center justify-between">
               <span className="text-xs font-bold text-slate-800 flex items-center gap-1.5">
                 <Clock className="w-3.5 h-3.5 text-emerald-600" />
-                <span>{isRTL ? "وقت الزيارة (الحضور والمغادرة • من 08:00 ص إلى 04:00 م)" : "Visit Hours (Arrival & Departure • 08:00 AM to 04:00 PM)"}</span>
+                <span>{isRTL ? "وقت الزيارة (الحضور والمغادرة • من 09:00 ص إلى 04:00 م)" : "Visit Hours (Arrival & Departure • 09:00 AM to 04:00 PM)"}</span>
               </span>
               <span className="text-[11px] font-bold text-emerald-700 bg-emerald-100/80 px-2.5 py-0.5 rounded-md font-mono">
                 {isRTL

@@ -78,7 +78,7 @@ const getFormattedRoomName = (nameAr: string, roomKey?: string) => {
 
 const mapRawBookingToMemberBooking = (b: Record<string, unknown>): MemberBooking => {
   const bId = String(b.id || b.booking_code || "");
-  const startRaw = String(b.startTime || b.start_time || "08:00");
+  const startRaw = String(b.startTime || b.start_time || "09:00");
   const endRaw = String(b.endTime || b.end_time || "16:00");
   const duration = Number(b.hours_count ?? b.durationHours ?? b.duration_hours ?? 8);
   const rawDate = String(b.date || b.booking_date || "");
@@ -171,7 +171,7 @@ export default function MemberBookingTab({ onApplyNewMember }: MemberBookingTabP
   }, [availableRooms, selectedRoomId]);
 
   // Dynamic Shift & Hourly Time-Slot Sharing State
-  const [bookingStartTime, setBookingStartTime] = useState<string>("08:00");
+  const [bookingStartTime, setBookingStartTime] = useState<string>("09:00");
   const [bookingEndTime, setBookingEndTime] = useState<string>("16:00");
 
   // Change password modal state
@@ -614,15 +614,15 @@ export default function MemberBookingTab({ onApplyNewMember }: MemberBookingTabP
                     <button
                       type="button"
                       onClick={() => {
-                        setBookingStartTime("08:00");
+                        setBookingStartTime("09:00");
                         setBookingEndTime("16:00");
                         setSelectedSeat(null);
                       }}
                       className="px-3.5 py-1.5 rounded-full text-xs font-black bg-emerald-600 hover:bg-emerald-700 text-white flex items-center gap-1.5 shadow-xs cursor-pointer transition-all active:scale-95"
                     >
                       <Clock className="w-3.5 h-3.5" />
-                      <span>{isRTL ? "8 ص – 4 م" : "8 AM – 4 PM"}</span>
-                      <span className="opacity-90 font-bold">{isRTL ? "8 ساعات" : "8 hrs"}</span>
+                      <span>{isRTL ? "9 ص – 4 م" : "9 AM – 4 PM"}</span>
+                      <span className="opacity-90 font-bold">{isRTL ? "7 ساعات" : "7 hrs"}</span>
                     </button>
                   </div>
 
@@ -635,7 +635,7 @@ export default function MemberBookingTab({ onApplyNewMember }: MemberBookingTabP
                           <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-[0_0_6px_rgba(16,185,129,0.5)]" />
                           <span className="text-slate-800 font-extrabold">{isRTL ? "وقت الحضور" : "Arrival Time"}</span>
                         </span>
-                        <span className="text-[10px] text-slate-400 font-mono">08:00 ص – 03:00 م</span>
+                        <span className="text-[10px] text-slate-400 font-mono">09:00 ص – 03:00 م</span>
                       </label>
                       <select
                         value={bookingStartTime}
@@ -651,7 +651,6 @@ export default function MemberBookingTab({ onApplyNewMember }: MemberBookingTabP
                         }}
                         className="w-full bg-white border border-slate-200/90 rounded-xl px-3 py-2.5 text-xs sm:text-sm font-black text-slate-800 shadow-2xs focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none cursor-pointer hover:border-slate-300 transition-all"
                       >
-                        <option value="08:00">08:00 ص</option>
                         <option value="09:00">09:00 ص</option>
                         <option value="10:00">10:00 ص</option>
                         <option value="11:00">11:00 ص</option>

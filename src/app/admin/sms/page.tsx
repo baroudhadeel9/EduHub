@@ -108,8 +108,8 @@ export default function AdminSmsPage() {
     {
       title: isRTL ? "⏰ تعديل مواعيد الدوام" : "Adjusted Hours",
       text: isRTL
-        ? "تنويه من إديو هب غزة: نلفت عنايتكم إلى تعديل ساعات العمل واستقبال الحجوزات اليوم لتكون من الساعة 8:00 صباحاً وحتى 4:00 مساءً."
-        : "Notice: EduHub Gaza opening hours today are adjusted to 8:00 AM - 4:00 PM.",
+        ? "تنويه من إديو هب غزة: نلفت عنايتكم إلى تعديل ساعات العمل واستقبال الحجوزات اليوم لتكون من الساعة 9:00 صباحاً وحتى 4:00 مساءً."
+        : "Notice: EduHub Gaza opening hours today are adjusted to 9:00 AM - 4:00 PM.",
     },
     {
       title: isRTL ? "⚡ توفر الطاقة والإنترنت" : "Power & Internet Ready",

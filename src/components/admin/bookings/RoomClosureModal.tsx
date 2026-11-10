@@ -35,7 +35,6 @@ const PRESET_REASONS = [
 ];
 
 const TIME_SLOTS = [
-  "08:00",
   "09:00",
   "10:00",
   "11:00",
@@ -305,7 +304,7 @@ export default function RoomClosureModal({
                     : "bg-white text-slate-700 border-slate-200 hover:bg-slate-100"
                 }`}
               >
-                {isRTL ? "اليوم بالكامل (08:00 - 16:00)" : "Full Day"}
+                {isRTL ? "اليوم بالكامل (09:00 - 16:00)" : "Full Day"}
               </button>
 
               <button
@@ -365,11 +364,11 @@ export default function RoomClosureModal({
               {/* Informative notice */}
               <p className="text-[10.5px] text-amber-900 font-medium leading-relaxed">
                 ✨ {isRTL
-                  ? (startTime === "08:00"
-                      ? `سيتم إغلاق الصالة في بداية الدوام لمدة (${durationHours} ${durationHours === 1 ? "ساعة" : durationHours === 2 ? "ساعتان" : "ساعات"}) فقط (من 08:00 إلى ${endTime})، وتكون الصالة متاحة للحجز بشكل طبيعي بعد انتهاء الإغلاق (من ${endTime} حتى 16:00).`
+                  ? (startTime === "09:00"
+                      ? `سيتم إغلاق الصالة في بداية الدوام لمدة (${durationHours} ${durationHours === 1 ? "ساعة" : durationHours === 2 ? "ساعتان" : "ساعات"}) فقط (من 09:00 إلى ${endTime})، وتكون الصالة متاحة للحجز بشكل طبيعي بعد انتهاء الإغلاق (من ${endTime} حتى 16:00).`
                       : endTime === "16:00"
-                      ? `سيتم إغلاق الصالة في نهاية الدوام لمدة (${durationHours} ${durationHours === 1 ? "ساعة" : durationHours === 2 ? "ساعتان" : "ساعات"}) فقط (من ${startTime} إلى 16:00)، وتكون الصالة متاحة للحجز في بداية اليوم (من 08:00 حتى ${startTime}).`
-                      : `سيتم إغلاق الصالة لمدة (${durationHours} ${durationHours === 1 ? "ساعة" : durationHours === 2 ? "ساعتان" : "ساعات"}) فقط من (${startTime} إلى ${endTime})، ويستطيع الطلاب الحجز في الساعات المتاحة (من 08:00 إلى ${startTime}) و (من ${endTime} إلى 16:00) بحرية تامّة.`)
+                      ? `سيتم إغلاق الصالة في نهاية الدوام لمدة (${durationHours} ${durationHours === 1 ? "ساعة" : durationHours === 2 ? "ساعتان" : "ساعات"}) فقط (من ${startTime} إلى 16:00)، وتكون الصالة متاحة للحجز في بداية اليوم (من 09:00 حتى ${startTime}).`
+                      : `سيتم إغلاق الصالة لمدة (${durationHours} ${durationHours === 1 ? "ساعة" : durationHours === 2 ? "ساعتان" : "ساعات"}) فقط من (${startTime} إلى ${endTime})، ويستطيع الطلاب الحجز في الساعات المتاحة (من 09:00 إلى ${startTime}) و (من ${endTime} إلى 16:00) بحرية تامّة.`)
                   : `Room closed for ${durationHours}h only. Students can freely book outside this period.`}
               </p>
             </div>

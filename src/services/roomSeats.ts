@@ -173,7 +173,7 @@ export async function getRoomsOverviewApi(
 }
 
 /**
- * Fetch single seat details and full 8:00 - 16:00 slots calendar
+ * Fetch single seat details and full 9:00 - 16:00 slots calendar
  */
 export async function getSeatCalendarApi(
   seatId: number | string,

@@ -115,7 +115,7 @@
     },
     "hoursStatus": {
       "title": "Today's Operating Hours",
-      "value": "08:00 AM - 04:00 PM",
+      "value": "09:00 AM - 04:00 PM",
       "desc": "Flexible daily operating hours to maximize community access",
       "percentage": 80
     },
@@ -196,7 +196,7 @@
         {
           "id": "morning",
           "name": "Morning Shift",
-          "time": "08:00 AM - 12:00 PM"
+          "time": "09:00 AM - 12:00 PM"
         },
         {
           "id": "afternoon",
@@ -445,7 +445,7 @@
     ],
     "period": "Preferred Shift",
     "periods": [
-      "Morning Shift (08:00 AM - 12:00 PM)",
+      "Morning Shift (09:00 AM - 12:00 PM)",
       "Afternoon Shift (12:00 PM - 03:30 PM)",
       "Evening Shift (03:30 PM - 07:00 PM)"
     ],
@@ -453,7 +453,7 @@
     "successMsg": "Your desk reservation has been submitted successfully! A confirmation notice will be sent via WhatsApp/Email.",
     "closeBtn": "Close",
     "mvpPlanBadge": "MVP Plan",
-    "workingHours": "Hours: 08:00 - 16:00",
+    "workingHours": "Hours: 09:00 - 16:00",
     "modalTitle": "EduHub Desk Reservation Hub",
     "modalSubtitle": "Choose the appropriate path to book your free workstation, electricity, and high-speed internet:",
     "activeMemberTitle": "Active Member (Direct Desk Booking)",
@@ -523,7 +523,7 @@
     ],
     "transparencyTitle": "Transparency & Operations",
     "transparencyItems": [
-      "Working Hours: 08:00 AM - 04:00 PM",
+      "Working Hours: 09:00 AM - 04:00 PM",
       "Location: Gaza - Al-Wehda St, Sondos Bldg (1st Floor)",
       "Energy System: Solar energy & generators for continuous uptime",
       "Connectivity: Dedicated High-Speed 100 Mbps Internet",
@@ -677,7 +677,7 @@
     "quotaUsedSuffix": "hours this month",
     "quotaRemaining": "Remaining:",
     "dailyLimitNote": "Daily limit: up to {limit} hours per day",
-    "workingHoursNote": "Working hours: 08:00 AM – 04:00 PM",
+    "workingHoursNote": "Working hours: 09:00 AM – 04:00 PM",
     "bookNewDesk": "Book a New Desk",
     "myBookings": "My Bookings",
     "bookingDate": "Booking Date",
@@ -724,7 +724,7 @@
     "visitReason": "Reason for Visit",
     "visitReasonPlaceholder": "e.g. Online exam, urgent remote meeting, device recharge...",
     "submitVisitorBtn": "Submit Visitor Pass Request",
-    "errClosingTime": "Booking must conclude before 16:00 (closing time 08:00 to 16:00).",
+    "errClosingTime": "Booking must conclude before 16:00 (closing time 09:00 to 16:00).",
     "errDailyLimit": "Daily limit for freelancer plan is {limit} hours.",
     "errQuotaRemaining": "Your remaining monthly quota ({remaining}h) is insufficient for {duration}h.",
     "errAlreadyBooked": "You already have a confirmed booking on this date. One reservation per day is allowed.",

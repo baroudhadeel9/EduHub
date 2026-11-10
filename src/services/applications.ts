@@ -784,9 +784,9 @@ export async function createMemberBookingApi(
     body: JSON.stringify({
       bookingDate: bookingData.date,
       date: bookingData.date,
-      startTime: bookingData.startTime || "08:00",
+      startTime: bookingData.startTime || "09:00",
       endTime: bookingData.endTime || "16:00",
-      durationHours: bookingData.durationHours ?? 8,
+      durationHours: bookingData.durationHours ?? 7,
       notes: bookingData.notes || "",
       seat_id: bookingData.seat_id,
       room_id: bookingData.room_id,

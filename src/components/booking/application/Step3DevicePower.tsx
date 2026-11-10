@@ -175,7 +175,7 @@ export default function Step3DevicePower({
             onChange={(e) => setPreferredShift(e.target.value)}
             className="w-full bg-[#f8fafc] border border-slate-200 rounded-xl px-4 py-2.5 text-xs sm:text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#5243e1]/20 focus:border-[#5243e1] transition-all font-medium cursor-pointer"
           >
-            <option value="الفترة الصباحية">{isRTL ? "الفترة الصباحية (08:00 ص - 12:00 م)" : "Morning Shift"}</option>
+            <option value="الفترة الصباحية">{isRTL ? "الفترة الصباحية (09:00 ص - 12:00 م)" : "Morning Shift"}</option>
             <option value="الفترة المسائية">{isRTL ? "الفترة المسائية (12:00 م - 04:00 م)" : "Evening Shift"}</option>
             <option value="في كلا الموعدين حسب الحاجة">{isRTL ? "في كلا الموعدين حسب الحاجة" : "Both shifts as needed"}</option>
           </select>

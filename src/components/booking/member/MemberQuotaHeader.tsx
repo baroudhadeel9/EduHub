@@ -127,8 +127,8 @@ export default function MemberQuotaHeader({
           ) : (
             <span>
               {isRTL
-                ? "ساعات العمل: 08:00 صباحاً – 04:00 مساءً"
-                : "Working hours: 08:00 – 16:00"}
+                ? "ساعات العمل: 09:00 صباحاً – 04:00 مساءً"
+                : "Working hours: 09:00 – 16:00"}
             </span>
           )}
         </div>

@@ -410,8 +410,8 @@ export default function MemberBookingsList({
                         {booking.startTime && booking.endTime
                           ? `${formatHour12(booking.startTime)} – ${formatHour12(booking.endTime)}`
                           : isRTL
-                          ? "08:00 ص – 04:00 م"
-                          : "08:00 AM – 04:00 PM"}
+                          ? "09:00 ص – 04:00 م"
+                          : "09:00 AM – 04:00 PM"}
                       </span>
                     </div>
                   </div>
