@@ -1,30 +1,24 @@
 "use client";
 
-import React, { useState, useEffect, useCallback, useMemo } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import {
   LifeBuoy,
   Search,
-  Filter,
   CheckCircle2,
   Clock,
   AlertCircle,
   MessageSquare,
-  Zap,
-  Wifi,
-  Armchair,
-  Building2,
-  HelpCircle,
   Send,
   Loader2,
   RefreshCw,
   ExternalLink,
   Phone,
   Mail,
-  User as UserIcon,
-  ShieldAlert,
   Trash2,
   Check,
+  ChevronDown,
+  Sparkles,
 } from "lucide-react";
 import {
   getAdminSupportTicketsApi,
@@ -33,17 +27,7 @@ import {
   SupportTicketItem,
   SupportTicketStats,
   SupportTicketStatus,
-  SupportTicketCategory,
 } from "@/services/supportTickets";
-
-const CATEGORIES: { id: SupportTicketCategory; label: string; icon: React.ElementType }[] = [
-  { id: "power_charging", label: "الكهرباء والشواحن", icon: Zap },
-  { id: "internet", label: "شبكة الإنترنت", icon: Wifi },
-  { id: "booking_seat", label: "المقاعد والحجوزات", icon: Armchair },
-  { id: "facility", label: "المرافق والهدوء", icon: Building2 },
-  { id: "account_quota", label: "الحساب والرصيد", icon: Clock },
-  { id: "general", label: "عام / أخرى", icon: HelpCircle },
-];
 
 export default function SupportTicketsView() {
   const [tickets, setTickets] = useState<SupportTicketItem[]>([]);
@@ -53,8 +37,6 @@ export default function SupportTicketsView() {
 
   // Filters
   const [statusFilter, setStatusFilter] = useState<string>("all");
-  const [categoryFilter, setCategoryFilter] = useState<string>("all");
-  const [priorityFilter, setPriorityFilter] = useState<string>("all");
   const [searchQuery, setSearchQuery] = useState<string>("");
 
   // Ticket being edited / replied to
@@ -71,8 +53,6 @@ export default function SupportTicketsView() {
     try {
       const res = await getAdminSupportTicketsApi({
         status: statusFilter,
-        category: categoryFilter,
-        priority: priorityFilter,
         search: searchQuery,
       });
 
@@ -86,7 +66,7 @@ export default function SupportTicketsView() {
       setLoading(false);
       setRefreshing(false);
     }
-  }, [statusFilter, categoryFilter, priorityFilter, searchQuery]);
+  }, [statusFilter, searchQuery]);
 
   useEffect(() => {
     fetchTickets();
@@ -108,10 +88,10 @@ export default function SupportTicketsView() {
       });
 
       if (res.success) {
-        setActionSuccess(res.message || "تم حفظ الرد وتحديث الحالة بنجاح.");
+        setActionSuccess(res.message || "تم حفظ الرد وتحديث حالة التذكرة بنجاح.");
         setReplyingTicketId(null);
         fetchTickets(true);
-        setTimeout(() => setActionSuccess(null), 3000);
+        setTimeout(() => setActionSuccess(null), 3500);
       } else {
         alert(res.message || "تعذر تحديث التذكرة.");
       }
@@ -123,7 +103,7 @@ export default function SupportTicketsView() {
   };
 
   const handleDelete = async (ticketId: number) => {
-    if (!confirm("هل أنت متأكد من رغبتك في حذف هذه التذكرة؟")) return;
+    if (!confirm("هل أنت متأكد من رغبتك في حذف هذه المشكلة؟")) return;
 
     try {
       const res = await deleteAdminSupportTicketApi(ticketId);
@@ -138,31 +118,26 @@ export default function SupportTicketsView() {
     }
   };
 
-  const getCategoryIcon = (cat: string) => {
-    const match = CATEGORIES.find((c) => c.id === cat);
-    return match ? match.icon : HelpCircle;
-  };
-
   return (
-    <div className="space-y-6 animate-in fade-in duration-300">
+    <div className="space-y-6 animate-in fade-in duration-300 pb-12">
       
       {/* ── Soft & Elegant Top Header ── */}
-      <div className="p-4 sm:p-5 rounded-2xl sm:rounded-3xl bg-white border border-slate-200/90 shadow-2xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+      <div className="p-5 sm:p-6 rounded-3xl bg-white border border-slate-100 shadow-2xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div className="flex items-center gap-3.5">
-          <div className="w-11 h-11 rounded-2xl bg-rose-50 text-rose-600 flex items-center justify-center font-black text-xl border border-rose-100 shadow-2xs shrink-0">
-            <LifeBuoy className="w-6 h-6" />
+          <div className="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-700 flex items-center justify-center font-black text-xl border border-emerald-100/80 shadow-2xs shrink-0">
+            <LifeBuoy className="w-6 h-6 text-emerald-600" />
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <h2 className="text-base sm:text-lg font-extrabold text-[#0c2340]">
-                إدارة تذاكر الدعم ومشاكل الطلاب
+              <h2 className="text-lg sm:text-xl font-black text-[#0c2340]">
+                الدعم الفني ومشاكل الطلاب
               </h2>
-              <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-50 text-emerald-800 border border-emerald-200/80 shadow-2xs">
-                متابعة وحل المشاكل
+              <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200/60 shadow-2xs">
+                متابعة فورية
               </span>
             </div>
-            <p className="text-xs text-slate-500 mt-0.5">
-              رصد كافة المشاكل والاستفسارات المقدمة من الطلاب والأعضاء، ومعرفة من قدمها وحلها مع توثيق الرد.
+            <p className="text-xs sm:text-sm text-slate-500 mt-1">
+              متابعة مشاكل واستفسارات الطلاب في الصالة، والرد عليها وتوثيق الحل مباشرة في حساب الطالب.
             </p>
           </div>
         </div>
@@ -171,7 +146,7 @@ export default function SupportTicketsView() {
           type="button"
           onClick={() => fetchTickets(true)}
           disabled={refreshing || loading}
-          className="flex items-center gap-2 px-3.5 py-2 rounded-xl border border-slate-200/80 hover:bg-slate-50 active:bg-slate-100 text-slate-700 text-xs font-bold transition-all cursor-pointer disabled:opacity-50 shadow-2xs self-stretch sm:self-auto justify-center"
+          className="flex items-center gap-2 px-4 py-2.5 rounded-2xl border border-slate-200/80 hover:bg-slate-50 active:bg-slate-100 text-slate-700 text-xs sm:text-sm font-bold transition-all cursor-pointer disabled:opacity-50 shadow-2xs self-stretch sm:self-auto justify-center"
         >
           <RefreshCw className={`w-3.5 h-3.5 ${refreshing ? "animate-spin text-emerald-600" : ""}`} />
           <span>تحديث القائمة</span>
@@ -179,115 +154,90 @@ export default function SupportTicketsView() {
       </div>
 
       {actionSuccess && (
-        <div className="p-3.5 rounded-xl bg-emerald-50 border border-emerald-200 text-xs sm:text-sm font-bold text-emerald-800 flex items-center gap-2 animate-in fade-in">
+        <div className="p-4 rounded-2xl bg-emerald-50/90 border border-emerald-200 text-xs sm:text-sm font-bold text-emerald-800 flex items-center gap-2.5 animate-in fade-in shadow-2xs">
           <CheckCircle2 className="w-4 h-4 shrink-0 text-emerald-600" />
           <span>{actionSuccess}</span>
         </div>
       )}
 
-      {/* ── Top Metric Cards ── */}
+      {/* ── Soft & Pastel Top Metrics ── */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
         
-        {/* Urgent Pending */}
-        <div className="p-4 rounded-2xl bg-white border border-rose-200 shadow-2xs flex items-center justify-between">
+        {/* Open / Pending */}
+        <div className="p-4 sm:p-5 rounded-2xl sm:rounded-3xl bg-amber-50/40 border border-amber-100/90 shadow-2xs flex items-center justify-between">
           <div>
-            <span className="text-[11px] font-bold text-rose-600 flex items-center gap-1">
-              <span className="w-2 h-2 rounded-full bg-rose-500 animate-ping"></span>
-              مشاكل عاجلة قيد الانتظار
-            </span>
-            <h3 className="text-xl sm:text-2xl font-black text-rose-700 mt-0.5">
-              {stats?.urgent_pending ?? 0}
-            </h3>
-          </div>
-          <div className="w-10 h-10 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center font-bold">
-            <ShieldAlert className="w-5 h-5" />
-          </div>
-        </div>
-
-        {/* Total Open / Pending */}
-        <div className="p-4 rounded-2xl bg-white border border-amber-200 shadow-2xs flex items-center justify-between">
-          <div>
-            <span className="text-[11px] font-bold text-amber-700">قيد المراجعة والانتظار</span>
-            <h3 className="text-xl sm:text-2xl font-black text-amber-800 mt-0.5">
+            <span className="text-xs font-bold text-amber-800">قيد الانتظار</span>
+            <h3 className="text-2xl sm:text-3xl font-black text-amber-900 mt-1">
               {stats?.open ?? 0}
             </h3>
+            <p className="text-[11px] text-amber-700/80 mt-0.5">بانتظار المراجعة</p>
           </div>
-          <div className="w-10 h-10 rounded-xl bg-amber-50 text-amber-700 flex items-center justify-center font-bold">
-            <Clock className="w-5 h-5" />
+          <div className="w-11 h-11 rounded-2xl bg-amber-100/80 text-amber-800 flex items-center justify-center">
+            <Clock className="w-5 h-5 text-amber-700" />
           </div>
         </div>
 
         {/* In Progress */}
-        <div className="p-4 rounded-2xl bg-white border border-blue-200 shadow-2xs flex items-center justify-between">
+        <div className="p-4 sm:p-5 rounded-2xl sm:rounded-3xl bg-blue-50/40 border border-blue-100/90 shadow-2xs flex items-center justify-between">
           <div>
-            <span className="text-[11px] font-bold text-blue-700">جاري المتابعة والحل</span>
-            <h3 className="text-xl sm:text-2xl font-black text-blue-800 mt-0.5">
+            <span className="text-xs font-bold text-blue-800">جاري المتابعة</span>
+            <h3 className="text-2xl sm:text-3xl font-black text-blue-900 mt-1">
               {stats?.in_progress ?? 0}
             </h3>
+            <p className="text-[11px] text-blue-700/80 mt-0.5">يتم معالجتها حالياً</p>
           </div>
-          <div className="w-10 h-10 rounded-xl bg-blue-50 text-blue-700 flex items-center justify-center font-bold">
-            <Loader2 className="w-5 h-5" />
+          <div className="w-11 h-11 rounded-2xl bg-blue-100/80 text-blue-800 flex items-center justify-center">
+            <Loader2 className="w-5 h-5 text-blue-700" />
           </div>
         </div>
 
         {/* Resolved */}
-        <div className="p-4 rounded-2xl bg-white border border-emerald-200 shadow-2xs flex items-center justify-between">
+        <div className="p-4 sm:p-5 rounded-2xl sm:rounded-3xl bg-emerald-50/40 border border-emerald-100/90 shadow-2xs flex items-center justify-between">
           <div>
-            <span className="text-[11px] font-bold text-emerald-700">تم حلها بنجاح</span>
-            <h3 className="text-xl sm:text-2xl font-black text-emerald-800 mt-0.5">
+            <span className="text-xs font-bold text-emerald-800">تم حلها بنجاح</span>
+            <h3 className="text-2xl sm:text-3xl font-black text-emerald-900 mt-1">
               {stats?.resolved ?? 0}
             </h3>
+            <p className="text-[11px] text-emerald-700/80 mt-0.5">تم توثيق الرد للطالب</p>
           </div>
-          <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-700 flex items-center justify-center font-bold">
-            <CheckCircle2 className="w-5 h-5" />
+          <div className="w-11 h-11 rounded-2xl bg-emerald-100/80 text-emerald-800 flex items-center justify-center">
+            <CheckCircle2 className="w-5 h-5 text-emerald-700" />
+          </div>
+        </div>
+
+        {/* Total */}
+        <div className="p-4 sm:p-5 rounded-2xl sm:rounded-3xl bg-slate-50/60 border border-slate-100 shadow-2xs flex items-center justify-between">
+          <div>
+            <span className="text-xs font-bold text-slate-700">إجمالي المشاكل</span>
+            <h3 className="text-2xl sm:text-3xl font-black text-slate-800 mt-1">
+              {stats?.total ?? 0}
+            </h3>
+            <p className="text-[11px] text-slate-500 mt-0.5">كافة المشاكل المسجلة</p>
+          </div>
+          <div className="w-11 h-11 rounded-2xl bg-slate-100 text-slate-700 flex items-center justify-center">
+            <LifeBuoy className="w-5 h-5 text-slate-600" />
           </div>
         </div>
 
       </div>
 
-      {/* ── Search & Filter Controls ── */}
-      <div className="p-4 rounded-2xl bg-white border border-slate-200 shadow-2xs space-y-3">
-        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
-          
-          {/* Search Input */}
-          <div className="relative flex-1">
-            <Search className="w-4 h-4 text-slate-400 absolute right-3.5 top-1/2 -translate-y-1/2" />
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="ابحث باسم الطالب، البريد، رقم الهاتف، أو نص المشكلة..."
-              className="w-full pr-10 pl-4 py-2.5 rounded-xl border border-slate-200 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 text-xs sm:text-sm bg-slate-50/50"
-            />
-          </div>
-
-          {/* Category Filter */}
-          <select
-            value={categoryFilter}
-            onChange={(e) => setCategoryFilter(e.target.value)}
-            className="px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-bold text-slate-700 bg-slate-50/50 focus:border-emerald-500"
-          >
-            <option value="all">جميع التصنيفات</option>
-            {CATEGORIES.map((c) => (
-              <option key={c.id} value={c.id}>{c.label}</option>
-            ))}
-          </select>
-
-          {/* Priority Filter */}
-          <select
-            value={priorityFilter}
-            onChange={(e) => setPriorityFilter(e.target.value)}
-            className="px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-bold text-slate-700 bg-slate-50/50 focus:border-emerald-500"
-          >
-            <option value="all">جميع الأولويات</option>
-            <option value="urgent">🔴 عاجل فقط</option>
-            <option value="normal">عادي</option>
-          </select>
+      {/* ── Soft Search & Status Filter Bar ── */}
+      <div className="p-3.5 sm:p-4 rounded-2xl sm:rounded-3xl bg-white border border-slate-100 shadow-2xs flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3">
+        
+        {/* Search Input */}
+        <div className="relative flex-1">
+          <Search className="w-4 h-4 text-slate-400 absolute right-3.5 top-1/2 -translate-y-1/2" />
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="ابحث باسم الطالب، البريد، رقم الهاتف، أو نص المشكلة..."
+            className="w-full pr-10 pl-4 py-2.5 rounded-2xl border border-slate-200/70 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/10 text-xs sm:text-sm bg-slate-50/50 font-medium transition-all"
+          />
         </div>
 
         {/* Status Pills */}
-        <div className="flex items-center gap-1.5 overflow-x-auto pb-1 pt-1 border-t border-slate-100">
-          <span className="text-xs font-bold text-slate-400 shrink-0 ml-2">الحالة:</span>
+        <div className="flex items-center gap-1.5 overflow-x-auto pb-0.5">
           {[
             { id: "all", label: "الكل" },
             { id: "open", label: "قيد الانتظار" },
@@ -298,10 +248,10 @@ export default function SupportTicketsView() {
               key={st.id}
               type="button"
               onClick={() => setStatusFilter(st.id)}
-              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer shrink-0 ${
+              className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer shrink-0 ${
                 statusFilter === st.id
-                  ? "bg-brand-navy text-white shadow-xs"
-                  : "bg-slate-100 hover:bg-slate-200 text-slate-700"
+                  ? "bg-[#0c2340] text-white shadow-2xs"
+                  : "bg-slate-100/80 hover:bg-slate-200 text-slate-700"
               }`}
             >
               {st.label}
@@ -313,57 +263,53 @@ export default function SupportTicketsView() {
       {/* ── Tickets List ── */}
       <div className="space-y-4">
         {loading ? (
-          <div className="p-12 text-center bg-white rounded-2xl border border-slate-200 space-y-3">
+          <div className="p-12 text-center bg-white rounded-3xl border border-slate-100 space-y-3 shadow-2xs">
             <Loader2 className="w-7 h-7 animate-spin mx-auto text-emerald-600" />
-            <p className="text-sm font-bold text-slate-600">جاري تحميل تذاكر ومشاكل الطلاب...</p>
+            <p className="text-sm font-bold text-slate-600">جاري تحميل مشاكل وتذاكر الطلاب...</p>
           </div>
         ) : tickets.length === 0 ? (
-          <div className="p-12 text-center bg-white rounded-2xl border border-slate-200 space-y-3">
-            <div className="w-12 h-12 rounded-full bg-slate-100 text-slate-500 flex items-center justify-center mx-auto text-xl">
-              🔍
+          <div className="p-12 text-center bg-white rounded-3xl border border-slate-100 space-y-3 shadow-2xs">
+            <div className="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center mx-auto text-xl">
+              ✨
             </div>
             <h4 className="text-base font-extrabold text-slate-800">لا توجد تذاكر تطابق هذا الفلتر</h4>
             <p className="text-xs text-slate-500">جرب تغيير شروط البحث أو الفلاتر أعلاه.</p>
           </div>
         ) : (
           tickets.map((ticket) => {
-            const CategoryIcon = getCategoryIcon(ticket.category);
             const isResolved = ticket.status === "resolved";
             const isInProgress = ticket.status === "in_progress";
-            const isUrgent = ticket.priority === "urgent";
             const isReplying = replyingTicketId === ticket.id;
 
             return (
               <div
                 key={ticket.id}
-                className={`p-4 sm:p-6 rounded-2xl border transition-all space-y-4 shadow-xs ${
-                  isUrgent && !isResolved
-                    ? "bg-rose-50/20 border-rose-300 ring-1 ring-rose-400/30"
-                    : isResolved
-                    ? "bg-white border-slate-200 hover:border-slate-300"
+                className={`p-5 sm:p-6 rounded-3xl border transition-all space-y-4 shadow-2xs ${
+                  isResolved
+                    ? "bg-white border-slate-100 hover:border-slate-200"
                     : isInProgress
-                    ? "bg-blue-50/20 border-blue-200 hover:border-blue-300"
-                    : "bg-amber-50/20 border-amber-200 hover:border-amber-300"
+                    ? "bg-gradient-to-br from-blue-50/20 via-white to-white border-blue-200/80 hover:border-blue-300"
+                    : "bg-gradient-to-br from-amber-50/20 via-white to-white border-amber-200/80 hover:border-amber-300"
                 }`}
               >
-                {/* ── Top Bar: Submitter Student Info & Status ── */}
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-3">
+                {/* ── Student Information & Ticket Status ── */}
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100/90 pb-3.5">
                   
-                  {/* Student Details (من قدمها) */}
+                  {/* Student Details */}
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-brand-navy to-slate-800 text-emerald-400 flex items-center justify-center font-black text-base shadow-xs shrink-0">
-                      {(ticket.user?.name || "S").charAt(0).toUpperCase()}
+                    <div className="w-11 h-11 rounded-2xl bg-[#0c2340] text-emerald-400 flex items-center justify-center font-black text-base shadow-2xs shrink-0">
+                      {(ticket.user?.name || "ط").charAt(0).toUpperCase()}
                     </div>
                     <div>
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-2 flex-wrap">
                         <span className="font-extrabold text-slate-900 text-sm sm:text-base">
-                          {ticket.user?.name || "طالب غير معروف"}
+                          {ticket.user?.name || "طالب"}
                         </span>
                         {ticket.user?.id && (
                           <Link
                             href={`/admin/members?id=${ticket.user.id}`}
-                            className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 px-2 py-0.5 rounded-lg border border-emerald-200 transition-all"
-                            title="عرض الملف الكامل للطالب وسجل الحضور والإنجازات"
+                            className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 px-2.5 py-0.5 rounded-lg border border-emerald-200/70 transition-all"
+                            title="عرض ملف العضو وسجل الحضور"
                           >
                             <span>ملف العضو</span>
                             <ExternalLink className="w-3 h-3" />
@@ -374,8 +320,8 @@ export default function SupportTicketsView() {
                         </span>
                       </div>
                       
-                      {/* Contacts */}
-                      <div className="flex items-center gap-3 text-xs text-slate-500 font-mono mt-0.5 flex-wrap">
+                      {/* Contact Info */}
+                      <div className="flex items-center gap-3 text-xs text-slate-500 font-mono mt-1 flex-wrap">
                         {ticket.user?.email && (
                           <a href={`mailto:${ticket.user.email}`} className="hover:text-emerald-700 flex items-center gap-1">
                             <Mail className="w-3 h-3 text-slate-400" />
@@ -392,14 +338,14 @@ export default function SupportTicketsView() {
                     </div>
                   </div>
 
-                  {/* Status Badge & Actions */}
+                  {/* Status Badge & Top Action Buttons */}
                   <div className="flex items-center gap-2 self-start sm:self-auto flex-wrap">
-                    <span className="text-[11px] font-mono text-slate-400">
-                      تذكرة #{ticket.id}
+                    <span className="text-xs font-mono text-slate-400 bg-slate-50 px-2 py-0.5 rounded-md">
+                      #{ticket.id}
                     </span>
 
                     <span
-                      className={`px-3 py-1 rounded-xl text-xs font-black flex items-center gap-1.5 border ${
+                      className={`px-3 py-1 rounded-xl text-xs font-black flex items-center gap-1.5 border shadow-2xs ${
                         isResolved
                           ? "bg-emerald-50 text-emerald-800 border-emerald-200"
                           : isInProgress
@@ -428,7 +374,7 @@ export default function SupportTicketsView() {
                     <button
                       type="button"
                       onClick={() => handleOpenReply(ticket)}
-                      className="px-3 py-1 rounded-xl border border-slate-200 hover:border-emerald-500 bg-white hover:bg-emerald-50 text-slate-700 hover:text-emerald-800 text-xs font-bold transition-all cursor-pointer shadow-2xs"
+                      className="px-3.5 py-1.5 rounded-xl border border-emerald-200 bg-emerald-50/70 hover:bg-emerald-100 text-emerald-800 text-xs font-bold transition-all cursor-pointer shadow-2xs active:scale-95"
                     >
                       {ticket.admin_reply ? "تعديل الرد والحالة" : "حل المشكلة والرد"}
                     </button>
@@ -436,7 +382,7 @@ export default function SupportTicketsView() {
                     <button
                       type="button"
                       onClick={() => handleDelete(ticket.id)}
-                      className="p-1.5 rounded-xl border border-slate-200 hover:border-red-300 hover:bg-red-50 text-slate-400 hover:text-red-600 transition-all cursor-pointer"
+                      className="p-1.5 rounded-xl border border-slate-200/70 hover:border-red-300 hover:bg-red-50 text-slate-400 hover:text-red-600 transition-all cursor-pointer"
                       title="حذف التذكرة"
                     >
                       <Trash2 className="w-3.5 h-3.5" />
@@ -444,109 +390,132 @@ export default function SupportTicketsView() {
                   </div>
                 </div>
 
-                {/* ── Problem Title & Classification ── */}
-                <div className="flex items-center gap-2 flex-wrap">
-                  <span className="w-8 h-8 rounded-xl bg-slate-100 flex items-center justify-center text-slate-700 shrink-0">
-                    <CategoryIcon className="w-4 h-4 text-slate-700" />
-                  </span>
-                  <h3 className="text-base sm:text-lg font-black text-slate-900">
-                    {ticket.subject}
-                  </h3>
-                  <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-slate-100 text-slate-700 border border-slate-200">
-                    {ticket.category_label}
-                  </span>
-                  {isUrgent && (
-                    <span className="px-2.5 py-0.5 rounded-full text-xs font-black bg-rose-100 text-rose-700 border border-rose-300 animate-pulse">
-                      عاجل 🔴
-                    </span>
-                  )}
+                {/* ── Problem Details (Displayed once, purely and softly) ── */}
+                <div className="space-y-1.5">
+                  <div className="flex items-center gap-1.5 text-xs font-bold text-slate-500">
+                    <MessageSquare className="w-3.5 h-3.5 text-slate-400" />
+                    <span>تفاصيل مشكلة الطالب:</span>
+                  </div>
+                  <div className="p-4 rounded-2xl bg-slate-50/70 border border-slate-100 text-xs sm:text-sm leading-relaxed text-slate-800 font-medium whitespace-pre-wrap">
+                    {ticket.description}
+                  </div>
                 </div>
 
-                {/* Problem Description */}
-                <div className="text-xs sm:text-sm text-slate-800 bg-slate-50/80 p-3.5 sm:p-4 rounded-xl border border-slate-200/80 leading-relaxed font-medium">
-                  {ticket.description}
-                </div>
-
-                {/* Existing Admin Reply Box */}
+                {/* ── Existing Admin Reply Box (Visible to Student) ── */}
                 {ticket.admin_reply && !isReplying && (
-                  <div className="p-4 rounded-xl bg-gradient-to-br from-emerald-50 to-teal-50 border border-emerald-200/90 space-y-1.5">
-                    <div className="flex items-center justify-between text-xs font-black text-emerald-800">
-                      <span className="flex items-center gap-1.5">
-                        <MessageSquare className="w-3.5 h-3.5 text-emerald-600" />
-                        <span>رد وإجراء الإدارة المسجل:</span>
-                      </span>
-                      {ticket.admin_name && (
-                        <span className="text-[11px] text-emerald-700/80 font-normal">
-                          بواسطة المشرف: {ticket.admin_name}
+                  <div className="p-4 sm:p-5 rounded-2xl bg-gradient-to-br from-emerald-50/80 via-teal-50/40 to-white border border-emerald-200/80 space-y-2 shadow-2xs">
+                    <div className="flex flex-wrap items-center justify-between gap-2 border-b border-emerald-100/80 pb-2">
+                      <div className="flex items-center gap-2">
+                        <div className="w-6 h-6 rounded-lg bg-emerald-600 text-white flex items-center justify-center shadow-2xs">
+                          <CheckCircle2 className="w-3.5 h-3.5" />
+                        </div>
+                        <span className="text-xs sm:text-sm font-black text-emerald-900">
+                          رد وإجراء الإدارة للطالب:
                         </span>
-                      )}
+                      </div>
+                      <div className="flex items-center gap-2 text-[11px] text-emerald-800 font-semibold">
+                        {ticket.admin_name && (
+                          <span className="px-2 py-0.5 rounded-md bg-white border border-emerald-200/70 text-emerald-800">
+                            بواسطة: {ticket.admin_name}
+                          </span>
+                        )}
+                        {ticket.resolved_at_human && (
+                          <span className="text-emerald-700/80">
+                            {ticket.resolved_at_human}
+                          </span>
+                        )}
+                      </div>
                     </div>
-                    <p className="text-xs sm:text-sm font-semibold text-emerald-950 leading-relaxed">
+                    <p className="text-xs sm:text-sm font-semibold text-slate-800 leading-relaxed whitespace-pre-wrap bg-white/70 p-3 rounded-xl border border-emerald-100/60">
                       {ticket.admin_reply}
                     </p>
-                    {ticket.resolved_at_human && (
-                      <div className="text-[10px] text-emerald-700/70 pt-0.5">
-                        تاريخ الحل: {ticket.resolved_at_human}
-                      </div>
-                    )}
+                    <div className="text-[11px] text-emerald-700/80 flex items-center gap-1 pt-0.5">
+                      <Sparkles className="w-3 h-3 text-emerald-600" />
+                      <span>هذا الرد معروض مباشرة للطالب في حسابه.</span>
+                    </div>
                   </div>
                 )}
 
-                {/* ── Reply / Resolution Form (When Activated) ── */}
+                {/* ── Inline Reply & Resolution Box ── */}
                 {isReplying && (
-                  <div className="p-4 sm:p-5 rounded-2xl bg-white border-2 border-emerald-500 shadow-md space-y-3.5 animate-in slide-in-from-top-2">
-                    <div className="flex items-center justify-between border-b border-slate-100 pb-2">
-                      <span className="text-xs font-black text-slate-800">
-                        معالجة المشكلة وكتابة الرد للطالب:
-                      </span>
-                      <span className="text-[11px] text-slate-400">سيظهر للطالب في حسابه</span>
+                  <div className="p-4 sm:p-5 rounded-2xl sm:rounded-3xl bg-slate-50/80 border-2 border-emerald-500/80 shadow-sm space-y-4 animate-in fade-in duration-200">
+                    <div className="flex items-center justify-between border-b border-slate-200/70 pb-3">
+                      <div>
+                        <h4 className="text-xs sm:text-sm font-black text-slate-900">
+                          معالجة المشكلة والرد على الطالب
+                        </h4>
+                        <p className="text-xs text-slate-500 mt-0.5">
+                          سيظهر ردك وإجراءك للطالب مباشرة في حسابه عند حفظ الرد
+                        </p>
+                      </div>
+                      <span className="text-xs font-mono text-slate-400">تذكرة #{ticket.id}</span>
                     </div>
 
-                    {/* Status Changer */}
-                    <div className="space-y-1">
-                      <label className="block text-xs font-bold text-slate-700">تحديث الحالة إلى:</label>
-                      <div className="grid grid-cols-3 gap-2">
-                        {[
-                          { id: "resolved", label: "تم الحل والإغلاق ✅", color: "bg-emerald-50 text-emerald-800 border-emerald-300" },
-                          { id: "in_progress", label: "جاري المتابعة 🔵", color: "bg-blue-50 text-blue-800 border-blue-300" },
-                          { id: "open", label: "قيد الانتظار 🟡", color: "bg-amber-50 text-amber-800 border-amber-300" },
-                        ].map((s) => (
-                          <button
-                            key={s.id}
-                            type="button"
-                            onClick={() => setSelectedStatus(s.id as SupportTicketStatus)}
-                            className={`p-2 rounded-xl text-xs font-bold border transition-all cursor-pointer text-center ${
-                              selectedStatus === s.id
-                                ? `${s.color} font-black shadow-xs ring-1 ring-emerald-500/30`
-                                : "bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100"
-                            }`}
-                          >
-                            {s.label}
-                          </button>
-                        ))}
+                    {/* Status Options */}
+                    <div className="space-y-1.5">
+                      <label className="block text-xs font-bold text-slate-700">تحديث حالة التذكرة:</label>
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                        <button
+                          type="button"
+                          onClick={() => setSelectedStatus("resolved")}
+                          className={`p-2.5 rounded-xl text-xs font-bold border transition-all cursor-pointer flex items-center justify-center gap-2 ${
+                            selectedStatus === "resolved"
+                              ? "bg-emerald-600 text-white border-emerald-600 shadow-xs"
+                              : "bg-white border-slate-200 text-slate-700 hover:bg-emerald-50"
+                          }`}
+                        >
+                          <CheckCircle2 className="w-3.5 h-3.5" />
+                          <span>تم الحل بنجاح ✅</span>
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={() => setSelectedStatus("in_progress")}
+                          className={`p-2.5 rounded-xl text-xs font-bold border transition-all cursor-pointer flex items-center justify-center gap-2 ${
+                            selectedStatus === "in_progress"
+                              ? "bg-blue-600 text-white border-blue-600 shadow-xs"
+                              : "bg-white border-slate-200 text-slate-700 hover:bg-blue-50"
+                          }`}
+                        >
+                          <Clock className="w-3.5 h-3.5" />
+                          <span>جاري المتابعة ⏳</span>
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={() => setSelectedStatus("open")}
+                          className={`p-2.5 rounded-xl text-xs font-bold border transition-all cursor-pointer flex items-center justify-center gap-2 ${
+                            selectedStatus === "open"
+                              ? "bg-amber-600 text-white border-amber-600 shadow-xs"
+                              : "bg-white border-slate-200 text-slate-700 hover:bg-amber-50"
+                          }`}
+                        >
+                          <AlertCircle className="w-3.5 h-3.5" />
+                          <span>قيد الانتظار 🟡</span>
+                        </button>
                       </div>
                     </div>
 
                     {/* Reply Textarea */}
-                    <div className="space-y-1">
+                    <div className="space-y-1.5">
                       <label className="block text-xs font-bold text-slate-700">
-                        نص الرد والإجراء المتخذ:
+                        نص الرد والإجراء المتخذ (يظهر للطالب):
                       </label>
                       <textarea
                         rows={3}
                         value={replyText}
                         onChange={(e) => setReplyText(e.target.value)}
-                        placeholder="اكتب توضيحاً للطالب عن كيفية حل المشكلة أو الإجراء الذي تم في الصالة..."
-                        className="w-full px-3 py-2 rounded-xl border border-slate-200 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 text-xs sm:text-sm bg-slate-50/50 resize-none font-medium"
+                        placeholder="اكتب توضيحاً أو إجراء تم لحل المشكلة (مثلاً: أهلاً بك، تم معالجة الحجز ولن يتم خصم أي ساعات، أو تم إصلاح فيش الكهرباء)..."
+                        className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/10 text-xs sm:text-sm bg-white resize-none font-medium leading-relaxed"
                       />
                     </div>
 
-                    {/* Action Buttons */}
+                    {/* Actions */}
                     <div className="flex items-center justify-end gap-2 pt-1">
                       <button
                         type="button"
                         onClick={() => setReplyingTicketId(null)}
-                        className="px-3.5 py-1.5 rounded-xl border border-slate-200 hover:bg-slate-100 text-slate-600 text-xs font-bold cursor-pointer"
+                        className="px-4 py-2 rounded-xl border border-slate-200 hover:bg-slate-100 text-slate-600 text-xs font-bold transition-all cursor-pointer"
                       >
                         إلغاء
                       </button>
@@ -554,17 +523,17 @@ export default function SupportTicketsView() {
                         type="button"
                         onClick={() => handleSaveReply(ticket.id)}
                         disabled={savingId === ticket.id}
-                        className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 active:bg-emerald-700 text-white text-xs font-bold flex items-center gap-1.5 shadow-xs cursor-pointer disabled:opacity-50"
+                        className="px-5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 active:scale-95 text-white text-xs sm:text-sm font-bold flex items-center gap-2 transition-all shadow-xs cursor-pointer disabled:opacity-50"
                       >
                         {savingId === ticket.id ? (
                           <>
                             <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                            <span>جاري الحفظ...</span>
+                            <span>جاري حفظ الرد...</span>
                           </>
                         ) : (
                           <>
-                            <Check className="w-3.5 h-3.5" />
-                            <span>حفظ الرد وتحديث الحالة</span>
+                            <Send className="w-3.5 h-3.5" />
+                            <span>حفظ الرد وإرساله للطالب</span>
                           </>
                         )}
                       </button>
@@ -572,8 +541,8 @@ export default function SupportTicketsView() {
                   </div>
                 )}
 
-                {/* Footer Timestamps */}
-                <div className="flex items-center justify-between text-[11px] text-slate-400 pt-1 border-t border-slate-100">
+                {/* ── Footer Timestamps ── */}
+                <div className="flex items-center justify-between text-[11px] text-slate-400 pt-1 border-t border-slate-100/80">
                   <span>تاريخ التقديم: {ticket.created_at_human || ticket.created_at}</span>
                   {ticket.resolved_at_human && (
                     <span className="text-emerald-700 font-bold">
@@ -591,4 +560,3 @@ export default function SupportTicketsView() {
     </div>
   );
 }
-

@@ -55,6 +55,11 @@ export default function MemberSupportTab() {
 
   useEffect(() => {
     fetchTickets();
+    // Auto-refresh every 12 seconds so admin replies appear automatically
+    const interval = setInterval(() => {
+      fetchTickets(false);
+    }, 12000);
+    return () => clearInterval(interval);
   }, [fetchTickets]);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -338,26 +343,32 @@ export default function MemberSupportTab() {
 
                   {/* Admin Reply & Solution Box */}
                   {ticket.admin_reply && (
-                    <div className="p-3.5 rounded-xl bg-gradient-to-br from-emerald-50/80 to-teal-50/50 border border-emerald-200/80 text-emerald-950 space-y-1.5 animate-in fade-in duration-200">
-                      <div className="flex items-center justify-between text-xs font-black text-emerald-800">
-                        <span className="flex items-center gap-1.5">
-                          <MessageSquare className="w-3.5 h-3.5 text-emerald-600" />
-                          <span>{bp?.adminReplyTitle || (isRTL ? "رد وإجراء إدارة إديو هب:" : "EduHub Admin Response:")}</span>
-                        </span>
-                        {ticket.admin_name && (
-                          <span className="text-[11px] text-emerald-700/80 font-normal">
-                            {bp?.adminReplyBy || (isRTL ? "بواسطة المشرف:" : "Supervisor:")} {ticket.admin_name}
+                    <div className="p-4 sm:p-5 rounded-2xl bg-gradient-to-br from-emerald-50/90 via-teal-50/40 to-white border border-emerald-200/90 text-emerald-950 space-y-2.5 animate-in fade-in duration-200 shadow-2xs">
+                      <div className="flex flex-wrap items-center justify-between gap-2 border-b border-emerald-100/80 pb-2">
+                        <div className="flex items-center gap-2">
+                          <div className="w-6 h-6 rounded-lg bg-emerald-600 text-white flex items-center justify-center shadow-2xs">
+                            <CheckCircle2 className="w-3.5 h-3.5" />
+                          </div>
+                          <span className="text-xs sm:text-sm font-black text-emerald-900">
+                            {bp?.adminReplyTitle || (isRTL ? "رد وإجراء إدارة إديو هب:" : "EduHub Admin Response:")}
                           </span>
-                        )}
+                        </div>
+                        <div className="flex items-center gap-2 text-[11px] text-emerald-800 font-semibold">
+                          {ticket.admin_name && (
+                            <span className="px-2 py-0.5 rounded-md bg-white border border-emerald-200/70 text-emerald-800">
+                              {bp?.adminReplyBy || (isRTL ? "المشرف:" : "Supervisor:")} {ticket.admin_name}
+                            </span>
+                          )}
+                          {ticket.resolved_at_human && (
+                            <span className="text-emerald-700/80">
+                              {ticket.resolved_at_human}
+                            </span>
+                          )}
+                        </div>
                       </div>
-                      <p className="text-xs sm:text-sm font-semibold text-emerald-900 leading-relaxed whitespace-pre-wrap">
+                      <p className="text-xs sm:text-sm font-semibold text-slate-800 leading-relaxed whitespace-pre-wrap bg-white/70 p-3 rounded-xl border border-emerald-100/60">
                         {ticket.admin_reply}
                       </p>
-                      {ticket.resolved_at_human && (
-                        <div className="text-[10px] text-emerald-700/70 pt-0.5">
-                          {bp?.resolvedAtPrefix || (isRTL ? "تاريخ المعالجة:" : "Resolved At:")} {ticket.resolved_at_human}
-                        </div>
-                      )}
                     </div>
                   )}
 
