@@ -54,7 +54,7 @@ export default function AdminTicketsPage() {
           </div>
         </header>
 
-        <main className="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto">
+        <main className="p-3.5 sm:p-6 lg:p-8 max-w-7xl mx-auto">
           <SupportTicketsView />
         </main>
       </div>
