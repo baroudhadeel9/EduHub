@@ -9,23 +9,15 @@ import {
   CheckCircle2,
   AlertCircle,
   MessageSquare,
-  Zap,
-  Wifi,
-  Armchair,
-  Building2,
-  HelpCircle,
   Send,
   Loader2,
   RefreshCw,
   Sparkles,
-  ShieldAlert,
 } from "lucide-react";
 import {
   getMemberSupportTicketsApi,
   createMemberSupportTicketApi,
   SupportTicketItem,
-  SupportTicketCategory,
-  SupportTicketPriority,
 } from "@/services/supportTickets";
 
 export default function MemberSupportTab() {
@@ -38,23 +30,11 @@ export default function MemberSupportTab() {
   const [refreshing, setRefreshing] = useState(false);
   const [isFormOpen, setIsFormOpen] = useState(false);
 
-  // Form State
-  const [subject, setSubject] = useState("");
-  const [category, setCategory] = useState<SupportTicketCategory>("power_charging");
-  const [priority, setPriority] = useState<SupportTicketPriority>("normal");
+  // Form State: Only the problem details (تفاصيل المشكلة)
   const [description, setDescription] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
   const [formSuccess, setFormSuccess] = useState<string | null>(null);
-
-  const categories: { id: SupportTicketCategory; label: string; icon: React.ElementType }[] = [
-    { id: "power_charging", label: bp?.catPowerCharging || (isRTL ? "الكهرباء والشواحن" : "Power & Charging"), icon: Zap },
-    { id: "internet", label: bp?.catInternet || (isRTL ? "شبكة الإنترنت" : "Internet & WiFi"), icon: Wifi },
-    { id: "booking_seat", label: bp?.catBookingSeat || (isRTL ? "المقاعد والحجوزات" : "Seats & Bookings"), icon: Armchair },
-    { id: "facility", label: bp?.catFacility || (isRTL ? "المرافق والهدوء" : "Facility & Quiet"), icon: Building2 },
-    { id: "account_quota", label: bp?.catAccountQuota || (isRTL ? "الحساب والرصيد" : "Account & Quota"), icon: Clock },
-    { id: "general", label: bp?.catGeneral || (isRTL ? "عام / أخرى" : "General / Other"), icon: HelpCircle },
-  ];
 
   const fetchTickets = useCallback(async (isRefresh = false) => {
     if (isRefresh) setRefreshing(true);
@@ -82,31 +62,30 @@ export default function MemberSupportTab() {
     setFormError(null);
     setFormSuccess(null);
 
-    if (!subject.trim() || subject.trim().length < 3) {
-      setFormError(bp?.errSubjectRequired || (isRTL ? "يرجى كتابة عنوان للمشكلة (على الأقل 3 أحرف)." : "Please enter an issue title."));
-      return;
-    }
-
-    if (!description.trim() || description.trim().length < 5) {
-      setFormError(bp?.errDescRequired || (isRTL ? "يرجى توضيح تفاصيل المشكلة حتى نتمكن من مساعدتك وحلها." : "Please describe the problem details."));
+    if (!description.trim() || description.trim().length < 3) {
+      setFormError(
+        bp?.errDescRequired ||
+          (isRTL
+            ? "يرجى كتابة تفاصيل المشكلة حتى نتمكن من مساعدتك."
+            : "Please describe the problem details.")
+      );
       return;
     }
 
     setSubmitting(true);
     try {
       const res = await createMemberSupportTicketApi({
-        subject: subject.trim(),
-        category,
-        priority,
         description: description.trim(),
       });
 
       if (res.success) {
-        setFormSuccess(res.message || (isRTL ? "تم استلام مشكلتك بنجاح." : "Your ticket was received successfully."));
-        setSubject("");
+        setFormSuccess(
+          res.message ||
+            (isRTL
+              ? "تم استلام مشكلتك بنجاح، وسيقوم المشرف بمتابعتها فوراً."
+              : "Your ticket was received successfully.")
+        );
         setDescription("");
-        setPriority("normal");
-        setCategory("power_charging");
         setTimeout(() => {
           setIsFormOpen(false);
           setFormSuccess(null);
@@ -120,16 +99,6 @@ export default function MemberSupportTab() {
     } finally {
       setSubmitting(false);
     }
-  };
-
-  const getCategoryIcon = (cat: string) => {
-    const match = categories.find((c) => c.id === cat);
-    return match ? match.icon : HelpCircle;
-  };
-
-  const getCategoryName = (cat: string) => {
-    const match = categories.find((c) => c.id === cat);
-    return match ? match.label : cat;
   };
 
   return (
@@ -187,7 +156,7 @@ export default function MemberSupportTab() {
         </div>
       </div>
 
-      {/* ── New Ticket Form (Soft Light Card) ── */}
+      {/* ── New Ticket Form (Only تفاصيل المشكلة) ── */}
       {isFormOpen && (
         <form
           onSubmit={handleSubmit}
@@ -219,102 +188,25 @@ export default function MemberSupportTab() {
             </div>
           )}
 
-          {/* Category Chips */}
+          {/* Description Field (Only visible field for the student) */}
           <div className="space-y-1.5">
             <label className="block text-xs font-bold text-slate-700">
-              {bp?.categoryLabel || (isRTL ? "تصنيف ونوع المشكلة:" : "Problem Category:")}
-            </label>
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-              {categories.map((cat) => {
-                const Icon = cat.icon;
-                const isSelected = category === cat.id;
-                return (
-                  <button
-                    key={cat.id}
-                    type="button"
-                    onClick={() => setCategory(cat.id)}
-                    className={`p-2.5 rounded-xl border text-right transition-all flex items-center gap-2 cursor-pointer ${
-                      isSelected
-                        ? "border-emerald-500 bg-emerald-50/70 text-emerald-900 font-extrabold shadow-2xs ring-1 ring-emerald-500/20"
-                        : "border-slate-200/90 bg-slate-50/60 hover:bg-slate-100 text-slate-700 text-xs font-medium"
-                    }`}
-                  >
-                    <Icon className={`w-3.5 h-3.5 shrink-0 ${isSelected ? "text-emerald-700" : "text-slate-500"}`} />
-                    <span className="text-xs truncate">{cat.label}</span>
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-
-          {/* Subject Field */}
-          <div className="space-y-1.5">
-            <label className="block text-xs font-bold text-slate-700">
-              {bp?.subjectLabel || (isRTL ? "عنوان المشكلة / الاستفسار:" : "Issue Title:")}
-            </label>
-            <input
-              type="text"
-              value={subject}
-              onChange={(e) => setSubject(e.target.value)}
-              placeholder={bp?.subjectPlaceholder || (isRTL ? "مثال: انقطاع الكهرباء في فيش طاولة 7، أو بطء في التحميل..." : "e.g., Socket 7 interrupted, slow upload...")}
-              className="w-full px-3.5 py-2 rounded-xl border border-slate-200 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/10 text-xs sm:text-sm bg-slate-50/50 font-medium transition-all"
-              maxLength={200}
-              required
-            />
-          </div>
-
-          {/* Priority Toggle */}
-          <div className="flex items-center justify-between p-2.5 sm:p-3 rounded-xl bg-slate-50/80 border border-slate-200/70">
-            <div className="flex items-center gap-2">
-              <ShieldAlert className="w-4 h-4 text-amber-600" />
-              <div>
-                <span className="text-xs font-bold text-slate-800">
-                  {bp?.priorityLabel || (isRTL ? "أولوية المشكلة:" : "Priority:")}
-                </span>
-                <p className="text-[11px] text-slate-400">
-                  {bp?.priorityHint || (isRTL ? "اختر عاجل إذا كانت المشكلة تعيق عملك حالياً في الصالة" : "Select urgent if this blocks your ongoing work")}
-                </p>
-              </div>
-            </div>
-            <div className="flex items-center gap-1 bg-white p-0.5 rounded-lg border border-slate-200">
-              <button
-                type="button"
-                onClick={() => setPriority("normal")}
-                className={`px-3 py-1 rounded-md text-xs font-bold transition-all cursor-pointer ${
-                  priority === "normal"
-                    ? "bg-slate-800 text-white shadow-2xs"
-                    : "text-slate-600 hover:text-slate-900"
-                }`}
-              >
-                {bp?.priorityNormal || (isRTL ? "عادي" : "Normal")}
-              </button>
-              <button
-                type="button"
-                onClick={() => setPriority("urgent")}
-                className={`px-3 py-1 rounded-md text-xs font-bold transition-all cursor-pointer ${
-                  priority === "urgent"
-                    ? "bg-rose-600 text-white shadow-2xs"
-                    : "text-slate-600 hover:text-rose-600"
-                }`}
-              >
-                {bp?.priorityUrgent || (isRTL ? "عاجل 🔴" : "Urgent 🔴")}
-              </button>
-            </div>
-          </div>
-
-          {/* Description Field */}
-          <div className="space-y-1.5">
-            <label className="block text-xs font-bold text-slate-700">
-              {bp?.descriptionLabel || (isRTL ? "شرح وتفاصيل المشكلة:" : "Issue Description:")}
+              {bp?.descriptionLabel || (isRTL ? "شرح وتفاصيل المشكلة:" : "Problem Details:")}
             </label>
             <textarea
-              rows={3}
+              rows={4}
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              placeholder={bp?.descriptionPlaceholder || (isRTL ? "اشرح ما الذي حدث معك بالتفصيل ليتمكن المشرف من معالجته فوراً..." : "Describe what happened in detail...")}
-              className="w-full px-3.5 py-2 rounded-xl border border-slate-200 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/10 text-xs sm:text-sm bg-slate-50/50 font-medium transition-all resize-none"
+              placeholder={
+                bp?.descriptionPlaceholder ||
+                (isRTL
+                  ? "اكتب ما يواجهك بالتفصيل (مثل: مشكلة في الكهرباء، الشاحن، الإنترنت، المقعد، أو أي استفسار)..."
+                  : "Describe what happened in detail so the supervisor can assist immediately...")
+              }
+              className="w-full px-3.5 py-3 rounded-xl border border-slate-200 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/10 text-xs sm:text-sm bg-slate-50/50 font-medium transition-all resize-none leading-relaxed"
               maxLength={4000}
               required
+              autoFocus
             />
           </div>
 
@@ -383,10 +275,8 @@ export default function MemberSupportTab() {
         ) : (
           <div className="space-y-3">
             {tickets.map((ticket) => {
-              const CategoryIcon = getCategoryIcon(ticket.category);
               const isResolved = ticket.status === "resolved";
               const isInProgress = ticket.status === "in_progress";
-              const isUrgent = ticket.priority === "urgent";
 
               return (
                 <div
@@ -401,28 +291,17 @@ export default function MemberSupportTab() {
                 >
                   {/* Ticket Header */}
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-100 pb-2.5">
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <span className="w-7 h-7 rounded-lg bg-slate-100/80 flex items-center justify-center text-slate-700 shrink-0 border border-slate-200/60">
-                        <CategoryIcon className="w-3.5 h-3.5 text-slate-600" />
+                    <div className="flex items-center gap-2">
+                      <span className="text-[10px] sm:text-[11px] font-mono text-slate-400 bg-slate-100 px-2 py-0.5 rounded-md">
+                        #{ticket.id}
                       </span>
-                      <h4 className="font-extrabold text-slate-900 text-xs sm:text-sm">
-                        {ticket.subject}
-                      </h4>
-                      <span className="px-2 py-0.5 rounded-md text-[10px] sm:text-[11px] font-semibold bg-slate-100 text-slate-600">
-                        {getCategoryName(ticket.category)}
+                      <span className="text-[11px] text-slate-500 font-medium">
+                        {ticket.created_at_human || ticket.created_at}
                       </span>
-                      {isUrgent && (
-                        <span className="px-2 py-0.5 rounded-md text-[10px] sm:text-[11px] font-extrabold bg-rose-100 text-rose-700 border border-rose-200 animate-pulse">
-                          {bp?.urgentBadge || (isRTL ? "عاجل 🔴" : "Urgent 🔴")}
-                        </span>
-                      )}
                     </div>
 
                     {/* Status Badge */}
                     <div className="flex items-center gap-2 self-start sm:self-auto">
-                      <span className="text-[10px] sm:text-[11px] font-mono text-slate-400">
-                        #{ticket.id}
-                      </span>
                       <span
                         className={`px-2.5 py-0.5 rounded-lg text-[11px] font-bold flex items-center gap-1.5 border ${
                           isResolved
@@ -452,8 +331,8 @@ export default function MemberSupportTab() {
                     </div>
                   </div>
 
-                  {/* Problem Description */}
-                  <div className="text-xs sm:text-sm text-slate-700 leading-relaxed bg-slate-50/70 p-3 rounded-xl border border-slate-200/60 font-medium">
+                  {/* Problem Description (Directly visible) */}
+                  <div className="text-xs sm:text-sm text-slate-800 leading-relaxed bg-slate-50/70 p-3.5 rounded-xl border border-slate-200/60 font-medium whitespace-pre-wrap">
                     {ticket.description}
                   </div>
 
@@ -471,7 +350,7 @@ export default function MemberSupportTab() {
                           </span>
                         )}
                       </div>
-                      <p className="text-xs sm:text-sm font-semibold text-emerald-900 leading-relaxed">
+                      <p className="text-xs sm:text-sm font-semibold text-emerald-900 leading-relaxed whitespace-pre-wrap">
                         {ticket.admin_reply}
                       </p>
                       {ticket.resolved_at_human && (
@@ -482,17 +361,12 @@ export default function MemberSupportTab() {
                     </div>
                   )}
 
-                  {/* Submission Timestamp Footer */}
-                  <div className="flex items-center justify-between text-[11px] text-slate-400 pt-0.5">
-                    <span>
-                      {bp?.submittedAtPrefix || (isRTL ? "تاريخ التقديم:" : "Submitted At:")} {ticket.created_at_human || ticket.created_at}
-                    </span>
-                    {!isResolved && (
-                      <span className="text-amber-700 font-medium">
-                        {bp?.underReviewNotice || (isRTL ? "فريق الإدارة في الصالة يتابع طلبك" : "The hall team is reviewing your ticket")}
-                      </span>
-                    )}
-                  </div>
+                  {/* Under Review Notice */}
+                  {!isResolved && (
+                    <div className="text-[11px] text-amber-700 font-medium pt-0.5">
+                      {bp?.underReviewNotice || (isRTL ? "فريق الإدارة في الصالة يتابع مشكلتك" : "The hall team is reviewing your ticket")}
+                    </div>
+                  )}
                 </div>
               );
             })}

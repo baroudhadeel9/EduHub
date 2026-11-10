@@ -57,7 +57,7 @@ export interface SupportTicketStats {
 }
 
 export interface CreateTicketPayload {
-  subject: string;
+  subject?: string;
   category?: SupportTicketCategory;
   priority?: SupportTicketPriority;
   description: string;
