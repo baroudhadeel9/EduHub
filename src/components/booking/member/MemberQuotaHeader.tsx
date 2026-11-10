@@ -159,7 +159,7 @@ export default function MemberQuotaHeader({
           }`}
         >
           <Trophy className="w-3.5 h-3.5 text-amber-400" />
-          <span>{isRTL ? "إنجازاتي" : "My Achievements"}</span>
+          <span>{bp?.myAchievements || (isRTL ? "إنجازاتي" : "My Achievements")}</span>
         </button>
         <button
           type="button"
@@ -170,8 +170,8 @@ export default function MemberQuotaHeader({
               : "text-slate-600 hover:text-slate-900 hover:bg-white/60"
           }`}
         >
-          <LifeBuoy className="w-3.5 h-3.5 text-rose-400" />
-          <span>{isRTL ? "الدعم الفني والشكاوى" : "Support & Help"}</span>
+          <LifeBuoy className={`w-3.5 h-3.5 ${memberSubView === "support" ? "text-emerald-400" : "text-slate-500"}`} />
+          <span>{bp?.supportTab || (isRTL ? "الدعم والمساعدة" : "Support & Help")}</span>
         </button>
       </div>
     </div>
