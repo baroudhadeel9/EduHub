@@ -75,9 +75,9 @@ export default function AdminQuickBookingModal({
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   const todayStr = useMemo(() => getLocalDateString(0), []);
-  const weekInfo = useMemo(() => getAllowedWeekDates(undefined, true), []);
+  const weekInfo = useMemo(() => getAllowedWeekDates(undefined, false), []);
   const [bookingDate, setBookingDate] = useState<string>(() => {
-    const isTodayAllowed = weekInfo.allAllowed.some((d) => d.date === todayStr);
+    const isTodayAllowed = weekInfo.currentWeek.some((d) => d.date === todayStr);
     return isTodayAllowed ? todayStr : weekInfo.defaultDate;
   });
   const [startTime, setStartTime] = useState("09:00");
@@ -468,23 +468,12 @@ export default function AdminQuickBookingModal({
               className="w-full px-3.5 py-2.5 rounded-2xl border border-slate-200 bg-white font-bold text-xs sm:text-sm outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/10 cursor-pointer text-slate-800"
               required
             >
-              <optgroup label={isRTL ? "الأسبوع الحالي (السبت – الخميس)" : "Current Week (Sat – Thu)"}>
-                {weekInfo.currentWeek.map((item) => (
-                  <option key={item.date} value={item.date}>
-                    {isRTL ? item.fullLabelAr : item.fullLabelEn}{" "}
-                    {item.isToday ? (isRTL ? "— (اليوم)" : "— (Today)") : ""}
-                  </option>
-                ))}
-              </optgroup>
-              {weekInfo.nextWeek.length > 0 && (
-                <optgroup label={isRTL ? "الأسبوع القادم (السبت – الخميس)" : "Next Week (Sat – Thu)"}>
-                  {weekInfo.nextWeek.map((item) => (
-                    <option key={item.date} value={item.date}>
-                      {isRTL ? item.fullLabelAr : item.fullLabelEn}
-                    </option>
-                  ))}
-                </optgroup>
-              )}
+              {weekInfo.currentWeek.map((item) => (
+                <option key={item.date} value={item.date}>
+                  {isRTL ? item.fullLabelAr : item.fullLabelEn}{" "}
+                  {item.isToday ? (isRTL ? "— (اليوم)" : "— (Today)") : ""}
+                </option>
+              ))}
             </select>
           </div>
 

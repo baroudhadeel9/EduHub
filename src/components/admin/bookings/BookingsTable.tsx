@@ -25,8 +25,6 @@ import {
   Armchair,
   GraduationCap,
   Phone,
-  ChevronLeft,
-  ChevronRight,
   Users,
 } from "lucide-react";
 
@@ -78,11 +76,11 @@ export default function BookingsTable({ refreshTrigger = 0 }: BookingsTableProps
   const isRTL = dir === "rtl" || locale === "ar";
 
   // Allowed working week dates (Saturday to Thursday, Friday closed)
-  const weekInfo = useMemo(() => getAllowedWeekDates(undefined, true), []);
+  const weekInfo = useMemo(() => getAllowedWeekDates(undefined, false), []);
   const todayStr = useMemo(() => getLocalDateString(0), []);
 
   const [selectedDate, setSelectedDate] = useState<string>(() => {
-    const isTodayAllowed = weekInfo.allAllowed.some((d) => d.date === todayStr);
+    const isTodayAllowed = weekInfo.currentWeek.some((d) => d.date === todayStr);
     return isTodayAllowed ? todayStr : weekInfo.defaultDate;
   });
   const [bookings, setBookings] = useState<AdminBookingRecord[]>([]);
@@ -133,18 +131,6 @@ export default function BookingsTable({ refreshTrigger = 0 }: BookingsTableProps
   useEffect(() => {
     loadBookings(selectedDate);
   }, [selectedDate, loadBookings, refreshTrigger]);
-
-  // Step day strictly within allowed working days (skips Friday automatically)
-  const handleStepDay = (step: number) => {
-    const currentIndex = weekInfo.allAllowed.findIndex((d) => d.date === selectedDate);
-    if (currentIndex !== -1) {
-      const newIndex = currentIndex + step;
-      if (newIndex >= 0 && newIndex < weekInfo.allAllowed.length) {
-        setSelectedDate(weekInfo.allAllowed[newIndex].date);
-        return;
-      }
-    }
-  };
 
   // Confirm and Cancel Booking
   const handleConfirmCancel = async () => {
@@ -264,63 +250,10 @@ export default function BookingsTable({ refreshTrigger = 0 }: BookingsTableProps
         </div>
       )}
 
-      {/* ── 1. Sleek Compact Week-Day Navigator (Sat – Thu, Fri Closed) ── */}
-      <div className="bg-white rounded-2xl border border-slate-200/80 p-3 sm:p-3.5 shadow-2xs flex flex-col md:flex-row md:items-center justify-between gap-3">
-        {/* Working Days Chips (Saturday to Thursday) */}
-        <div className="flex items-center gap-1.5 overflow-x-auto pb-1 md:pb-0 scrollbar-none">
-          <button
-            type="button"
-            onClick={() => handleStepDay(isRTL ? 1 : -1)}
-            title={isRTL ? "اليوم التالي" : "Next Day"}
-            className="p-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 transition-colors cursor-pointer shrink-0"
-          >
-            <ChevronRight className="w-4 h-4" />
-          </button>
-
-          {weekInfo.currentWeek.map((item) => {
-            const isSelected = selectedDate === item.date;
-            return (
-              <button
-                key={item.date}
-                type="button"
-                onClick={() => setSelectedDate(item.date)}
-                className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap flex items-center gap-1.5 shrink-0 ${
-                  isSelected
-                    ? "bg-emerald-600 text-white shadow-2xs ring-2 ring-emerald-600/20"
-                    : "bg-slate-100 text-slate-700 hover:bg-slate-200"
-                }`}
-              >
-                <span>{isRTL ? item.dayNameAr : item.dayNameEn}</span>
-                <span
-                  className={`text-[10px] font-mono ${
-                    isSelected ? "text-emerald-100" : "text-slate-400"
-                  }`}
-                >
-                  {item.formattedShort}
-                </span>
-                {item.isToday && (
-                  <span
-                    className={`w-1.5 h-1.5 rounded-full ${
-                      isSelected ? "bg-white" : "bg-emerald-500 animate-pulse"
-                    }`}
-                  />
-                )}
-              </button>
-            );
-          })}
-
-          <button
-            type="button"
-            onClick={() => handleStepDay(isRTL ? -1 : 1)}
-            title={isRTL ? "اليوم السابق" : "Previous Day"}
-            className="p-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 transition-colors cursor-pointer shrink-0"
-          >
-            <ChevronLeft className="w-4 h-4" />
-          </button>
-        </div>
-
-        {/* Week-Day Dropdown (No native multi-month calendar) & Refresh */}
-        <div className="flex items-center gap-2 justify-between md:justify-end">
+      {/* ── 1. Sleek Compact Week-Day Navigator (Saturday to Thursday only) ── */}
+      <div className="bg-white rounded-2xl border border-slate-200/80 p-3 sm:p-3.5 shadow-2xs flex items-center justify-between gap-3">
+        <div className="flex items-center gap-2 flex-wrap">
+          {/* Week-Day Dropdown (Saturday to Thursday) */}
           <div className="flex items-center gap-2 px-3 py-1.5 bg-[#f8fafc] border border-slate-200 rounded-xl shadow-2xs">
             <CalendarDays className="w-4 h-4 text-emerald-600 shrink-0" />
             <select
@@ -328,23 +261,12 @@ export default function BookingsTable({ refreshTrigger = 0 }: BookingsTableProps
               onChange={(e) => setSelectedDate(e.target.value)}
               className="text-xs sm:text-sm font-bold text-slate-800 bg-transparent focus:outline-none cursor-pointer"
             >
-              <optgroup label={isRTL ? "الأسبوع الحالي (السبت – الخميس)" : "Current Week (Sat – Thu)"}>
-                {weekInfo.currentWeek.map((item) => (
-                  <option key={item.date} value={item.date}>
-                    {isRTL ? item.fullLabelAr : item.fullLabelEn}{" "}
-                    {item.isToday ? (isRTL ? "— (اليوم)" : "— (Today)") : ""}
-                  </option>
-                ))}
-              </optgroup>
-              {weekInfo.nextWeek.length > 0 && (
-                <optgroup label={isRTL ? "الأسبوع القادم (السبت – الخميس)" : "Next Week (Sat – Thu)"}>
-                  {weekInfo.nextWeek.map((item) => (
-                    <option key={item.date} value={item.date}>
-                      {isRTL ? item.fullLabelAr : item.fullLabelEn}
-                    </option>
-                  ))}
-                </optgroup>
-              )}
+              {weekInfo.currentWeek.map((item) => (
+                <option key={item.date} value={item.date}>
+                  {isRTL ? item.fullLabelAr : item.fullLabelEn}{" "}
+                  {item.isToday ? (isRTL ? "— (اليوم)" : "— (Today)") : ""}
+                </option>
+              ))}
             </select>
           </div>
 
@@ -352,21 +274,22 @@ export default function BookingsTable({ refreshTrigger = 0 }: BookingsTableProps
             <button
               type="button"
               onClick={() => setSelectedDate(todayStr)}
-              className="px-2.5 py-1.5 rounded-xl text-xs font-bold bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 transition-colors cursor-pointer shrink-0"
+              className="px-3 py-1.5 rounded-xl text-xs font-bold bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 transition-colors cursor-pointer shrink-0"
             >
-              {isRTL ? "اليوم" : "Today"}
+              {isRTL ? "العودة لليوم" : "Back to Today"}
             </button>
           )}
-
-          <button
-            type="button"
-            onClick={() => loadBookings(selectedDate)}
-            title={isRTL ? "تحديث" : "Refresh"}
-            className="p-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 transition-colors cursor-pointer shrink-0"
-          >
-            <RefreshCw className={`w-3.5 h-3.5 ${loading ? "animate-spin" : ""}`} />
-          </button>
         </div>
+
+        {/* Refresh Button */}
+        <button
+          type="button"
+          onClick={() => loadBookings(selectedDate)}
+          title={isRTL ? "تحديث" : "Refresh"}
+          className="p-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 transition-colors cursor-pointer shrink-0"
+        >
+          <RefreshCw className={`w-3.5 h-3.5 ${loading ? "animate-spin" : ""}`} />
+        </button>
       </div>
 
       {/* ── 2. Top Metric Cards (Responsive: Compact 3-col on mobile, spacious on desktop) ── */}
