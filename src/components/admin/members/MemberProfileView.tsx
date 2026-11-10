@@ -23,11 +23,9 @@ import {
 } from "@/services/supportTickets";
 import MemberProfileTicketsTab from "@/components/admin/members/profile/MemberProfileTicketsTab";
 import MemberProfileSmsModal from "@/components/admin/members/profile/MemberProfileSmsModal";
-import {
-  AchievementCard,
-  AchievementDetailsModal,
-  AchievementFormView,
-} from "@/components/achievements/AchievementShowcase";
+import MemberProfileAchievementsTab from "@/components/admin/members/profile/MemberProfileAchievementsTab";
+import MemberProfileBookingsTab from "@/components/admin/members/profile/MemberProfileBookingsTab";
+import MemberProfileDuesTab from "@/components/admin/members/profile/MemberProfileDuesTab";
 import {
   ArrowLeft,
   ArrowRight,
@@ -689,301 +687,40 @@ export default function MemberProfileView({ memberId }: MemberProfileViewProps) 
               TAB 1: MEMBER ACHIEVEMENTS (Private & Verified)
              ═════════════════════════════════════════════════════════════ */}
           {activeTab === "achievements" && (
-            achievementModalOpen ? (
-              <AchievementFormView
-                onBack={() => setAchievementModalOpen(false)}
-                onSubmit={handleSaveAchievement}
-                targetName={member.name}
-                isSubmitting={achievementSubmitting}
-                feedback={achievementFeedback}
-              />
-            ) : (
-            <div className="space-y-6 animate-in fade-in duration-200">
-              
-              {/* Header Banner */}
-              <div className="bg-gradient-to-r from-amber-500/10 via-emerald-500/5 to-transparent rounded-3xl border border-amber-200/70 p-5 sm:p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-2xs">
-                <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 rounded-2xl bg-amber-100 text-amber-800 flex items-center justify-center shrink-0 border border-amber-200 shadow-2xs">
-                    <Trophy className="w-6 h-6 text-amber-600" />
-                  </div>
-                  <div>
-                    <h3 className="text-base sm:text-lg font-black text-[#0c2340]">
-                      {isRTL ? "معرض إنجازات ومشاريع العضو المعتمدة" : "Verified Member Projects & Portfolio"}
-                    </h3>
-                    <p className="text-xs text-slate-500 flex items-center gap-1.5 mt-0.5">
-                      <Lock className="w-3.5 h-3.5 text-slate-400" />
-                      <span>{isRTL ? "سجل خاص: مرئي للعضو ولإدارة الحاضنة فقط لتوثيق الأثر والنجاحات المهنية." : "Private portfolio: visible only to this member and workspace administration."}</span>
-                    </p>
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-2.5 self-stretch sm:self-auto">
-                  <span className="text-xs font-bold text-slate-600 bg-white px-3.5 py-2 rounded-xl border border-slate-200 shadow-2xs">
-                    {isRTL ? `إجمالي المشاريع: ${member.achievements?.length || 0}` : `Total: ${member.achievements?.length || 0}`}
-                  </span>
-                  <button
-                    type="button"
-                    onClick={() => setAchievementModalOpen(true)}
-                    className="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition-all shadow-xs active:scale-95 cursor-pointer"
-                  >
-                    <Plus className="w-4 h-4" />
-                    <span>{isRTL ? "توثيق مشروع جديد" : "Add Project"}</span>
-                  </button>
-                </div>
-              </div>
-
-              {/* Feedback Alert */}
-              {achievementFeedback && (
-                <div
-                  className={`p-4 rounded-2xl text-xs sm:text-sm font-bold flex items-center gap-2.5 shadow-2xs ${
-                    achievementFeedback.type === "success"
-                      ? "bg-emerald-50 text-emerald-800 border border-emerald-200"
-                      : "bg-rose-50 text-rose-800 border border-rose-200"
-                  }`}
-                >
-                  {achievementFeedback.type === "success" ? (
-                    <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-                  ) : (
-                    <AlertCircle className="w-4 h-4 text-rose-600 shrink-0" />
-                  )}
-                  <span>{achievementFeedback.message}</span>
-                </div>
-              )}
-
-              {/* Professional Achievements Grid */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-5">
-                {(member.achievements || [])
-                  .map((item: MemberAchievementItem) => (
-                    <AchievementCard
-                      key={item.id}
-                      item={item}
-                      onOpenDetails={(ach) => setSelectedAchievement(ach)}
-                      onDelete={handleDeleteAchievement}
-                      isDeleting={deletingAchievementId === item.id}
-                      canDelete={true}
-                    />
-                  ))}
-              </div>
-
-              {/* Empty State */}
-              {(member.achievements || []).length === 0 && (
-                <div className="bg-white rounded-3xl border-2 border-dashed border-slate-200 p-12 text-center space-y-4 shadow-2xs">
-                  <div className="w-16 h-16 rounded-3xl bg-amber-50 text-amber-600 flex items-center justify-center mx-auto border border-amber-100 shadow-2xs">
-                    <Trophy className="w-8 h-8" />
-                  </div>
-                  <div className="space-y-1">
-                    <h4 className="text-base sm:text-lg font-black text-[#0c2340]">
-                      {isRTL ? "لم يسجل العضو أي إنجازات أو مشاريع حتى الآن" : "No achievements recorded yet"}
-                    </h4>
-                    <p className="text-xs text-slate-500 max-w-md mx-auto leading-relaxed">
-                      {isRTL
-                        ? "يمكن للعضو توثيق مشاريعه البرمجية وصورها وعقود العمل والشهادات من حسابه الخاص، أو يمكنك كإدارة توثيقها هنا مع إمكانية رفع عدة صور واختيار صورة الغلاف."
-                        : "The member can document projects from their portal, or you can add them directly with multiple photos."}
-                    </p>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => setAchievementModalOpen(true)}
-                    className="inline-flex items-center gap-2 px-5 py-2.5 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition-all shadow-xs active:scale-95 cursor-pointer"
-                  >
-                    <Plus className="w-4 h-4" />
-                    <span>{isRTL ? "توثيق أول مشروع للعضو" : "Add First Project"}</span>
-                  </button>
-                </div>
-              )}
-
-              {/* Lightbox / Details Modal */}
-              <AchievementDetailsModal
-                item={selectedAchievement}
-                isOpen={!!selectedAchievement}
-                onClose={() => setSelectedAchievement(null)}
-                onDelete={handleDeleteAchievement}
-                canDelete={true}
-              />
-
-            </div>
-            )
+            <MemberProfileAchievementsTab
+              member={member}
+              isRTL={isRTL}
+              achievementModalOpen={achievementModalOpen}
+              setAchievementModalOpen={setAchievementModalOpen}
+              achievementSubmitting={achievementSubmitting}
+              achievementFeedback={achievementFeedback}
+              handleSaveAchievement={handleSaveAchievement}
+              selectedAchievement={selectedAchievement}
+              setSelectedAchievement={setSelectedAchievement}
+              handleDeleteAchievement={handleDeleteAchievement}
+              deletingAchievementId={deletingAchievementId}
+            />
           )}
 
           {/* ═════════════════════════════════════════════════════════════
               TAB 2: BOOKINGS & VISIT HISTORY TABLE
              ═════════════════════════════════════════════════════════════ */}
           {activeTab === "bookings" && (
-            <div className="space-y-6 animate-in fade-in duration-200">
-              
-              {/* Today's Active Booking Card (if any) */}
-              {member.bookingNote && member.bookingNote.includes("حجز اليوم") && (
-                <div className="bg-gradient-to-r from-emerald-50/70 via-white to-emerald-50/40 rounded-2xl border border-emerald-200/90 p-5 shadow-2xs space-y-2">
-                  <div className="flex items-center justify-between">
-                    <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800">
-                      <span className="w-2 h-2 rounded-full bg-emerald-600 animate-pulse" />
-                      <span>{isRTL ? "حجز نشط اليوم بالمساحة" : "Active Booking Today"}</span>
-                    </span>
-                    <span className="text-xs font-bold text-emerald-800">
-                      {isRTL ? "طاولة رقم 12 (قاعة المستقلين)" : "Desk #12"}
-                    </span>
-                  </div>
-                  <p className="text-xs sm:text-sm font-bold text-[#0c2340]">
-                    {member.bookingNote}
-                  </p>
-                </div>
-              )}
-
-              {/* Booking History Table */}
-              <div className="bg-white rounded-2xl border border-slate-200/80 shadow-xs overflow-hidden">
-                <div className="p-5 border-b border-slate-100 flex items-center justify-between">
-                  <div>
-                    <h3 className="text-base font-bold text-[#0c2340]">
-                      {isRTL ? "سجل الحجوزات والزيارات" : "Booking & Visit History"}
-                    </h3>
-                    <p className="text-xs text-slate-400 mt-0.5">
-                      {isRTL
-                        ? "سجل الجلسات السابقة وساعات الاستخدام في المركز"
-                        : "Past sessions and time allocated at the center"}
-                    </p>
-                  </div>
-                  <span className="text-xs font-semibold text-slate-500">
-                    {isRTL ? `${member.history.length} حجوزات مسجلة` : `${member.history.length} Bookings`}
-                  </span>
-                </div>
-
-                <div className="overflow-x-auto">
-                  <table className="w-full text-start border-collapse text-xs sm:text-sm">
-                    <thead>
-                      <tr className="bg-slate-50/70 text-slate-500 text-xs font-bold border-b border-slate-200/60">
-                        <th className="py-3 px-5 text-start">{isRTL ? "التاريخ والمدة" : "Date & Duration"}</th>
-                        <th className="py-3 px-5 text-start">{isRTL ? "المكان / المقعد" : "Desk / Space"}</th>
-                        <th className="py-3 px-5 text-start">{isRTL ? "الغرض من الحجز" : "Purpose"}</th>
-                        <th className="py-3 px-5 text-center">{isRTL ? "الحالة" : "Status"}</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-slate-100">
-                      {member.history.map((h) => {
-                        const cleanDate = String(h.date || "").split("T")[0];
-                        const dateFormatted = h.date_formatted || (h.day_name ? `${h.day_name}، ${cleanDate}` : cleanDate);
-                        const isAttended = h.status === "attended" || (h.status === "completed" && h.attended_range?.includes("حضر"));
-                        const isInside = h.status === "inside" || h.status === "active";
-                        const isNoShow = h.status === "no_show" || (h.purpose && h.purpose.includes("لم يحضر")) || (h.duration && h.duration.includes("لم يحضر"));
-                        const isCancelled = h.status === "cancelled" && !isNoShow;
-                        const isConfirmed = h.status === "confirmed";
-
-                        return (
-                          <tr key={h.id} className="hover:bg-slate-50/60 transition-colors">
-                            <td className="py-3.5 px-5">
-                              <div className="font-extrabold text-[#0c2340] flex items-center gap-1.5">
-                                <Calendar className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
-                                <span>{dateFormatted}</span>
-                              </div>
-                              <div className="text-[11px] text-slate-500 font-mono mt-0.5">{h.duration}</div>
-                            </td>
-                            <td className="py-3.5 px-5 text-slate-700 font-medium">
-                              <div className="flex items-center gap-1.5">
-                                <MapPin className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
-                                <span className="font-bold">{h.desk}</span>
-                              </div>
-                              {h.room && <span className="text-[10px] text-slate-400 block mt-0.5">{h.room}</span>}
-                            </td>
-                            <td className="py-3.5 px-5 text-slate-600 max-w-sm">
-                              {h.attended_range ? (
-                                <div className="space-y-0.5">
-                                  <span className={`inline-block font-bold text-xs ${
-                                    isAttended ? "text-emerald-700" : isInside ? "text-emerald-600" : isNoShow ? "text-amber-800" : "text-slate-700"
-                                  }`}>
-                                    {h.attended_range}
-                                  </span>
-                                  {h.purpose && <p className="text-[11px] text-slate-400 truncate">{h.purpose}</p>}
-                                </div>
-                              ) : (
-                                <span>{h.purpose}</span>
-                              )}
-                            </td>
-                            <td className="py-3.5 px-5 text-center">
-                              {isInside ? (
-                                <span className="px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-600 text-white animate-pulse">
-                                  {isRTL ? "داخل المساحة الآن 🟢" : "Active Now 🟢"}
-                                </span>
-                              ) : isAttended ? (
-                                <span className="px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800 border border-emerald-300">
-                                  {isRTL ? "حضر بنجاح ✓" : "Attended ✓"}
-                                </span>
-                              ) : isNoShow ? (
-                                <span className="px-2.5 py-1 rounded-full text-xs font-bold bg-amber-100 text-amber-900 border border-amber-300">
-                                  {isRTL ? "لم يحضر ⚠️" : "No-Show ⚠️"}
-                                </span>
-                              ) : isCancelled ? (
-                                <span className="px-2.5 py-1 rounded-full text-xs font-bold bg-rose-100 text-rose-800 border border-rose-300">
-                                  {isRTL ? "ملغي ✕" : "Cancelled ✕"}
-                                </span>
-                              ) : isConfirmed ? (
-                                <span className="px-2.5 py-1 rounded-full text-xs font-bold bg-sky-100 text-sky-800 border border-sky-300">
-                                  {isRTL ? "حجز مؤكد ⏳" : "Confirmed ⏳"}
-                                </span>
-                              ) : (
-                                <span className="px-2.5 py-1 rounded-full text-xs font-bold bg-slate-100 text-slate-700">
-                                  {h.status_label || (isRTL ? "مكتمل" : "Completed")}
-                                </span>
-                              )}
-                            </td>
-                          </tr>
-                        );
-                      })}
-
-                      {member.history.length === 0 && (
-                        <tr>
-                          <td colSpan={4} className="py-8 text-center text-slate-400">
-                            {isRTL ? "لا توجد حجوزات مسجلة بعد لهذا العضو" : "No booking history recorded yet"}
-                          </td>
-                        </tr>
-                      )}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-            </div>
+            <MemberProfileBookingsTab
+              member={member}
+              isRTL={isRTL}
+            />
           )}
 
           {/* ═════════════════════════════════════════════════════════════
               TAB 3: QUOTA & POLICY AUDIT
              ═════════════════════════════════════════════════════════════ */}
           {activeTab === "dues" && (
-            <div className="space-y-6 animate-in fade-in duration-200">
-              
-              <div className="bg-white rounded-2xl border border-slate-200/90 p-6 shadow-xs space-y-4">
-                <h3 className="text-base font-bold text-[#0c2340]">
-                  {isRTL ? "تفاصيل الحصة الشهرية والاستهلاك" : "Monthly Quota & Usage Details"}
-                </h3>
-
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2">
-                  <div className="p-4 bg-slate-50 rounded-xl border border-slate-200">
-                    <span className="text-xs text-slate-500 font-semibold">{isRTL ? "الحصة المخصصة شهرياً" : "Monthly Limit"}</span>
-                    <div className="text-2xl font-black text-[#0c2340] mt-1">{member.hoursLimit} {isRTL ? "ساعة" : "hours"}</div>
-                    <span className="text-[11px] text-slate-400">{member.type === "freelancer" ? "35 ساعة للمستقلين" : "25 ساعة للطلاب"}</span>
-                  </div>
-
-                  <div className="p-4 bg-slate-50 rounded-xl border border-slate-200">
-                    <span className="text-xs text-slate-500 font-semibold">{isRTL ? "الساعات المستهلكة" : "Hours Used"}</span>
-                    <div className="text-2xl font-black text-[#0c2340] mt-1">{member.hoursUsed} {isRTL ? "ساعة" : "hours"}</div>
-                    <span className="text-[11px] text-slate-400">{percentage}% من الحصة الإجمالية</span>
-                  </div>
-
-                  <div className="p-4 bg-slate-50 rounded-xl border border-slate-200">
-                    <span className="text-xs text-slate-500 font-semibold">{isRTL ? "الساعات الإضافية" : "Extra Hours"}</span>
-                    <div className="text-2xl font-black text-rose-600 mt-1">{member.extraHours} {isRTL ? "ساعة" : "hours"}</div>
-                    <span className="text-[11px] text-slate-400">{member.dueAmount} ₪ مستحق مالي</span>
-                  </div>
-                </div>
-
-                <div className="p-4 bg-amber-50 rounded-xl border border-amber-200 text-xs text-amber-900 leading-relaxed flex items-start gap-2.5">
-                  <AlertCircle className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
-                  <span>
-                    {isRTL
-                      ? "وفق لائحة تشغيل إديو هب غزة، تُمنح الساعات الأساسية مجاناً بالكامل. في حال تجاوز العضو للحصة المعتمدة ورغب بساعات إضافية لدواعي تسليم مشاريع عاجلة، يتم فرض رسم رمزي قدره 2 شيكل لكل ساعة لدعم تكاليف السولار وصيانة المنظومة."
-                      : "Core hours are 100% free. Any extra hours requested beyond monthly allocation for critical project delivery cost 2 NIS / hour to offset generator fuel."}
-                  </span>
-                </div>
-              </div>
-
-            </div>
+            <MemberProfileDuesTab
+              member={member}
+              percentage={percentage}
+              isRTL={isRTL}
+            />
           )}
 
           {/* ═════════════════════════════════════════════════════════════
