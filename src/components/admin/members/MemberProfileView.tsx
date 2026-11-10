@@ -277,7 +277,7 @@ export default function MemberProfileView({ memberId }: MemberProfileViewProps) 
     setTicketSavingId(ticketId);
     try {
       const res = await updateAdminSupportTicketApi(ticketId, {
-        status: ticketSelectedStatus,
+        status: "resolved",
         admin_reply: ticketReplyText.trim(),
       });
       if (res.success) {
@@ -1157,26 +1157,7 @@ export default function MemberProfileView({ memberId }: MemberProfileViewProps) 
                         {isReplying && (
                           <div className="p-4 rounded-xl bg-white border-2 border-emerald-500 shadow-sm space-y-3">
                             <div className="flex items-center justify-between text-xs font-bold text-slate-800">
-                              <span>تحديث حالة التذكرة وكتابة رد للطالب:</span>
-                            </div>
-                            <div className="grid grid-cols-2 gap-2">
-                              {[
-                                { id: "resolved", label: "تم الحل ✅" },
-                                { id: "open", label: "قيد الانتظار 🟡" },
-                              ].map((st) => (
-                                <button
-                                  key={st.id}
-                                  type="button"
-                                  onClick={() => setTicketSelectedStatus(st.id as SupportTicketStatus)}
-                                  className={`p-1.5 rounded-lg text-xs font-bold border transition-all text-center ${
-                                    ticketSelectedStatus === st.id
-                                      ? "bg-emerald-50 border-emerald-500 text-emerald-800"
-                                      : "bg-slate-50 border-slate-200 text-slate-600"
-                                  }`}
-                                >
-                                  {st.label}
-                                </button>
-                              ))}
+                              <span>كتابة رد المشرف للطالب:</span>
                             </div>
                             <textarea
                               rows={2}

@@ -38,7 +38,6 @@ export default function SupportTicketsView() {
   // Ticket being edited / replied to
   const [replyingTicketId, setReplyingTicketId] = useState<number | null>(null);
   const [replyText, setReplyText] = useState<string>("");
-  const [selectedStatus, setSelectedStatus] = useState<SupportTicketStatus>("resolved");
   const [savingId, setSavingId] = useState<number | null>(null);
   const [actionSuccess, setActionSuccess] = useState<string | null>(null);
 
@@ -76,7 +75,6 @@ export default function SupportTicketsView() {
   const handleOpenReply = (ticket: SupportTicketItem) => {
     setReplyingTicketId(ticket.id);
     setReplyText(ticket.admin_reply || "");
-    setSelectedStatus(ticket.status === "open" ? "resolved" : ticket.status);
   };
 
   const handleSaveReply = async (ticketId: number) => {
@@ -84,7 +82,7 @@ export default function SupportTicketsView() {
     setActionSuccess(null);
     try {
       const res = await updateAdminSupportTicketApi(ticketId, {
-        status: selectedStatus,
+        status: "resolved",
         admin_reply: replyText.trim(),
       });
 
@@ -431,38 +429,6 @@ export default function SupportTicketsView() {
                         </p>
                       </div>
                       <span className="text-xs font-mono text-slate-400">#{ticket.id}</span>
-                    </div>
-
-                    {/* Status Options */}
-                    <div className="space-y-1.5">
-                      <label className="block text-[11px] sm:text-xs font-bold text-slate-700">تحديث الحالة إلى:</label>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 sm:gap-2">
-                        <button
-                          type="button"
-                          onClick={() => setSelectedStatus("resolved")}
-                          className={`p-2 sm:p-2.5 rounded-xl text-xs font-bold border transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
-                            selectedStatus === "resolved"
-                              ? "bg-emerald-600 text-white border-emerald-600 shadow-xs"
-                              : "bg-white border-slate-200 text-slate-700 hover:bg-emerald-50"
-                          }`}
-                        >
-                          <CheckCircle2 className="w-3.5 h-3.5" />
-                          <span>تم الحل بنجاح ✅</span>
-                        </button>
-
-                        <button
-                          type="button"
-                          onClick={() => setSelectedStatus("open")}
-                          className={`p-2 sm:p-2.5 rounded-xl text-xs font-bold border transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
-                            selectedStatus === "open"
-                              ? "bg-amber-600 text-white border-amber-600 shadow-xs"
-                              : "bg-white border-slate-200 text-slate-700 hover:bg-amber-50"
-                          }`}
-                        >
-                          <AlertCircle className="w-3.5 h-3.5" />
-                          <span>إبقاء قيد الانتظار 🟡</span>
-                        </button>
-                      </div>
                     </div>
 
                     {/* Reply Textarea */}
