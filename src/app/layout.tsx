@@ -1,7 +1,8 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Cairo, Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
 import { LanguageProvider } from "@/context/LanguageContext";
+import InstallPwaPrompt from "@/components/pwa/InstallPwaPrompt";
 
 const cairo = Cairo({
   subsets: ["arabic", "latin"],
@@ -17,10 +18,23 @@ const plusJakartaSans = Plus_Jakarta_Sans({
   display: "swap",
 });
 
+export const viewport: Viewport = {
+  themeColor: "#0c2340",
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 5,
+};
+
 export const metadata: Metadata = {
   title: "EduHub Gaza",
   description:
     "A non-profit educational and coworking sanctuary providing stable solar energy, high-speed 100 Mbps internet, and workstations in Gaza.",
+  manifest: "/manifest.webmanifest",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "EduHub Gaza",
+  },
   icons: {
     icon: [
       { url: "/images/logo.png", type: "image/png" },
@@ -41,6 +55,7 @@ export default function RootLayout({
       <body className="min-h-screen bg-brand-bg text-slate-800 antialiased selection:bg-emerald-500 selection:text-white" suppressHydrationWarning>
         <LanguageProvider>
           {children}
+          <InstallPwaPrompt />
         </LanguageProvider>
       </body>
     </html>
