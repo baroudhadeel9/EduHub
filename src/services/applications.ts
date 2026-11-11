@@ -1261,6 +1261,8 @@ export async function submitVisitorRequestApi(data: {
   email: string;
   visitDate: string;
   durationHours?: number;
+  startHour?: number;
+  endHour?: number;
   visitTime?: string;
   purpose: string;
 }) {
@@ -1276,9 +1278,13 @@ export async function submitVisitorRequestApi(data: {
       email: data.email,
       visitDate: data.visitDate,
       purpose: data.purpose,
+      duration_hours: data.durationHours,
+      durationHours: data.durationHours,
+      startHour: data.startHour,
+      endHour: data.endHour,
       visitTime: data.visitTime,
       visit_time: data.visitTime,
-      notes: data.visitTime ? `وقت الزيارة: ${data.visitTime}` : (data.durationHours ? `المدة: ${data.durationHours} ساعات` : undefined),
+      notes: data.visitTime ? `وقت الزيارة: ${data.visitTime} (المدة: ${data.durationHours || 3} ساعات)` : undefined,
     }),
   });
 

@@ -52,14 +52,17 @@ export default function VisitorPassTab() {
   // Arrival slots: strictly before 4:00 PM (9:00 AM to 3:30 PM)
   const arrivalSlots = allSlots.filter((s) => s.hour24 < 16);
 
-  // Departure slots: strictly after the selected arrival time up to 4:00 PM
-  const departureSlots = allSlots.filter((s) => s.hour24 > startHour);
+  // Departure slots: strictly after startHour AND maximum 3 hours duration (up to 4:00 PM closing)
+  const maxDepartureHour = Math.min(16, startHour + 3);
+  const departureSlots = allSlots.filter(
+    (s) => s.hour24 > startHour && s.hour24 <= maxDepartureHour
+  );
 
   const handleStartChange = (newStart: number) => {
     setStartHour(newStart);
-    if (newStart >= endHour) {
-      const nextEnd = Math.min(16, newStart + 2 > 16 ? 16 : newStart + 1);
-      setEndHour(nextEnd);
+    const newMaxEnd = Math.min(16, newStart + 3);
+    if (endHour <= newStart || endHour > newMaxEnd) {
+      setEndHour(newMaxEnd);
     }
   };
 
@@ -112,6 +115,16 @@ export default function VisitorPassTab() {
     const startSlot = allSlots.find((s) => s.hour24 === startHour);
     const endSlot = allSlots.find((s) => s.hour24 === endHour);
     const duration = Math.max(0.5, endHour - startHour);
+
+    if (duration > 3) {
+      setSubmitError(
+        isRTL
+          ? "الحد الأقصى لطلب تصريح الزيارة هو 3 ساعات فقط لكل زائر."
+          : "Maximum duration for a visitor pass is 3 hours."
+      );
+      return;
+    }
+
     const formattedVisitTime = isRTL
       ? `من ${startSlot?.labelAr} إلى ${endSlot?.labelAr}`
       : `From ${startSlot?.labelEn} to ${endSlot?.labelEn}`;
@@ -123,7 +136,9 @@ export default function VisitorPassTab() {
         phone: visPhone.trim(),
         email: visEmail.trim(),
         visitDate: visDate,
-        durationHours: Math.round(duration),
+        durationHours: duration,
+        startHour: startHour,
+        endHour: endHour,
         visitTime: formattedVisitTime,
         purpose: visReason.trim(),
       });
@@ -242,8 +257,8 @@ export default function VisitorPassTab() {
               </span>
               <span className="text-[11px] font-bold text-emerald-700 bg-emerald-100/80 px-2.5 py-0.5 rounded-md font-mono">
                 {isRTL
-                  ? `المدة: ${endHour - startHour} ${endHour - startHour === 1 ? "ساعة" : endHour - startHour === 2 ? "ساعتان" : "ساعات"}`
-                  : `Duration: ${endHour - startHour} hrs`}
+                  ? `المدة: ${endHour - startHour} ${endHour - startHour === 1 ? "ساعة" : endHour - startHour === 2 ? "ساعتان" : "ساعات"} (الحد الأقصى 3 ساعات)`
+                  : `Duration: ${endHour - startHour} hrs (Max 3 hrs)`}
               </span>
             </div>
 
@@ -288,6 +303,12 @@ export default function VisitorPassTab() {
                 </select>
               </div>
             </div>
+
+            <p className="text-[11px] text-slate-500 font-medium pt-0.5">
+              ℹ️ {isRTL
+                ? "ملاحظة: الحد الأقصى لطلب تصريح الزيارة اليومية هو 3 ساعات فقط لضمان إتاحة المقاعد للجميع."
+                : "Note: Maximum duration for a daily visitor pass is 3 hours to ensure desk availability for all."}
+            </p>
           </div>
 
           {/* Reason for Visit */}
