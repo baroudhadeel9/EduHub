@@ -41,6 +41,9 @@ export default function RejectReasonModal({
     isRTL
       ? "طلب مكرر لنفس اليوم أو تجاوز الحصة المسموح بها"
       : "Duplicate request for same day or exceeded allowance",
+    isRTL
+      ? "انتهاء موعد الزيارة المحدد قبل المراجعة"
+      : "Scheduled visit date has passed before review",
     isRTL ? "أخرى (يرجى مراجعة الملاحظات المرفقة)" : "Other (please review attached notes)",
   ];
 

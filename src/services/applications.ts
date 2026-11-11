@@ -1648,9 +1648,7 @@ export async function getAdminOverviewApi() {
       const pendingVisitors = rawVisitorPasses.filter((v) => {
         const isPending = v.status === "pending" || v.status === "قيد المراجعة";
         const isNotRejected = v.status !== "rejected" && v.status !== "مرفوض";
-        const visitDate = String(v.visit_date || v.visitDate || "").substring(0, 10);
-        const isExpired = visitDate && visitDate < todayStr;
-        return isPending && isNotRejected && !isExpired;
+        return isPending && isNotRejected;
       }).length;
 
       const attendanceList = Array.isArray((attendanceRaw as { data?: unknown[] })?.data)

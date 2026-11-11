@@ -251,7 +251,8 @@ export default function VisitorDetailModal({
           {/* ── Footer Actions ── */}
           <div className="p-4 sm:p-5 border-t border-slate-200 bg-white">
             {request.status === "pending" && (() => {
-              const todayStr = new Date().toISOString().split("T")[0];
+              const now = new Date();
+              const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
               const isPastDate = request.visitDate !== "-" && request.visitDate < todayStr;
 
               return (

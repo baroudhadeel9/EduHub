@@ -24,7 +24,8 @@ import {
 
 interface RawVisitorRequest {
   id: string | number;
-  name: string;
+  name?: string;
+  full_name?: string;
   phone?: string;
   email?: string;
   submission_time?: string;
@@ -34,7 +35,35 @@ interface RawVisitorRequest {
   visit_time?: string;
   duration_hours?: number | string;
   purpose?: string;
+  notes?: string;
   status?: string;
+}
+
+// Helper to get local date string YYYY-MM-DD
+function getLocalDateString(d: Date = new Date()): string {
+  const year = d.getFullYear();
+  const month = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
+// Helper to parse visit_date into clean YYYY-MM-DD
+function parseVisitDateString(rawDate?: string): string {
+  if (!rawDate) return "";
+  const s = String(rawDate).trim();
+  if (/^\d{4}-\d{2}-\d{2}$/.test(s)) {
+    return s;
+  }
+  try {
+    const d = new Date(s);
+    if (!isNaN(d.getTime())) {
+      const year = d.getFullYear();
+      const month = String(d.getMonth() + 1).padStart(2, "0");
+      const day = String(d.getDate()).padStart(2, "0");
+      return `${year}-${month}-${day}`;
+    }
+  } catch {}
+  return s.substring(0, 10);
 }
 
 interface VisitorRequestsTableProps {
@@ -58,35 +87,70 @@ export default function VisitorRequestsTable({ onOpenMobileMenu }: VisitorReques
 
   // Filter out rejected and expired requests right at mapping
   const mapRawRequests = (data: RawVisitorRequest[]): VisitorRequest[] => {
-    const todayStr = new Date().toISOString().split("T")[0];
+    const todayStr = getLocalDateString();
     return (data || [])
       .filter((r) => r.status !== "rejected" && r.status !== "مرفوض")
       .filter((r) => {
-        const dateStr = typeof r.visit_date === "string" ? r.visit_date.split("T")[0] : "";
-        // Exclude any request whose visit date has already passed
+        // Pending requests MUST ALWAYS BE SHOWN so admin can review and take action
+        const isPending = r.status === "pending" || r.status === "قيد المراجعة" || !r.status;
+        if (isPending) return true;
+
+        // For non-pending requests (e.g. approved), check if the visit date has passed
+        const dateStr = parseVisitDateString(r.visit_date);
         if (dateStr && dateStr < todayStr) {
           return false;
         }
         return true;
       })
       .map((r) => {
-        const dateStr = typeof r.visit_date === "string" ? r.visit_date.split("T")[0] : "";
+        const name = r.name || r.full_name || "";
+        const dateStr = parseVisitDateString(r.visit_date);
         const isToday = dateStr === todayStr;
+
+        let visitTime = r.visit_time || "";
+        let durationLabel = r.duration_hours ? `${r.duration_hours} ساعات` : "";
+        if (!visitTime && r.notes && r.notes.includes("وقت الزيارة:")) {
+          visitTime = r.notes.replace("وقت الزيارة:", "").trim();
+        } else if (!durationLabel && r.notes && r.notes.includes("المدة:")) {
+          durationLabel = r.notes.replace("المدة:", "").trim();
+        }
+
+        let submittedAt = "-";
+        if (r.submission_time) {
+          submittedAt = `${r.submission_date || r.created_at?.split("T")[0]} - ${r.submission_time}`;
+        } else if (r.created_at) {
+          try {
+            const d = new Date(r.created_at);
+            if (!isNaN(d.getTime())) {
+              const formattedDate = d.toLocaleDateString(isRTL ? "ar-EG" : "en-US", {
+                year: "numeric",
+                month: "2-digit",
+                day: "2-digit",
+              });
+              const formattedTime = d.toLocaleTimeString(isRTL ? "ar-EG" : "en-US", {
+                hour: "2-digit",
+                minute: "2-digit",
+              });
+              submittedAt = `${formattedDate} (${formattedTime})`;
+            } else {
+              submittedAt = String(r.created_at).split("T")[0];
+            }
+          } catch {
+            submittedAt = String(r.created_at).split("T")[0];
+          }
+        }
+
         return {
           id: String(r.id),
-          name: r.name,
+          name,
           phone: r.phone || "",
           email: r.email || "",
-          submittedAt: r.submission_time
-            ? `${r.submission_date || r.created_at?.split("T")[0]} - ${r.submission_time}`
-            : typeof r.created_at === "string"
-            ? r.created_at.split("T")[0]
-            : "-",
-          avatarLetter: r.name ? r.name.charAt(0) : "ز",
+          submittedAt,
+          avatarLetter: name ? name.charAt(0) : "ز",
           avatarColor: "bg-emerald-100 text-emerald-800 border-emerald-200",
           visitDate: dateStr || "-",
-          visitTime: r.visit_time || "-",
-          durationLabel: r.duration_hours ? `${r.duration_hours} ساعات` : "-",
+          visitTime: visitTime || "-",
+          durationLabel: durationLabel || "-",
           isToday,
           isVerified: r.status === "approved",
           purposeBadge: r.purpose ? r.purpose.slice(0, 24) : "-",
@@ -164,7 +228,7 @@ export default function VisitorRequestsTable({ onOpenMobileMenu }: VisitorReques
   };
 
   const handleApprove = async (req: VisitorRequest) => {
-    const today = new Date().toISOString().split("T")[0];
+    const today = getLocalDateString();
     if (req.visitDate !== "-" && req.visitDate < today) {
       alert(
         isRTL
