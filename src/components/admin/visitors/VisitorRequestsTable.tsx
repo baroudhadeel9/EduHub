@@ -291,10 +291,11 @@ export default function VisitorRequestsTable({ onOpenMobileMenu }: VisitorReques
   };
 
   const handleSendPass = (id: string) => {
-    setPassSentId(id);
-    setTimeout(() => {
-      setPassSentId(null);
-    }, 3000);
+    const target = requests.find((r) => r.id === id);
+    if (target) {
+      setApprovedItem(target);
+      setSelectedVisitorId(null);
+    }
   };
 
   return (

@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import Link from "next/link";
 import { useLanguage } from "@/context/LanguageContext";
 import {
   CheckCircle2,
@@ -8,6 +9,7 @@ import {
   Loader2,
   AlertCircle,
   Clock,
+  LogIn,
 } from "lucide-react";
 import { submitVisitorRequestApi } from "@/services/applications";
 
@@ -309,9 +311,22 @@ export default function VisitorPassTab() {
           </div>
 
           {submitError && (
-            <div className="p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs font-semibold flex items-center gap-2">
-              <AlertCircle className="w-4 h-4 shrink-0 text-rose-600" />
-              <span>{submitError}</span>
+            <div className="p-3.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-xs sm:text-sm font-semibold space-y-2">
+              <div className="flex items-start gap-2">
+                <AlertCircle className="w-4 h-4 shrink-0 text-rose-600 mt-0.5" />
+                <span className="leading-relaxed">{submitError}</span>
+              </div>
+              {(submitError.includes("عضو") || submitError.includes("عضوية")) && (
+                <div className="pt-2 border-t border-rose-200/60 flex items-center justify-end">
+                  <Link
+                    href="/login"
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-brand-navy text-white text-xs font-bold hover:bg-brand-navy-hover transition-colors shadow-2xs"
+                  >
+                    <LogIn className="w-3.5 h-3.5" />
+                    <span>{isRTL ? "تسجيل الدخول إلى حسابك" : "Log In to Your Account"}</span>
+                  </Link>
+                </div>
+              )}
             </div>
           )}
 

@@ -1335,6 +1335,21 @@ export async function updateVisitorRequestStatusApi(
   return result.data;
 }
 
+export async function sendVisitorPassEmailApi(id: string | number) {
+  const response = await fetch(`${API_BASE_URL}/admin/visitor-passes/${id}/send-email`, {
+    method: "POST",
+    headers: getAdminHeaders({
+      "Content-Type": "application/json",
+    }),
+  });
+
+  const result = await response.json();
+  if (!response.ok) {
+    throw new Error(result.message || "تعذر إرسال بريد تأكيد التصريح للزائر.");
+  }
+  return result;
+}
+
 /**
  * ── Attendance & Daily Check-ins API ──
  */
