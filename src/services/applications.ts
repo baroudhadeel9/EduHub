@@ -1315,7 +1315,9 @@ export async function updateVisitorRequestStatusApi(
   id: string | number,
   status: "approved" | "rejected" | "pending",
   rejectionReason?: string,
-  adminNotes?: string
+  adminNotes?: string,
+  seatId?: number | string,
+  roomId?: number | string
 ) {
   const response = await fetch(`${API_BASE_URL}/admin/visitor-passes/${id}/status`, {
     method: "PATCH",
@@ -1325,6 +1327,8 @@ export async function updateVisitorRequestStatusApi(
     body: JSON.stringify({
       status,
       status_note: rejectionReason || adminNotes,
+      seat_id: seatId,
+      room_id: roomId,
     }),
   });
 
@@ -1333,6 +1337,20 @@ export async function updateVisitorRequestStatusApi(
     throw new Error(result.message || "تعذر تحديث حالة طلب الزيارة.");
   }
   return result.data;
+}
+
+export async function getVisitorPassAvailableSeatsApi(id: string | number) {
+  const response = await fetch(`${API_BASE_URL}/admin/visitor-passes/${id}/available-seats`, {
+    method: "GET",
+    headers: getAdminHeaders(),
+    cache: "no-store",
+  });
+
+  const result = await response.json();
+  if (!response.ok) {
+    throw new Error(result.message || "تعذر جلب المقاعد المتاحة للزائر.");
+  }
+  return result;
 }
 
 export async function sendVisitorPassEmailApi(id: string | number) {

@@ -37,6 +37,12 @@ interface RawVisitorRequest {
   purpose?: string;
   notes?: string;
   status?: string;
+  seat_id?: number;
+  room_id?: number;
+  seat_number?: number;
+  seat_label?: string;
+  room?: { id?: number; name_ar?: string; room_key?: string };
+  seat?: { id?: number; seat_number?: number; label?: string };
 }
 
 // Helper to get local date string YYYY-MM-DD
@@ -157,6 +163,11 @@ export default function VisitorRequestsTable({ onOpenMobileMenu }: VisitorReques
           purposeBadgeColor: "bg-slate-100 text-slate-700 border-slate-200",
           purposeText: r.purpose || "",
           status: (r.status as "pending" | "approved") || "pending",
+          seatId: r.seat_id || r.seat?.id,
+          roomId: r.room_id || r.room?.id,
+          seatNumber: r.seat_number || r.seat?.seat_number,
+          seatLabel: r.seat_label || r.seat?.label || (r.seat_number ? `مقعد ${r.seat_number}` : undefined),
+          roomName: r.room?.name_ar,
         };
       });
   };
@@ -227,7 +238,7 @@ export default function VisitorRequestsTable({ onOpenMobileMenu }: VisitorReques
     setSelectedVisitorId(null);
   };
 
-  const handleApprove = async (req: VisitorRequest) => {
+  const handleApprove = async (req: VisitorRequest, seatId?: number, roomId?: number) => {
     const today = getLocalDateString();
     if (req.visitDate !== "-" && req.visitDate < today) {
       alert(
@@ -239,15 +250,38 @@ export default function VisitorRequestsTable({ onOpenMobileMenu }: VisitorReques
     }
 
     try {
-      await updateVisitorRequestStatusApi(req.id, "approved");
-      setRequests((prev) =>
-        prev.map((r) => (r.id === req.id ? { ...r, status: "approved", isVerified: true } : r))
+      const updatedData = await updateVisitorRequestStatusApi(
+        req.id,
+        "approved",
+        undefined,
+        undefined,
+        seatId,
+        roomId
       );
-      setApprovedItem(req);
+
+      const seatNum = updatedData?.seat_number || req.seatNumber;
+      const seatLbl = updatedData?.seat_label || (seatNum ? `مقعد ${seatNum}` : undefined);
+      const rmName = updatedData?.room?.name_ar || req.roomName;
+
+      const updatedReq: VisitorRequest = {
+        ...req,
+        status: "approved",
+        isVerified: true,
+        seatId: updatedData?.seat_id || seatId,
+        roomId: updatedData?.room_id || roomId,
+        seatNumber: seatNum,
+        seatLabel: seatLbl,
+        roomName: rmName,
+      };
+
+      setRequests((prev) =>
+        prev.map((r) => (r.id === req.id ? updatedReq : r))
+      );
+      setApprovedItem(updatedReq);
       setSelectedVisitorId(null);
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : null;
-      alert(message || "تعذر اعتماد الطلب");
+      alert(message || "تعذر اعتماد الطلب وحجز المقعد");
     }
   };
 

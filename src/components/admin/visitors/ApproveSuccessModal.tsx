@@ -37,7 +37,11 @@ export default function ApproveSuccessModal({
     ? "970" + cleanPhone
     : cleanPhone;
 
-  const whatsAppMessage = `مرحباً ${request.name}،\nيسعدنا إعلامك بأنه تم قبول طلب تصريح الزيارة الخاص بك لمساحة العمل المشترك (EduHub) بنجاح! ✓\n\n📌 رقم التصريح: #VIS-${String(request.id).padStart(4, "0")}\n📅 موعد الزيارة: ${request.visitDate}\n⏰ الفترة: ${request.durationLabel || "حسب الحجز المحدد"}\n\nنتشرف باستقبالك في أي وقت ضمن ساعات الدوام الرسمي.`;
+  const seatInfo = request.seatLabel || (request.seatNumber ? `مقعد ${request.seatNumber}` : "");
+  const roomInfo = request.roomName ? ` (${request.roomName})` : "";
+  const seatText = seatInfo ? `${seatInfo}${roomInfo}` : (isRTL ? "مقعد مخصص في مساحة العمل" : "Assigned Desk");
+
+  const whatsAppMessage = `مرحباً ${request.name}،\nيسعدنا إعلامك بأنه تم قبول طلب تصريح الزيارة الخاص بك لمساحة العمل المشترك (EduHub) بنجاح! ✓\n\n📌 رقم التصريح: #VIS-${String(request.id).padStart(4, "0")}\n📅 موعد الزيارة: ${request.visitDate}\n⏰ الفترة المحددة: ${request.visitTime || request.durationLabel || "حسب الحجز"}\n💺 المقعد المخصص لك: ${seatText}\n\nنتشرف باستقبالك في أي وقت ضمن ساعات الدوام الرسمي.`;
 
   const handleSendWhatsApp = () => {
     if (!formattedPhone) return;
@@ -119,9 +123,9 @@ export default function ApproveSuccessModal({
             </span>
           </div>
           <div className="flex items-center gap-2">
-            <span className="font-semibold text-slate-500">{isRTL ? "البريد:" : "Email:"}</span>
-            <span className="font-bold text-slate-800 font-mono text-[11px]" dir="ltr">
-              {request.email || (isRTL ? "غير محدد" : "None")}
+            <span className="font-semibold text-slate-500">{isRTL ? "المقعد المحجوز:" : "Assigned Seat:"}</span>
+            <span className="font-bold text-emerald-800 bg-emerald-100/90 px-2 py-0.5 rounded-md border border-emerald-300">
+              {seatText}
             </span>
           </div>
         </div>

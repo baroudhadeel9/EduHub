@@ -17,4 +17,9 @@ export interface VisitorRequest {
   purposeBadgeColor?: string;
   purposeText: string;
   status: VisitorStatus;
+  seatId?: number;
+  roomId?: number;
+  seatNumber?: number;
+  seatLabel?: string;
+  roomName?: string;
 }
