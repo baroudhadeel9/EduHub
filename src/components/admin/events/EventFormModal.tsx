@@ -107,8 +107,8 @@ export default function EventFormModal({
       setEventDate(today);
       setDescription("");
       setStatus("completed");
-      setImageUrl("/images/hero-workspace.jpg");
-      setPreviewSrc("/images/hero-workspace.jpg");
+      setImageUrl("");
+      setPreviewSrc("");
       setImageFile(null);
     }
     setErrorMsg("");
@@ -364,13 +364,10 @@ export default function EventFormModal({
 
             {/* 4. Workshop Image (1-Click Presets or Optional Upload) */}
             <div className="pt-2 border-t border-slate-100">
-              <div className="flex items-center justify-between mb-1.5">
+              <div className="flex items-center justify-between mb-2">
                 <label className="block text-xs font-bold text-slate-800">
                   {m?.imageLabel || (isRTL ? "صورة الورشة الميدانية" : "Workshop Image")}
                 </label>
-                <span className="text-[11px] text-slate-500 font-medium">
-                  {m?.imageHint || (isRTL ? "اختيار بنقرة واحدة أو رفع (اختياري)" : "1-Click or upload (optional)")}
-                </span>
               </div>
 
               {/* Ready preset photos for 1-click selection */}
@@ -403,84 +400,63 @@ export default function EventFormModal({
 
               {previewSrc ? (
                 /* Selected / Uploaded Image View */
-                <div className="flex items-center gap-3 p-3 rounded-2xl border border-slate-200 bg-slate-50/70 hover:bg-slate-50 transition-all">
-                  <div
-                    onClick={() => fileInputRef.current?.click()}
-                    className="relative w-20 h-16 sm:w-24 sm:h-20 rounded-xl overflow-hidden border border-slate-200 bg-slate-200 shrink-0 cursor-pointer group shadow-2xs"
-                    title={isRTL ? "انقر لتغيير الصورة" : "Click to change photo"}
-                  >
-                    <Image
-                      src={previewSrc}
-                      alt="Workshop single photo"
-                      fill
-                      unoptimized={true}
-                      className="object-cover group-hover:scale-105 transition-transform duration-300"
-                    />
-                    <div className="absolute inset-0 bg-slate-950/45 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center text-white text-xs font-bold gap-1">
-                      <Camera className="w-3.5 h-3.5" />
-                      <span className="text-[10px]">{isRTL ? "تعديل" : "Edit"}</span>
+                <div className="flex items-center justify-between gap-3 p-2.5 rounded-2xl border border-slate-200 bg-slate-50/70">
+                  <div className="flex items-center gap-2.5 min-w-0">
+                    <div
+                      onClick={() => fileInputRef.current?.click()}
+                      className="relative w-16 h-14 rounded-xl overflow-hidden border border-slate-200 bg-slate-200 shrink-0 cursor-pointer group shadow-2xs"
+                      title={isRTL ? "انقر لتغيير الصورة" : "Click to change photo"}
+                    >
+                      <Image
+                        src={previewSrc}
+                        alt="Workshop photo"
+                        fill
+                        unoptimized={true}
+                        className="object-cover group-hover:scale-105 transition-transform duration-300"
+                      />
                     </div>
+                    <span className="text-xs font-bold text-slate-800 truncate">
+                      {imageFile
+                        ? imageFile.name
+                        : presetImages.find((p) => p.url === previewSrc)?.label ||
+                          (isRTL ? "صورة محددة" : "Selected Image")}
+                    </span>
                   </div>
 
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-1.5 text-xs font-bold text-slate-800">
-                      <ImageIcon className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
-                      <span className="truncate">
-                        {imageFile
-                          ? imageFile.name
-                          : presetImages.find((p) => p.url === previewSrc)?.label ||
-                            (isRTL ? "صورة الورشة المحددة" : "Selected Image")}
-                      </span>
-                    </div>
+                  <div className="flex items-center gap-1.5 shrink-0">
+                    <button
+                      type="button"
+                      onClick={() => fileInputRef.current?.click()}
+                      className="px-2.5 py-1.5 rounded-xl text-xs font-bold bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 transition-all flex items-center gap-1 shadow-2xs cursor-pointer active:scale-95"
+                    >
+                      <Camera className="w-3.5 h-3.5 text-emerald-600" />
+                      <span>{isRTL ? "تغيير" : "Change"}</span>
+                    </button>
 
-                    <p className="text-[10px] sm:text-[11px] text-slate-500 mt-0.5 truncate">
-                      {imageFile
-                        ? isRTL
-                          ? `حجم الملف: ${(imageFile.size / (1024 * 1024)).toFixed(2)} MB`
-                          : `Size: ${(imageFile.size / (1024 * 1024)).toFixed(2)} MB`
-                        : m?.presetSelected ||
-                          (isRTL ? "صورة جاهزة معتمدة بالمركز (لا حاجة لرفع أي ملف)" : "Verified center image (no upload required)")}
-                    </p>
-
-                    <div className="mt-2 flex items-center gap-2">
-                      <button
-                        type="button"
-                        onClick={() => fileInputRef.current?.click()}
-                        className="px-2.5 py-1 rounded-lg text-xs font-bold bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 transition-all flex items-center gap-1.5 shadow-2xs cursor-pointer active:scale-95"
-                      >
-                        <Camera className="w-3 h-3 text-emerald-600" />
-                        <span>{m?.uploadAlt || (isRTL ? "رفع صورة بديلة من جهازك" : "Upload replacement")}</span>
-                      </button>
-
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setImageFile(null);
-                          setImageUrl("/images/hero-workspace.jpg");
-                          setPreviewSrc("/images/hero-workspace.jpg");
-                        }}
-                        className="text-[11px] text-slate-500 hover:text-slate-800 font-semibold transition-colors cursor-pointer px-1 py-0.5"
-                      >
-                        {m?.resetDefault || (isRTL ? "استعادة الافتراضية" : "Reset Default")}
-                      </button>
-                    </div>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setImageFile(null);
+                        setImageUrl("");
+                        setPreviewSrc("");
+                      }}
+                      className="px-2.5 py-1.5 rounded-xl text-xs font-bold text-rose-600 hover:text-rose-700 hover:bg-rose-50 transition-colors cursor-pointer"
+                    >
+                      {isRTL ? "إزالة" : "Remove"}
+                    </button>
                   </div>
                 </div>
               ) : (
                 /* Clean Empty Upload Prompt */
                 <div
                   onClick={() => fileInputRef.current?.click()}
-                  className="flex flex-col items-center justify-center p-5 rounded-2xl border-2 border-dashed border-emerald-300 hover:border-emerald-500 bg-emerald-50/40 hover:bg-emerald-50/80 transition-all cursor-pointer group text-center"
+                  className="flex flex-col items-center justify-center p-4 sm:p-5 rounded-2xl border-2 border-dashed border-slate-200 hover:border-emerald-400 bg-slate-50/60 hover:bg-emerald-50/20 transition-all cursor-pointer group text-center"
                 >
-                  <div className="w-10 h-10 rounded-2xl bg-white text-emerald-600 flex items-center justify-center mb-2 shadow-2xs group-hover:scale-105 transition-transform border border-emerald-200/60">
+                  <div className="w-10 h-10 rounded-2xl bg-white text-slate-400 group-hover:text-emerald-600 flex items-center justify-center mb-1.5 shadow-2xs group-hover:scale-105 transition-transform border border-slate-200/80">
                     <Upload className="w-4 h-4 stroke-[2.2]" />
                   </div>
-                  <span className="text-xs sm:text-sm font-bold text-slate-900 group-hover:text-emerald-900">
-                    {m?.uploadEmpty || (isRTL ? "انقر لرفع صورة من جهازك (اختياري)" : "Click to upload image (optional)")}
-                  </span>
-                  <span className="text-[11px] text-slate-500 mt-0.5">
-                    {m?.uploadEmptySub ||
-                      (isRTL ? "أو اختر مباشرة من الأزرار الجاهزة بالأعلى بدون أي رفع" : "Or pick directly from ready presets above")}
+                  <span className="text-xs font-bold text-slate-700 group-hover:text-emerald-800">
+                    {isRTL ? "انقر لرفع صورة الورشة" : "Click to upload workshop image"}
                   </span>
                 </div>
               )}

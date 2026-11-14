@@ -339,7 +339,7 @@
   },
   "eventsSection": {
     "badge": "Continuous Growth & Opportunities",
-    "title": "Current Events & Workshops",
+    "title": "Latest Events & Workshops",
     "viewAll": "View Full Calendar",
     "prev": "Previous Workshop",
     "next": "Next Workshop",
@@ -517,7 +517,7 @@
   },
   "footer": {
     "aboutTitle": "EduHub Gaza",
-    "aboutDesc": "A non-profit community space providing an educational and tech lifeline for Gaza's youth, supported by independent solar energy and satellite internet.",
+    "aboutDesc": "A non-profit community space providing an educational and tech lifeline for Gaza's youth, supported by independent solar energy and continuous high-speed internet.",
     "nonProfitBadge": "Serving students & remote workers daily",
     "quickLinksTitle": "Quick Links",
     "quickLinks": [
@@ -564,6 +564,20 @@
     "sponsorBtn": "Sponsor",
     "items": [
       {
+        "id": "electricity",
+        "title": "Electricity & Solar Backup",
+        "amount": 600,
+        "percentage": 24,
+        "tagline": "Continuous 220V power upkeep: lithium storage, solar inverters, and emergency fuel."
+      },
+      {
+        "id": "repairs",
+        "title": "Operations, Maintenance & Repairs",
+        "amount": 100,
+        "percentage": 4,
+        "tagline": "Ongoing maintenance of ergonomic desks, laptop power adapters, and high-gain routers."
+      },
+      {
         "id": "volunteers",
         "title": "Volunteer Team Stipends",
         "amount": 800,
@@ -578,25 +592,11 @@
         "tagline": "Central, secure AC sanctuary in Gaza City hosting 200 learners daily to study and work."
       },
       {
-        "id": "electricity",
-        "title": "Electricity & Solar Backup",
-        "amount": 600,
-        "percentage": 24,
-        "tagline": "Continuous 220V power upkeep: lithium storage, solar inverters, and emergency fuel."
-      },
-      {
-        "id": "repairs",
-        "title": "Monthly Maintenance & Repairs",
-        "amount": 100,
-        "percentage": 4,
-        "tagline": "Ongoing maintenance of ergonomic desks, laptop power adapters, and high-gain routers."
-      },
-      {
         "id": "internet",
         "title": "High-Speed Internet (100 Mbps)",
         "amount": 250,
         "percentage": 10,
-        "tagline": "LEO satellite terminal subscription powering exams, remote jobs, and university research."
+        "tagline": "Dedicated high-speed subscription powering exams, remote jobs, and university research."
       },
       {
         "id": "water_cleaning",
