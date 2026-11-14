@@ -223,7 +223,7 @@ export default function TransparencyWall({ onOpenDonation }: TransparencyWallPro
       aria-labelledby="transparency-title"
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        
+
         {/* Top Header: Inspiring Title & Subtitle */}
         <div className="text-center max-w-3xl mx-auto mb-12">
           <h2
@@ -242,7 +242,7 @@ export default function TransparencyWall({ onOpenDonation }: TransparencyWallPro
         <div className="mb-16">
           <div className="bg-slate-50/60 rounded-3xl p-6 sm:p-10 border border-slate-200/80 shadow-xs">
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
-              
+
               {/* Left Column: Interactive Radial Ecosystem Dial (SVG Donut Chart) */}
               <div className="lg:col-span-5 flex flex-col items-center justify-center">
                 <div
@@ -365,126 +365,112 @@ export default function TransparencyWall({ onOpenDonation }: TransparencyWallPro
                 </div>
 
                 <div
-                  className="grid grid-cols-1 sm:grid-cols-2 gap-3.5"
+                  className="grid grid-cols-1 sm:grid-cols-2 gap-4"
                   onMouseLeave={() => setActiveCategoryId(null)}
                 >
                   {budgetItems.map((item) => {
                     const IconComp = item.icon;
                     const isSelected = activeCategoryId === item.id;
                     return (
-                      <div
+                      <article
                         key={item.id}
                         onMouseEnter={() => setActiveCategoryId(item.id)}
                         onMouseLeave={() => setActiveCategoryId(null)}
                         onClick={() => setActiveCategoryId(isSelected ? null : item.id)}
-                        className={`group relative p-4 rounded-2xl border transition-all duration-300 flex flex-col justify-between cursor-pointer overflow-hidden ${
-                          isSelected
-                            ? `${item.colorTheme.activeRing} scale-[1.02] shadow-md`
-                            : `${item.colorTheme.border} bg-white hover:border-slate-300 hover:shadow-xs`
-                        }`}
+                        className={`group relative rounded-2xl border bg-white transition-all duration-300 flex flex-col justify-between cursor-pointer overflow-hidden shadow-2xs hover:shadow-md ${isSelected
+                            ? `${item.colorTheme.activeRing} scale-[1.01] shadow-md`
+                            : `${item.colorTheme.border} hover:border-slate-300`
+                          }`}
                       >
-                        {/* ── Background Photo with Soft Faded Tint Overlay (Single Card) ── */}
+                        {/* ── 1. Top Card Image Showcase (صورة نظيفة وواضحة بدون نصوص مشوشة) ── */}
                         {item.image && (
-                          <div className="absolute inset-0 pointer-events-none overflow-hidden">
+                          <div className="relative w-full aspect-[16/10] overflow-hidden bg-slate-100 shrink-0">
                             <Image
                               src={item.image}
                               alt={item.imageAlt || item.title}
                               fill
                               sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 30vw"
-                              className={`object-cover object-center transition-all duration-700 ease-out ${
-                                isSelected
-                                  ? "scale-105 opacity-100"
-                                  : "scale-100 opacity-92 group-hover:opacity-100 group-hover:scale-104"
-                              }`}
+                              className={`object-cover object-center transition-transform duration-500 ease-out ${isSelected ? "scale-105" : "scale-100 group-hover:scale-105"
+                                }`}
                             />
-                            {/* Light Gradient Overlay: soft bottom gradient allowing the photo to be visible as a faded background */}
-                            <div
-                              className={`absolute inset-0 bg-gradient-to-t ${item.colorTheme.lightOverlay} transition-opacity duration-300 ${
-                                isSelected ? "opacity-68" : "opacity-72 group-hover:opacity-60"
-                              }`}
-                            />
-                          </div>
-                        )}
 
-                        <div className="relative z-10">
-                          {/* Top Row: Icon + Title & Percentage + Photo Preview Button */}
-                          <div className="flex items-start justify-between gap-2 mb-2">
-                            <div className="flex items-center gap-2.5 min-w-0">
-                              <div
-                                className={`w-8 h-8 rounded-xl ${item.colorTheme.iconBg} flex items-center justify-center shrink-0 shadow-2xs`}
-                              >
-                                <IconComp className="w-4 h-4" />
-                              </div>
-                              <div className="min-w-0">
-                                <h4 className="text-xs sm:text-sm font-black text-slate-950 leading-tight truncate drop-shadow-[0_1px_1px_rgba(255,255,255,0.95)]">
-                                  {item.title}
-                                </h4>
-                                <span className="text-[10px] font-black text-slate-700 drop-shadow-[0_1px_1px_rgba(255,255,255,0.9)]">
-                                  {item.percentage}% {tw?.ofTotal}
-                                </span>
-                              </div>
-                            </div>
+                            {/* Top End: Full-view Camera Preview Button */}
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setLightboxItem({
+                                  id: item.id,
+                                  title: item.title,
+                                  category: `${item.percentage}% ${tw?.ofTotal || "من الميزانية"}`,
+                                  description: item.tagline,
+                                  image: item.image,
+                                });
+                              }}
+                              title={isRtl ? "معاينة الصورة الميدانية بالحجم الكامل" : "View full photo"}
+                              className="absolute top-2.5 end-2.5 p-1.5 rounded-lg bg-black/40 hover:bg-black/70 text-white backdrop-blur-xs shadow-xs flex items-center justify-center transition-all cursor-pointer z-10 border border-white/20"
+                            >
+                              <Camera className="w-3.5 h-3.5" />
+                            </button>
 
-                            {item.image && (
+                            {/* Bottom of Image: Sponsor Item Animated Floating Pill Button (زر كفالة البند التفاعلي المتحرك) */}
+                            <div className="absolute inset-x-0 bottom-0 pt-8 pb-3 px-3 bg-gradient-to-t from-black/60 via-black/20 to-transparent flex justify-center z-10 pointer-events-none">
                               <button
                                 type="button"
                                 onClick={(e) => {
                                   e.stopPropagation();
-                                  setLightboxItem({
-                                    id: item.id,
-                                    title: item.title,
-                                    category: `${item.percentage}% ${tw?.ofTotal || "من الميزانية"}`,
-                                    description: item.tagline,
-                                    image: item.image,
-                                  });
+                                  onOpenDonation(item.amount);
                                 }}
-                                title={isRtl ? "معاينة الصورة الميدانية بالحجم الكامل" : "View full photo"}
-                                className="p-1 rounded-lg bg-white/85 hover:bg-white text-slate-700 hover:text-emerald-700 border border-slate-200/80 shadow-2xs flex items-center justify-center transition-all cursor-pointer shrink-0"
+                                aria-label={`${tw?.sponsorBtn || "كفالة البند"}: ${item.title} ($${item.amount})`}
+                                className="pointer-events-auto shimmer-button animate-subtle-float group/btn py-1.5 px-4 rounded-full text-xs font-black transition-all duration-300 flex items-center justify-center gap-2 cursor-pointer shadow-lg shadow-black/30 hover:shadow-emerald-500/35 bg-emerald-600 hover:bg-emerald-500 text-white hover:scale-105 active:scale-95 border border-emerald-400/50 backdrop-blur-xs"
                               >
-                                <Camera className="w-3.5 h-3.5" />
+                                <Heart className="w-3.5 h-3.5 fill-white text-white animate-heartbeat shrink-0" />
+                                <span className="tracking-normal font-bold drop-shadow-xs">{tw?.sponsorBtn || "كفالة البند"}</span>
+                                <span className="font-mono text-[11px] font-black bg-emerald-700/90 text-emerald-100 px-2 py-0.5 rounded-full border border-emerald-500/40 shrink-0">
+                                  ${item.amount}
+                                </span>
                               </button>
-                            )}
+                            </div>
                           </div>
+                        )}
 
-                          {/* Dynamic Progress Indicator */}
-                          <div className="w-full bg-slate-200/80 h-1.5 rounded-full overflow-hidden mb-2 shadow-inner">
-                            <div
-                              className={`${item.colorTheme.barColor} h-full rounded-full transition-all duration-500`}
-                              style={{ width: `${item.percentage * 2}%` }}
-                            />
+                        {/* ── 2. Card Content (الكلام والنسبة تحت الصورة) ── */}
+                        <div className="p-3.5 sm:p-4 flex-1 flex flex-col justify-between bg-white">
+                          <div>
+                            {/* Card Header: Icon + Full Title without truncation */}
+                            <div className="flex items-center gap-2 mb-2.5">
+                              <div
+                                className={`w-7 h-7 rounded-lg ${item.colorTheme.iconBg} flex items-center justify-center shrink-0 shadow-2xs`}
+                              >
+                                <IconComp className="w-3.5 h-3.5" />
+                              </div>
+                              <h4 className="text-sm sm:text-base font-black text-slate-950 leading-snug">
+                                {item.title}
+                              </h4>
+                            </div>
+
+                            {/* Dynamic Progress Indicator (الخط) */}
+                            <div className="w-full bg-slate-100 h-1.5 rounded-full overflow-hidden mb-1.5 shadow-inner">
+                              <div
+                                className={`${item.colorTheme.barColor} h-full rounded-full transition-all duration-500`}
+                                style={{ width: `${item.percentage * 2}%` }}
+                              />
+                            </div>
+
+                            {/* Budget under the line in a light/subtle font (ميزانية تحت الخط بخط خفيف) */}
+                            <div className="text-[11px] text-slate-400 font-normal mb-2">
+                              <span>
+                                {item.percentage}% {tw?.ofTotal || "من الميزانية"}
+                              </span>
+                            </div>
+
+                            {/* Human Impact Description */}
+                            <p className="text-xs text-slate-600 leading-relaxed font-medium">
+                              {item.tagline}
+                            </p>
                           </div>
-
-                          {/* Concise Human Impact Statement (Clear, crisp, readable font) */}
-                          <p className="text-[11px] sm:text-xs text-slate-950 leading-relaxed font-black mb-3 drop-shadow-[0_1px_2px_rgba(255,255,255,0.95)]">
-                            {item.tagline}
-                          </p>
                         </div>
-
-                        {/* Sponsor Item Action Button */}
-                        <div className="relative z-10 pt-1">
-                          <button
-                            type="button"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              onOpenDonation(item.amount);
-                            }}
-                            aria-label={`${tw?.sponsorBtn || "Sponsor"}: ${item.title} ($${item.amount})`}
-                            className={`w-full py-2 px-3 rounded-xl text-xs font-black transition-all flex items-center justify-between cursor-pointer shadow-xs ${
-                              isSelected
-                                ? "bg-slate-950 text-white shadow-md ring-2 ring-emerald-500/50"
-                                : "bg-white/95 hover:bg-white text-slate-950 border border-slate-300/90 hover:border-emerald-500"
-                            }`}
-                          >
-                            <span className="flex items-center gap-1.5">
-                              <Heart className="w-3.5 h-3.5 text-emerald-500" />
-                              <span>{tw?.sponsorBtn}</span>
-                            </span>
-                            <span className="font-mono font-black text-emerald-600 text-sm">
-                              ${item.amount}
-                            </span>
-                          </button>
-                        </div>
-                      </div>
+                      </article>
                     );
                   })}
                 </div>

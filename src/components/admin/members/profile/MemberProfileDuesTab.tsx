@@ -1,26 +1,40 @@
 "use client";
 
 import React from "react";
-import { AlertCircle } from "lucide-react";
+import { AlertCircle, Clock } from "lucide-react";
 import { MemberRecord } from "@/components/admin/members/data";
 
 interface MemberProfileDuesTabProps {
   member: MemberRecord;
   percentage: number;
   isRTL: boolean;
+  onOpenAdjustHours?: () => void;
 }
 
 export default function MemberProfileDuesTab({
   member,
   percentage,
   isRTL,
+  onOpenAdjustHours,
 }: MemberProfileDuesTabProps) {
   return (
     <div className="space-y-6 animate-in fade-in duration-200">
       <div className="bg-white rounded-2xl border border-slate-200/90 p-6 shadow-xs space-y-4">
-        <h3 className="text-base font-bold text-[#0c2340]">
-          {isRTL ? "تفاصيل الحصة الشهرية والاستهلاك" : "Monthly Quota & Usage Details"}
-        </h3>
+        <div className="flex items-center justify-between flex-wrap gap-2">
+          <h3 className="text-base font-bold text-[#0c2340]">
+            {isRTL ? "تفاصيل الحصة الشهرية والاستهلاك" : "Monthly Quota & Usage Details"}
+          </h3>
+          {onOpenAdjustHours && (
+            <button
+              type="button"
+              onClick={onOpenAdjustHours}
+              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition-all shadow-2xs active:scale-95 cursor-pointer"
+            >
+              <Clock className="w-3.5 h-3.5" />
+              <span>{isRTL ? "تعديل رصيد الساعات" : "Adjust Hours"}</span>
+            </button>
+          )}
+        </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2">
           <div className="p-4 bg-slate-50 rounded-xl border border-slate-200">

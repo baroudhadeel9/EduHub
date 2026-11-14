@@ -1,0 +1,126 @@
+<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
+<head>
+<meta charset="utf-8">
+<title>دليل مميزات المقعد الذكي في منصة EduHub Gaza</title>
+<style>
+body { font-family: 'Arial', 'Segoe UI', Tahoma, sans-serif; direction: rtl; text-align: right; line-height: 1.6; }
+h1 { color: #0284c7; border-bottom: 2px solid #0284c7; padding-bottom: 8px; font-size: 20pt; }
+h2 { color: #0f172a; border-bottom: 1px solid #cbd5e1; padding-bottom: 5px; margin-top: 25px; font-size: 15pt; }
+h3 { color: #0369a1; font-size: 12pt; margin-top: 15px; }
+.card { background-color: #f8fafc; border: 1px solid #e2e8f0; padding: 12px; margin-bottom: 12px; }
+.highlight { background-color: #eff6ff; border-right: 4px solid #0284c7; padding: 10px 14px; margin: 12px 0; }
+table { width: 100%; border-collapse: collapse; margin: 15px 0; }
+th, td { border: 1px solid #cbd5e1; padding: 8px 12px; text-align: right; font-size: 10pt; }
+th { background-color: #f1f5f9; color: #0f172a; }
+ul { margin-right: 20px; }
+li { margin-bottom: 6px; }
+code { font-family: Consolas, monospace; background: #e2e8f0; padding: 2px 5px; font-size: 9pt; }
+</style>
+</head>
+<body>
+
+<h1>💺 الدليل الشامل: مميزات وتقنيات "المقعد الذكي" في منصة EduHub Gaza</h1>
+<p><strong>التوثيق الفني والتقني المتكامل لخصائص محطة العمل (The Smart Workstation)</strong></p>
+
+<div class="highlight">
+<strong>مفهوم المقعد في EduHub:</strong> المقعد في مساحة EduHub ليس مجرد أثاث، بل "محطة عمل ذكية" مدمجة بين النظام الرقمي الذكي على الموقع والتجهيزات المادية المتطورة على أرض الواقع لضمان عدم توقف العمل والتعلم نهائياً تحت أي ظرف.
+</div>
+
+<h2>💻 1. الفيوتشرز والخصائص الرقمية للمقعد على الموقع (Digital Platform Features)</h2>
+
+<h3>1. خريطة المقاعد التفاعلية الحية (Interactive Live Seat Map)</h3>
+<ul>
+    <li><strong>توزيع منظم بدقة:</strong> كل صالة تحتوي على 20 مقعداً مقسمة على 4 صفوف (5 مقاعد في كل صف).</li>
+    <li><strong>صالات مستقلة ومراعاة للخصوصية:</strong>
+        <ul>
+            <li><strong>صالة الشباب (Youth Hall):</strong> 20 مقعداً تحمل الأكواد <code>YM-01</code> حتى <code>YM-20</code>.</li>
+            <li><strong>صالة الإناث (Women Hall):</strong> 20 مقعداً مستقلة تماماً ومخصصة للطالبات والمستقلات بالأكواد <code>FH-01</code> حتى <code>FH-20</code>.</li>
+        </ul>
+    </li>
+    <li><strong>تحديث تفاعلي لحظي:</strong> الخريطة تفحص توفر المقاعد في نفس ثانية اختيار التاريخ والساعات.</li>
+</ul>
+
+<h3>2. حالات المقعد الذكية وألوانها الدلالية</h3>
+<table>
+    <thead>
+        <tr>
+            <th>الحالة</th>
+            <th>اللون في الموقع</th>
+            <th>الوصف البرمجي</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td><strong>متاح بالكامل (Fully Available)</strong></td>
+            <td>أخضر زمردي</td>
+            <td>المقعد متاح للحجز في كامل الفترة المحددة بنقرة واحدة.</td>
+        </tr>
+        <tr>
+            <td><strong>محجوز جزئياً (Partially Booked)</strong></td>
+            <td>أزرق سماوي</td>
+            <td>المقعد محجوز في بعض الساعات ومتاح في أخرى؛ يتيح النظام حجز الساعات الشاغرة بضغطة زر.</td>
+        </tr>
+        <tr>
+            <td><strong>غير متاح / محجوز بالكامل</strong></td>
+            <td>رمادي (معطل)</td>
+            <td>المقعد مشغول بالكامل في هذا الوقت ولا يمكن اختياره لمنع التضارب.</td>
+        </tr>
+        <tr>
+            <td><strong>مقفل إدارياً / صيانة (Locked)</strong></td>
+            <td>أصفر / برتقالي مع قفل</td>
+            <td>مقعد قيد الصيانة الفنية أو محجوز لقرار إداري.</td>
+        </tr>
+    </tbody>
+</table>
+
+<h3>3. مؤشر الطاقة الكهربائية النشط (Active Power Indicator ⚡)</h3>
+<ul>
+    <li>كل مقعد على الموقع يحمل أيقونة البرق (Zap) المعبرة عن خاصية <code>has_power = true</code>، للدلالة على وجود مصدر طاقة كهربائية موصول ومباشر بالمقعد.</li>
+</ul>
+
+<h3>4. نظام الفترات الزمنية ومنع التضارب الرياضي (Collision Detection)</h3>
+<ul>
+    <li><strong>7 فترات تشغيلية يومياً:</strong> من 09:00 صباحاً حتى 04:00 عصراً مقسمة بالساعة.</li>
+    <li><strong>منع التداخل الرياضي:</strong> استحالة حجز المقعد لنفس الساعة لمستخدمين اثنين عبر معادلة برمجية صارمة.</li>
+    <li><strong>التعبئة التلقائية الذكية (Autofill):</strong> عند اختيار مقعد متاح جزئياً، يعدل النظام ساعات الحضور لتتوافق تلقائياً مع الساعات الشاغرة.</li>
+</ul>
+
+<h3>5. تخصيص المقعد الذكي لتصاريح الزوار (Visitor Desk Allocation)</h3>
+<ul>
+    <li>عند اعتماد طلب زيارة يومية (1-Day Visitor Pass)، يخصص النظام مقعداً متاحاً تلقائياً أو تختاره الإدارة يدوياً.</li>
+    <li>يُحفظ رقم المقعد والصالة على سجل التصريح، ويظهر في جدول الإشغال العام لمنع حجزه من أي شخص آخر.</li>
+</ul>
+
+<h3>6. إشعارات المقعد عبر واتساب والإيميل (WhatsApp & Email Dispatch)</h3>
+<ul>
+    <li>تصل الزائر أو العضو رسالة تأكيد رسمية واضحة تحمل:
+        <ul>
+            <li>رقم المقعد واسم الصالة (مثلاً: <code>💺 المقعد المخصص لك: مقعد 5 - صالة الشباب</code>).</li>
+            <li>تاريخ وساعات الزيارة الدقيقة.</li>
+            <li>كود الحجز أو التصريح الرسمي للتحقق عند الاستقبال.</li>
+        </ul>
+    </li>
+</ul>
+
+<h2>⚡ 2. التجهيزات الميدانية والفيزيائية للمقعد (On-Ground Facilities)</h2>
+<ul>
+    <li><strong>منفذ كهرباء وشاحن مخصص 24/7 لكل مقعد:</strong> قابس طاقة مباشر مدعوم بمنظومة طاقة شمسية هجينة ومولدات وUPS يضمن عدم انقطاع التيار نهائياً عن لابتوبك وأجهزتك.</li>
+    <li><strong>إنترنت فايبر مخصص وفائق السرعة:</strong> تغطية Wi-Fi 6 ممتازة وموزعة لتصل لكل طاولة ومقعد بكفاءة عالية وبدون تقطيع أثناء مكالمات الفيديو واجتماعات العمل.</li>
+    <li><strong>كرسي مكتبي مريح (Ergonomic Chair):</strong> مصمم لدعم الظهر والفقرات أثناء فترات الجلوس الطويلة للعمل والدراسة.</li>
+    <li><strong>طاولة عمل واسعة:</strong> مساحة مكتبية رحبة تتسع للابتوب، شاشة إضافية، وماوس، مع مسافات مريحة تضمن الخصوصية.</li>
+    <li><strong>إضاءة مريحة وتكييف هوائي:</strong> إضاءة غير عاكسة تقلل إجهاد العين ونظام تكييف مستمر.</li>
+</ul>
+
+<h2>🛠️ 3. البنية والتقنيات المستخدمة برمجياً (Tech Stack)</h2>
+<ul>
+    <li><strong>Frontend:</strong> Next.js 16 (App Router), React 19, Tailwind CSS, Lucide Icons (Armchair, Zap, Clock).</li>
+    <li><strong>Backend:</strong> Laravel 11 REST API, PHP 8.2+.</li>
+    <li><strong>Database:</strong> MySQL / MariaDB, Eloquent Models (<code>Seat</code>, <code>Room</code>, <code>Booking</code>, <code>VisitorPass</code>).</li>
+    <li><strong>Notification Services:</strong> Brevo API (SMTP Transactions), WhatsApp API Integration.</li>
+</ul>
+
+<hr>
+<p style="text-align: center; color: #64748b; font-size: 10pt;">EduHub Gaza • مساحة العمل والتعليم الذكية الأولى • 2026</p>
+
+</body>
+</html>

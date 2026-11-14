@@ -28,6 +28,7 @@ import MemberProfileBookingsTab from "@/components/admin/members/profile/MemberP
 import MemberProfileDuesTab from "@/components/admin/members/profile/MemberProfileDuesTab";
 import { MemberResendActivationModal } from "@/components/admin/members/MemberResendActivationModal";
 import { MemberWhatsAppModal } from "@/components/admin/members/MemberWhatsAppModal";
+import AdjustMemberHoursModal from "@/components/admin/members/AdjustMemberHoursModal";
 import {
   ArrowLeft,
   ArrowRight,
@@ -269,6 +270,8 @@ export default function MemberProfileView({ memberId }: MemberProfileViewProps) 
     }
   };
 
+  const [adjustHoursModalOpen, setAdjustHoursModalOpen] = useState(false);
+
   if (loading) {
     return (
       <div dir={dir} className="min-h-screen bg-[#f8fafc] flex flex-col items-center justify-center p-4">
@@ -434,7 +437,7 @@ export default function MemberProfileView({ memberId }: MemberProfileViewProps) 
               <div className="flex flex-wrap items-center gap-2 self-stretch sm:self-auto shrink-0 pt-2 lg:pt-0 border-t lg:border-t-0 border-slate-100">
                 <button
                   type="button"
-                  onClick={() => setActiveTab("dues")}
+                  onClick={() => setAdjustHoursModalOpen(true)}
                   className="flex-1 sm:flex-initial inline-flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-xl bg-white border border-slate-200 hover:border-emerald-300 text-slate-700 hover:text-emerald-700 text-xs font-bold transition-all shadow-2xs active:scale-95 cursor-pointer"
                 >
                   <Clock className="w-3.5 h-3.5 text-emerald-600" />
@@ -761,6 +764,7 @@ export default function MemberProfileView({ memberId }: MemberProfileViewProps) 
               member={member}
               percentage={percentage}
               isRTL={isRTL}
+              onOpenAdjustHours={() => setAdjustHoursModalOpen(true)}
             />
           )}
 
@@ -874,6 +878,36 @@ export default function MemberProfileView({ memberId }: MemberProfileViewProps) 
                 allocatedHours: member.hoursLimit,
                 usedHours: member.hoursUsed,
               }}
+              isRTL={isRTL}
+            />
+          )}
+
+          {/* Adjust Member Hours Modal */}
+          {member && (
+            <AdjustMemberHoursModal
+              isOpen={adjustHoursModalOpen}
+              onClose={() => setAdjustHoursModalOpen(false)}
+              onSuccess={(updated) => {
+                if (updated) {
+                  setMember((prev) =>
+                    prev
+                      ? {
+                          ...prev,
+                          hoursLimit: updated.allocated_hours,
+                          hoursUsed: updated.used_hours,
+                          extraHours: updated.extra_hours,
+                          remainingHours: updated.remaining_hours,
+                          dueAmount: updated.extra_amount_due,
+                        }
+                      : prev
+                  );
+                }
+              }}
+              memberId={member.id}
+              memberName={member.name}
+              memberType={member.type}
+              currentLimit={member.hoursLimit}
+              currentUsed={member.hoursUsed}
               isRTL={isRTL}
             />
           )}

@@ -18,6 +18,7 @@ import {
   LogOut,
   MessageSquareText,
   LifeBuoy,
+  Sparkles,
 } from "lucide-react";
 
 interface AdminSidebarProps {
@@ -125,6 +126,13 @@ export default function AdminSidebar({
           ? { text: String(realCounts.pendingVisitors), bg: "bg-orange-100 text-orange-800" }
           : null,
       href: "/admin/visitor-requests",
+    },
+    {
+      id: "events",
+      label: isRTL ? "الورش والفعاليات" : "Workshops & Events",
+      icon: Sparkles,
+      badge: null,
+      href: "/admin/events",
     },
     {
       id: "sms",

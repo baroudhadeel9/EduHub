@@ -1,0 +1,168 @@
+<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
+<head>
+<meta charset="utf-8">
+<title>المرجع الشامل: جميع مميزات وتقنيات منصة EduHub Gaza</title>
+<style>
+body { font-family: 'Arial', 'Segoe UI', Tahoma, sans-serif; direction: rtl; text-align: right; line-height: 1.6; }
+h1 { color: #0284c7; border-bottom: 2px solid #0284c7; padding-bottom: 8px; font-size: 20pt; }
+h2 { color: #0f172a; border-bottom: 1px solid #cbd5e1; padding-bottom: 5px; margin-top: 25px; font-size: 15pt; }
+h3 { color: #0369a1; font-size: 12pt; margin-top: 15px; }
+table { width: 100%; border-collapse: collapse; margin: 15px 0; }
+th, td { border: 1px solid #cbd5e1; padding: 8px 12px; text-align: right; font-size: 10pt; }
+th { background-color: #f1f5f9; color: #0f172a; }
+.card { background-color: #f8fafc; border: 1px solid #e2e8f0; padding: 12px; margin-bottom: 12px; }
+.highlight { background-color: #eff6ff; border-right: 4px solid #0284c7; padding: 10px 14px; margin: 12px 0; }
+ul { margin-right: 20px; }
+li { margin-bottom: 6px; }
+code { font-family: Consolas, monospace; background: #e2e8f0; padding: 2px 5px; font-size: 9pt; }
+</style>
+</head>
+<body>
+
+<h1>🌐 المرجع الشامل: جميع مميزات وتقنيات منصة EduHub Gaza</h1>
+<p><strong>التوثيق الفني والوظيفي المتكامل لمنظومة مساحة العمل والتعليم الذكية الأولى في غزة</strong></p>
+
+<div class="highlight">
+<strong>عن منصة EduHub Gaza:</strong> منظومة سحابية وإدارية حديثة متكاملة صُممت خصيصاً لإدارة وتشغيل أول وأكبر مساحة عمل وتعليم ذكية في قطاع غزة، تجمع بين الواجهة البرمجية المتطورة والتجهيزات الميدانية الصلبة لضمان بيئة إنتاجية متواصلة 100%.
+</div>
+
+<h2>🛠️ 1. التقنيات والمعمارية البرمجية المستخدمة (Tech Stack)</h2>
+<table>
+    <thead>
+        <tr>
+            <th>الطبقة (Layer)</th>
+            <th>التقنيات والمكتبات المستخدمة</th>
+            <th>الوظيفة في المنصة</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td><strong>واجهة المستخدم (Frontend)</strong></td>
+            <td><code>Next.js 16.4 (App Router)</code>, <code>React 19.3</code>, <code>TypeScript 5</code>, <code>Turbopack</code></td>
+            <td>بناء واجهة تفاعلية فائقة السرعة، توجيه سلس بدون تحديث كامل للصفحة، وأداء تحميل استثنائي.</td>
+        </tr>
+        <tr>
+            <td><strong>التصميم والواجهات (Styling)</strong></td>
+            <td><code>Tailwind CSS v4</code>, <code>Lucide React</code>, <code>clsx</code>, <code>tailwind-merge</code></td>
+            <td>تصميم عصري متجاوب 100% مع الهواتف والشاشات الكبيرة، ونظام أيقونات عصري موحد.</td>
+        </tr>
+        <tr>
+            <td><strong>محرك اللغات والاتجاه</strong></td>
+            <td><code>Custom LanguageContext (Ar/En)</code>, <code>RTL / LTR Dynamic Engine</code></td>
+            <td>دعم كامل وفوري للغتين العربية والإنجليزية مع تبديل الاتجاه آلياً.</td>
+        </tr>
+        <tr>
+            <td><strong>طبقة الحماية والوسيط</strong></td>
+            <td><code>Next.js API Proxy Layer (/api/proxy)</code>, <code>Zod Schema Validation</code></td>
+            <td>عزل مفاتيح الـ API وحل مشاكل CORS والتحقق الصارم من صحة المدخلات.</td>
+        </tr>
+        <tr>
+            <td><strong>الخادم والـ API (Backend)</strong></td>
+            <td><code>Laravel 12 Framework</code>, <code>PHP 8.2+</code>, <code>RESTful API</code></td>
+            <td>معالجة منطق الأعمال، الحجوزات، الرصيد، والصلاحيات الإدارية.</td>
+        </tr>
+        <tr>
+            <td><strong>المصادقة والأمان</strong></td>
+            <td><code>Laravel Sanctum</code>, <code>Bcrypt Encryption</code>, <code>Tokenized Links</code></td>
+            <td>جلسات توثيق مشفرة وحماية بنكية لكلمات المرور وتفعيل سري عبر روابط مؤقتة.</td>
+        </tr>
+        <tr>
+            <td><strong>قاعدة البيانات (Database)</strong></td>
+            <td><code>MySQL / MariaDB</code>, <code>Eloquent ORM</code>, <code>DB Transactions</code></td>
+            <td>جداول مترابطة بفهارس عالية السرعة وضمان عدم التضارب أثناء الحجز والخصم.</td>
+        </tr>
+        <tr>
+            <td><strong>بوابات الإشعار والرسائل</strong></td>
+            <td><code>Brevo REST API</code>, <code>Tweet SMS Gateway API</code>, <code>WhatsApp API</code></td>
+            <td>إرسال رسائل القبول والتأكيد عبر الإيميل، إرسال رسائل SMS جماعية، وتوليد نصوص واتساب.</td>
+        </tr>
+    </tbody>
+</table>
+
+<h2>🌟 2. بوابة الزوار والخدمات العامة (Public Features)</h2>
+
+<h3>1. ميزة تصريح الزيارة اليومية السريعة (1-Day Visitor Pass)</h3>
+<ul>
+    <li><strong>حل فوري للطوارئ:</strong> مخصص لمن يحتاج المساحة ليوم واحد فقط (امتحانات إلكترونية، مقابلات عمل عن بعد، تقديم فيزا أو مهمة عاجلة) دون الحاجة للاشتراك الشهري.</li>
+    <li><strong>تحديد إجباري للموعد:</strong> اختيار دقيق لتاريخ وساعات الزيارة للتنسيق المسبق وضمان توفر المقاعد.</li>
+    <li><strong>تخصيص مقعد ذكي وتلقائي:</strong> عند اعتماد الطلب، يخصص النظام مقعداً شاغراً في القاعة المناسبة ويربطه برقم التصريح الرسمي (#VIS-XXXX).</li>
+    <li><strong>إشعار فوري مزدوج (WhatsApp + Email):</strong> تصل الزائر رسالة واتساب رسمية وإيميل معتمد يحتويان على رقم المقعد، ساعات الحجز، وإرشادات الدخول.</li>
+    <li><strong>حماية أولوية العضويات:</strong> النظام يمنع الأعضاء المسجلين من تقديم طلب زائر، ويوجههم لتسجيل الدخول للاستفادة الكاملة من مميزات عضويتهم.</li>
+</ul>
+
+<h3>2. ميزة التقديم الذكي للعضوية (Smart Membership Application)</h3>
+<ul>
+    <li>استمارة تسجيل إلكترونية بـ 3 خطوات مع تحديد فئة العضوية (طالب جامعي / مستقل Freelancer).</li>
+    <li>إمكانية رفع صورة بطاقة الطالب أو إثبات العمل الحر مباشرة لمراجعتها من الإدارة.</li>
+    <li>لوحة فرز وتدقيق للإدارة للموافقة أو الرفض مع ذكر الأسباب بكل وضوح.</li>
+</ul>
+
+<h3>3. ميزة التفعيل الآمن وتعيين كلمة المرور (Self-Activation)</h3>
+<ul>
+    <li>رابط تفعيل سري ومحمي (Token-based URL) يرسل لبريد العضو فور قبول طلبه.</li>
+    <li>العضو يحدد كلمة مروره بنفسه بخصوصية تامة دون تدخل أو معرفة أي موظف.</li>
+    <li>حماية ضد التكرار: منع إعادة إرسال روابط التفعيل للحسابات المفعلة والمحمية.</li>
+</ul>
+
+<h3>4. الصفحة الرئيسية التفاعلية (Modern Landing Page)</h3>
+<ul>
+    <li>استعراض تعريفي متكامل بالمساحة، عدادات الإحصائيات الحية، وخطط الأسعار والعضويات.</li>
+    <li>معاينة تفاعلية للقاعات، نبذة عن التجهيزات (طاقة، إنترنت، ضيافة)، وقسم الأسئلة الشائعة ونموذج التواصل المباشر.</li>
+</ul>
+
+<h2>💺 3. ميزة حجز المقاعد التفاعلي المباشر (Seat Booking System)</h2>
+<ul>
+    <li><strong>خريطة مقاعد حية ومباشرة:</strong> شبكة تفاعلية تضم 20 مقعداً في كل قاعة، تتحدث ألوانها فورياً بحسب اليوم والوقت المختار.</li>
+    <li><strong>فصل كامل ومراعاة تامة للخصوصية:</strong>
+        <ul>
+            <li><strong>صالة الإناث (Women Hall):</strong> صالة مستقلة بالكامل ومخصصة للطالبات والمستقلات بالأكواد <code>FH-01</code> إلى <code>FH-20</code>.</li>
+            <li><strong>صالة الشباب (Youth Hall):</strong> مساحة عمل متكاملة مجهزة للطاقة المستمرة بالأكواد <code>YM-01</code> إلى <code>YM-20</code>.</li>
+        </ul>
+    </li>
+    <li><strong>حالات المقاعد الذكية بالألوان:</strong>
+        <ul>
+            <li>🟢 متاح بالكامل (Fully Available): جاهز للحجز الفوري بنقرة واحدة.</li>
+            <li>🔵 محجوز جزئياً (Partially Booked): محجوز في بعض الساعات ومتاح في أخرى مع خاصية الضبط التلقائي للساعات الشاغرة (Smart Autofill).</li>
+            <li>⚪ غير متاح (Unavailable): محجوز بالكامل في هذه الفترة لمنع التضارب.</li>
+            <li>🔒 مقفل إدارياً (Locked): مخصص للصيانة الفنية أو لأمر إداري طارئ.</li>
+        </ul>
+    </li>
+    <li><strong>مؤشر الكهرباء المباشر (⚡ Zap):</strong> علامة تؤكد أن المقعد متصل بمنفذ طاقة نشط ومستمر 24/7.</li>
+    <li><strong>محرك منع التضارب الرياضي (Collision Detection):</strong> استحالة حجز المقعد لنفس الساعة لمستخدمين مختلفين عبر خوارزمية فحص التداخل الزمني بالدقيقة.</li>
+    <li><strong>فترات تشغيلية قياسية:</strong> 7 فترات تشغيلية يومياً من الساعة 09:00 صباحاً حتى 04:00 عصراً مقسمة بالساعة.</li>
+</ul>
+
+<h2>👤 4. بوابة لوحة تحكم العضو (Member Portal Features)</h2>
+<ul>
+    <li><strong>إدارة الرصيد والحصص الشهرية (Rolling Quotas):</strong> عرض إجمالي الساعات المتاحة، المستهلكة، والمتبقية في اشتراك العضو لحظة بلحظة.</li>
+    <li><strong>إدارة الحجوزات:</strong> سجل كامل بالحجوزات السابقة والقادمة مع إمكانية الإلغاء الإلكتروني المسبق واسترجاع الساعات تلقائياً للرصيد.</li>
+    <li><strong>معرض إنجازات الأعضاء (Portfolio):</strong> مساحة خاصة لكل عضو لنشر مشاريعه ونجاحاته وصور أعماله داخل مجتمع المنصة.</li>
+    <li><strong>مركز الدعم الفني والتذاكر المباشرة:</strong> إمكانية فتح تذكرة دعم فني أو اقتراح من داخل الحساب ومتابعة ردود الإدارة حتى حل المشكلة.</li>
+    <li><strong>أمان الحساب:</strong> إمكانية تعديل كلمة المرور والبيانات الشخصية بسهولة وأمان.</li>
+</ul>
+
+<h2>⚙️ 5. لوحة التحكم والإدارة المركزية (Admin Control Center)</h2>
+<ul>
+    <li><strong>لوحة المراقبة العامة وعداد الإشغال الحي:</strong> رؤية فورية لعدد المتواجدين داخل الصالات الآن، ونسبة الإشغال، والإحصائيات التشغيلية اليومية.</li>
+    <li><strong>الحجز الإداري السريع:</strong> إمكانية قيام موظف الاستقبال بحجز مقعد لعضو قادم مباشرة في ثوانٍ.</li>
+    <li><strong>تسجيل الحضور والانصراف الرقمي (QR Attendance):</strong> تسجيل الحضور بلمسة واحدة برقم العضوية أو رمز الـ QR مع احتساب ساعات التواجد الفعلية ومطابقتها مع الحجوزات.</li>
+    <li><strong>إدارة المستحقات المالية والاشتراكات:</strong> متابعة اشتراكات الأعضاء، المبالغ المستحقة والمسددة، وتوثيق السداد بوضوح وشفافية.</li>
+    <li><strong>منظومة التعميمات والرسائل الجماعية (SMS Broadcasts):</strong> إرسال رسائل وتنبيهات جماعية لكافة الأعضاء بضغطة زر عبر TweetSMS.</li>
+    <li><strong>إدارة تذاكر الدعم والطلبات:</strong> فرز وحل استفسارات وشكاوى الأعضاء والرد الفوري عليها.</li>
+    <li><strong>نظام التقارير والإحصائيات:</strong> تقارير شاملة عن معدلات إشغال القاعات وتصدير البيانات.</li>
+</ul>
+
+<h2>⚡ 6. التجهيزات الميدانية والفيزيائية للمساحة (On-Ground Specs)</h2>
+<ul>
+    <li><strong>كهرباء مستمرة 24/7 دون انقطاع:</strong> منظومة طاقة شمسية هجينة ومولدات احتياطية ومنظومة UPS تضمن عدم انقطاع التيار نهائياً عن أجهزتك.</li>
+    <li><strong>إنترنت ألياف ضوئية (Fiber Optic) فائق السرعة:</strong> شبكة مخصصة للعمل عن بعد والاجتماعات ومكالمات الفيديو بدون تقطيع.</li>
+    <li><strong>منفذ كهرباء وشاحن مخصص لكل مقعد:</strong> استقلالية تامة دون الحاجة لمشتركات وتوصيلات إضافية.</li>
+    <li><strong>كراسي مكتبية طبية مريحة (Ergonomic Chairs):</strong> مصممة لدعم الظهر والفقرات لجلسات العمل والدراسة الطويلة.</li>
+    <li><strong>تكييف وهدوء صوتي تام:</strong> بيئة عمل مكيفة بالكامل مع سياسة صارمة للهدوء، بالإضافة لركن كافتيريا وضيافة مجهز.</li>
+</ul>
+
+<hr>
+<p style="text-align: center; color: #64748b; font-size: 10pt;">EduHub Gaza • مساحة العمل والتعليم الذكية الأولى • 2026</p>
+
+</body>
+</html>

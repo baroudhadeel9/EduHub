@@ -18,6 +18,7 @@ import {
 import { MemberRecord } from "./data";
 import { MemberResendActivationModal } from "./MemberResendActivationModal";
 import { MemberWhatsAppModal } from "./MemberWhatsAppModal";
+import AdjustMemberHoursModal from "./AdjustMemberHoursModal";
 
 interface MemberDetailDrawerProps {
   member: MemberRecord | null;
@@ -41,6 +42,7 @@ export default function MemberDetailDrawer({
   const [copiedPhone, setCopiedPhone] = useState(false);
   const [activationModalOpen, setActivationModalOpen] = useState(false);
   const [whatsAppModalOpen, setWhatsAppModalOpen] = useState(false);
+  const [adjustHoursModalOpen, setAdjustHoursModalOpen] = useState(false);
 
   if (!isOpen || !member) return null;
 
@@ -55,20 +57,21 @@ export default function MemberDetailDrawer({
   const isAccountActive = member.status === "active" || Boolean(member.hasPassword) || Boolean(member.isPasswordSet);
 
   return (
-    <div
-      dir={dir}
-      className="fixed inset-0 z-50 overflow-hidden bg-slate-900/40 backdrop-blur-2xs transition-opacity duration-300"
-      onClick={onClose}
-    >
+    <>
       <div
-        className={`fixed inset-y-0 ${
-          isRTL ? "left-0" : "right-0"
-        } max-w-full flex pl-0`}
+        dir={dir}
+        className="fixed inset-0 z-50 overflow-hidden bg-slate-900/40 backdrop-blur-2xs transition-opacity duration-300"
+        onClick={onClose}
       >
         <div
-          className="w-screen max-w-xl bg-white shadow-2xl border-x border-slate-200 flex flex-col h-full transform transition-transform duration-300 ease-out"
-          onClick={(e) => e.stopPropagation()}
+          className={`fixed inset-y-0 ${
+            isRTL ? "left-0" : "right-0"
+          } max-w-full flex pl-0`}
         >
+          <div
+            className="w-screen max-w-xl bg-white shadow-2xl border-x border-slate-200 flex flex-col h-full transform transition-transform duration-300 ease-out"
+            onClick={(e) => e.stopPropagation()}
+          >
           {/* ── Header ── */}
           <div className="p-5 border-b border-slate-100 flex items-center justify-between gap-4 bg-slate-50/50">
             <div className="flex items-center gap-3">
@@ -177,6 +180,21 @@ export default function MemberDetailDrawer({
                   </span>
                 </div>
               )}
+
+              {/* Adjust Hours Quota Action */}
+              <div className="pt-2 border-t border-slate-200/80 flex items-center justify-between">
+                <span className="text-[11px] font-medium text-slate-500">
+                  {isRTL ? "التحكم الإداري بالساعات:" : "Admin Hours Control:"}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setAdjustHoursModalOpen(true)}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white hover:bg-emerald-50 text-slate-700 hover:text-emerald-800 text-xs font-bold border border-slate-200 hover:border-emerald-300 transition-all shadow-2xs cursor-pointer active:scale-95"
+                >
+                  <Clock className="w-3.5 h-3.5 text-emerald-600" />
+                  <span>{isRTL ? "تعديل رصيد الساعات" : "Adjust Hours Quota"}</span>
+                </button>
+              </div>
             </div>
 
             {/* Contact Details */}
@@ -385,6 +403,7 @@ export default function MemberDetailDrawer({
           </div>
         </div>
       </div>
+      </div>
 
       {/* Activation & Password Setup Modal */}
       <MemberResendActivationModal
@@ -418,6 +437,28 @@ export default function MemberDetailDrawer({
         }}
         isRTL={isRTL}
       />
-    </div>
+
+      {/* Adjust Member Hours Quota Modal */}
+      <AdjustMemberHoursModal
+        isOpen={adjustHoursModalOpen}
+        onClose={() => setAdjustHoursModalOpen(false)}
+        onSuccess={(updated) => {
+          if (updated && member) {
+            member.hoursLimit = updated.allocated_hours;
+            member.hoursUsed = updated.used_hours;
+            member.extraHours = updated.extra_hours;
+            member.remainingHours = updated.remaining_hours;
+            member.dueAmount = updated.extra_amount_due;
+          }
+          if (onMemberUpdated) onMemberUpdated();
+        }}
+        memberId={member.id}
+        memberName={member.name}
+        memberType={member.type}
+        currentLimit={member.hoursLimit}
+        currentUsed={member.hoursUsed}
+        isRTL={isRTL}
+      />
+    </>
   );
 }

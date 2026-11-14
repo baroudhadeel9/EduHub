@@ -14,6 +14,7 @@ interface AdminHeaderProps {
   onOpenCheckIn?: () => void;
   onOpenMobileMenu: () => void;
   actionButton?: React.ReactNode;
+  showDate?: boolean;
 }
 
 export default function AdminHeader({
@@ -22,6 +23,7 @@ export default function AdminHeader({
   onOpenCheckIn,
   onOpenMobileMenu,
   actionButton,
+  showDate = true,
 }: AdminHeaderProps) {
   const { t, locale, dir } = useLanguage();
   const isRTL = dir === "rtl" || locale === "ar";
@@ -68,9 +70,13 @@ export default function AdminHeader({
             </h1>
 
             <div className="flex items-center gap-2 text-xs sm:text-sm text-slate-500 font-medium flex-wrap">
-              <Calendar className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-              <span>{currentDateStr || (isRTL ? "جاري تحديد التاريخ..." : "Loading date...")}</span>
-              <span className="text-slate-300">•</span>
+              {showDate && (
+                <>
+                  <Calendar className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                  <span>{currentDateStr || (isRTL ? "جاري تحديد التاريخ..." : "Loading date...")}</span>
+                  <span className="text-slate-300">•</span>
+                </>
+              )}
               <span>{displaySubtitle}</span>
             </div>
           </div>
@@ -78,14 +84,14 @@ export default function AdminHeader({
 
         {/* Action Controls (Fast Check-in, Book Seat, Room Closure, etc.) */}
         {(actionButton || onOpenCheckIn) && (
-          <div className="flex items-center gap-2 sm:gap-3 shrink-0 self-start sm:self-auto">
+          <div className="flex items-center gap-2 sm:gap-3 shrink-0 w-full sm:w-auto">
             {actionButton ? (
               actionButton
             ) : onOpenCheckIn ? (
               <button
                 type="button"
                 onClick={onOpenCheckIn}
-                className="flex items-center gap-1.5 sm:gap-2 px-3.5 sm:px-5 py-2 sm:py-2.5 rounded-xl text-xs sm:text-sm font-bold text-white bg-gradient-to-r from-emerald-600 to-teal-700 hover:from-emerald-700 hover:to-teal-800 shadow-xs hover:shadow-md hover:shadow-emerald-900/15 transition-all cursor-pointer active:scale-98"
+                className="w-full sm:w-auto flex items-center justify-center gap-1.5 sm:gap-2 px-3.5 sm:px-5 py-2 sm:py-2.5 rounded-xl text-xs sm:text-sm font-bold text-white bg-gradient-to-r from-emerald-600 to-teal-700 hover:from-emerald-700 hover:to-teal-800 shadow-xs hover:shadow-md hover:shadow-emerald-900/15 transition-all cursor-pointer active:scale-98"
               >
                 <LogIn className="w-4 h-4" />
                 <span>{h?.checkInBtn || (isRTL ? "تسجيل وصول فوري" : "Fast Check-In")}</span>

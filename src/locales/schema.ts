@@ -215,6 +215,10 @@ export const translationSchema = z.object({
     badge: z.string(),
     title: z.string(),
     viewAll: z.string(),
+    prev: z.string().optional(),
+    next: z.string().optional(),
+    swipeHint: z.string().optional(),
+    workshopCount: z.string().optional(),
     items: z.array(
       z.object({
         id: z.string(),

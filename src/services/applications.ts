@@ -6,8 +6,8 @@ const API_BASE_URL =
   typeof window !== "undefined"
     ? "/api/proxy"
     : process.env.BACKEND_API_URL ||
-      process.env.NEXT_PUBLIC_API_BASE_URL ||
-      REMOTE_API_URL;
+    process.env.NEXT_PUBLIC_API_BASE_URL ||
+    REMOTE_API_URL;
 
 const ADMIN_STORAGE_KEY = "eduhub_admin_auth";
 export const ADMIN_COOKIE_NAME = "eduhub_admin_token";
@@ -351,16 +351,16 @@ export function normalizeMembershipApplication(
 
   const proofFileUrl = hasProof && id
     ? sanitizeFileUrl(
-        raw.proofFileUrl || raw.proof_file_url,
-        `/api/proxy/admin/files/proof/${id}${tokenSuffix}`
-      )
+      raw.proofFileUrl || raw.proof_file_url,
+      `/api/proxy/admin/files/proof/${id}${tokenSuffix}`
+    )
     : "";
 
   const chargerPhotoUrl = hasCharger && id
     ? sanitizeFileUrl(
-        raw.chargerPhotoUrl || raw.charger_photo_url,
-        `/api/proxy/admin/files/charger/${id}${tokenSuffix}`
-      )
+      raw.chargerPhotoUrl || raw.charger_photo_url,
+      `/api/proxy/admin/files/charger/${id}${tokenSuffix}`
+    )
     : "";
 
   return {
@@ -375,8 +375,8 @@ export function normalizeMembershipApplication(
       typeof raw.assignedQuota === "number"
         ? raw.assignedQuota
         : typeof raw.assigned_quota === "number"
-        ? raw.assigned_quota
-        : 25,
+          ? raw.assigned_quota
+          : 25,
     temporaryPassword: safeStr(raw.temporaryPassword || raw.temporary_password),
 
     // 1. Personal & Contact
@@ -818,6 +818,8 @@ export interface MemberDueItem {
   due_amount: number;
   hourly_rate: number;
   month: string;
+  reason?: string | null;
+  notes?: string | null;
   quota_id?: number | null;
   joined_at?: string | null;
 }
@@ -916,7 +918,7 @@ export async function getAdminDuesApi(params?: {
  */
 export async function settleMemberDuesApi(
   id: number | string,
-  data?: { payment_method?: string; notes?: string }
+  data?: { amount?: number; payment_method?: string; notes?: string }
 ) {
   try {
     const response = await fetch(`${API_BASE_URL}/admin/dues/${id}/settle`, {
@@ -934,6 +936,95 @@ export async function settleMemberDuesApi(
     throw new Error(err.message || "فشل تسوية المستحقات.");
   } catch (e: unknown) {
     const msg = e instanceof Error ? e.message : "فشل تسوية المستحقات.";
+    throw new Error(msg);
+  }
+}
+
+/**
+ * Record / Add financial due on a member or external debtor
+ */
+export async function createMemberDueApi(data: {
+  user_id?: number | string;
+  name?: string;
+  phone?: string;
+  email?: string;
+  member_type?: string;
+  amount: number;
+  extra_hours?: number;
+  notes?: string;
+}): Promise<{
+  success: boolean;
+  message: string;
+  data: {
+    id: number;
+    name: string;
+    email: string;
+    phone: string | null;
+    member_type: string;
+    due_amount: number;
+    extra_hours: number;
+    is_external?: boolean;
+  };
+}> {
+  try {
+    const response = await fetch(`${API_BASE_URL}/admin/dues`, {
+      method: "POST",
+      headers: getAdminHeaders({
+        "Content-Type": "application/json",
+      }),
+      body: JSON.stringify(data),
+    });
+
+    const resJson = await response.json().catch(() => ({}));
+    if (!response.ok || resJson.success === false) {
+      throw new Error(resJson.message || "فشل تسجيل المستحق المالي.");
+    }
+
+    return resJson;
+  } catch (e: unknown) {
+    const msg = e instanceof Error ? e.message : "فشل تسجيل المستحق المالي.";
+    throw new Error(msg);
+  }
+}
+
+/**
+ * Adjust (Increase or Decrease) member or visitor financial due
+ */
+export async function adjustMemberDueApi(
+  memberId: number | string,
+  payload: {
+    action: "increase" | "decrease";
+    amount: number;
+    notes?: string;
+  }
+): Promise<{
+  success: boolean;
+  message: string;
+  data: {
+    member_id: number | string;
+    name: string;
+    action: "increase" | "decrease";
+    adjusted_amount: number;
+    new_due_amount: number;
+  };
+}> {
+  try {
+    const response = await fetch(`${API_BASE_URL}/admin/dues/${memberId}/adjust`, {
+      method: "POST",
+      headers: getAdminHeaders({
+        "Content-Type": "application/json",
+      }),
+      body: JSON.stringify(payload),
+    });
+
+    const resJson = await response.json().catch(() => ({}));
+    if (!response.ok || resJson.success === false) {
+      throw new Error(resJson.message || "فشل تعديل المستحق المالي.");
+    }
+
+    return resJson;
+  } catch (e: unknown) {
+    const msg = e instanceof Error ? e.message : "فشل تعديل المستحق المالي.";
     throw new Error(msg);
   }
 }
@@ -1193,6 +1284,52 @@ export async function updateAdminMemberApi(
   const result = await safeJsonParse<{ success: boolean; message: string; data?: unknown }>(response);
   if (!response.ok || !result) {
     throw new Error(extractErrorMessage(result, response, "فشل تحديث بيانات العضو."));
+  }
+  return result;
+}
+
+export interface UpdateMemberQuotaPayload {
+  action?: "set_values" | "add_allowance" | "deduct_used" | "add_used";
+  allocated_hours?: number;
+  used_hours?: number;
+  hours?: number;
+  notes?: string;
+}
+
+export interface UpdateMemberQuotaResponse {
+  success: boolean;
+  message: string;
+  data?: {
+    member_id: string | number;
+    name: string;
+    allocated_hours: number;
+    used_hours: number;
+    extra_hours: number;
+    remaining_hours: number;
+    extra_amount_due: number;
+    percentage: number;
+  };
+}
+
+/**
+ * Update / Adjust member hours quota by Admin
+ */
+export async function updateMemberQuotaApi(
+  id: string | number,
+  data: UpdateMemberQuotaPayload
+): Promise<UpdateMemberQuotaResponse> {
+  const response = await fetch(`${API_BASE_URL}/admin/members/${id}/quota`, {
+    method: "POST",
+    headers: getAdminHeaders({
+      "Content-Type": "application/json",
+      "X-HTTP-Method-Override": "PATCH",
+    }),
+    body: JSON.stringify(data),
+  });
+
+  const result = await safeJsonParse<UpdateMemberQuotaResponse>(response);
+  if (!response.ok || !result) {
+    throw new Error(extractErrorMessage(result, response, "فشل تحديث رصيد الساعات."));
   }
   return result;
 }
@@ -1617,15 +1754,15 @@ export async function getAdminOverviewApi() {
           hasOverviewEndpoint = true;
           const result = await response.json();
           const todayStr = new Date().toISOString().split("T")[0];
-          
+
           // Verify actual active attendance for TODAY to fix backend stale/seeded count
           try {
             const attRaw = await getAdminAttendanceApi(todayStr).catch(() => ({ data: [] }));
             const attList = Array.isArray((attRaw as { data?: unknown[] })?.data)
               ? (attRaw as { data: Record<string, unknown>[] }).data
               : Array.isArray(attRaw)
-              ? (attRaw as Record<string, unknown>[])
-              : [];
+                ? (attRaw as Record<string, unknown>[])
+                : [];
 
             const realInsideToday = attList.filter((att) => {
               const hasCheckIn = Boolean(att.check_in || att.checkIn || att.check_in_time);
@@ -1676,8 +1813,8 @@ export async function getAdminOverviewApi() {
 
       const pendingApplications = Array.isArray(applications)
         ? applications.filter(
-            (app: MembershipApplication) => app.status === "pending"
-          ).length
+          (app: MembershipApplication) => app.status === "pending"
+        ).length
         : 0;
 
       const rawVisitorPasses = Array.isArray(visitorPasses)
@@ -1693,8 +1830,8 @@ export async function getAdminOverviewApi() {
       const attendanceList = Array.isArray((attendanceRaw as { data?: unknown[] })?.data)
         ? (attendanceRaw as { data: Record<string, unknown>[] }).data
         : Array.isArray(attendanceRaw)
-        ? (attendanceRaw as Record<string, unknown>[])
-        : [];
+          ? (attendanceRaw as Record<string, unknown>[])
+          : [];
 
       const insideAttendees = attendanceList.filter((att) => {
         const hasCheckIn = Boolean(att.check_in || att.checkIn || att.check_in_time);
@@ -1706,35 +1843,35 @@ export async function getAdminOverviewApi() {
 
       const todayBookings = bookingsList.length > 0
         ? bookingsList.slice(0, 10).map((b: Record<string, unknown>, idx: number) => {
-            const user = (b.user as Record<string, unknown>) || {};
-            const userName = (user.name as string) || (b.userName as string) || (b.name as string) || "عضو مسجل";
-            const memberType = (user.member_type as string) || (b.member_type as string);
-            const startRaw = (b.start_time as string) || (b.startTime as string) || "";
-            const endRaw = (b.end_time as string) || (b.endTime as string) || "";
-            const timeStr = startRaw && endRaw ? `${startRaw} - ${endRaw}` : "اليوم";
+          const user = (b.user as Record<string, unknown>) || {};
+          const userName = (user.name as string) || (b.userName as string) || (b.name as string) || "عضو مسجل";
+          const memberType = (user.member_type as string) || (b.member_type as string);
+          const startRaw = (b.start_time as string) || (b.startTime as string) || "";
+          const endRaw = (b.end_time as string) || (b.endTime as string) || "";
+          const timeStr = startRaw && endRaw ? `${startRaw} - ${endRaw}` : "اليوم";
 
-            const seatNum = (b.seat_number as number) || ((b.seat as Record<string, unknown>)?.seat_number as number);
-            const seatLabel = (b.seat_label as string) || ((b.seat as Record<string, unknown>)?.label as string);
-            const seatCode = (b.seat_code as string) || ((b.seat as Record<string, unknown>)?.code as string);
-            const deskDisplay = seatLabel || (seatNum ? `مقعد ${seatNum}${seatCode ? ` (${seatCode})` : ""}` : `حجز #${b.id || idx + 1}`);
+          const seatNum = (b.seat_number as number) || ((b.seat as Record<string, unknown>)?.seat_number as number);
+          const seatLabel = (b.seat_label as string) || ((b.seat as Record<string, unknown>)?.label as string);
+          const seatCode = (b.seat_code as string) || ((b.seat as Record<string, unknown>)?.code as string);
+          const deskDisplay = seatLabel || (seatNum ? `مقعد ${seatNum}${seatCode ? ` (${seatCode})` : ""}` : `حجز #${b.id || idx + 1}`);
 
-            return {
-              id: (b.id as string | number) || idx + 1,
-              name: userName,
-              time: timeStr,
-              desk: deskDisplay,
-              type: memberType === "freelancer" ? "عمل حر" : "طالب",
-              reason: (b.notes as string) || "حجز مقعد دراسة/عمل",
-            };
-          })
+          return {
+            id: (b.id as string | number) || idx + 1,
+            name: userName,
+            time: timeStr,
+            desk: deskDisplay,
+            type: memberType === "freelancer" ? "عمل حر" : "طالب",
+            reason: (b.notes as string) || "حجز مقعد دراسة/عمل",
+          };
+        })
         : attendanceList.slice(0, 10).map((att, idx) => ({
-            id: (att.id as string | number) || idx + 1,
-            name: (att.user_name || att.member_name || att.name || "عضو") as string,
-            time: (att.check_in_time || att.check_in || att.time || "اليوم") as string,
-            desk: (att.desk || att.seat || `مكتب ${idx + 1}`) as string,
-            type: (att.type || (att.role === "freelancer" ? "عمل حر" : att.role === "student" ? "طالب" : "عضو")) as string,
-            reason: (att.purpose || att.reason || "حضور مساحة العمل") as string,
-          }));
+          id: (att.id as string | number) || idx + 1,
+          name: (att.user_name || att.member_name || att.name || "عضو") as string,
+          time: (att.check_in_time || att.check_in || att.time || "اليوم") as string,
+          desk: (att.desk || att.seat || `مكتب ${idx + 1}`) as string,
+          type: (att.type || (att.role === "freelancer" ? "عمل حر" : att.role === "student" ? "طالب" : "عضو")) as string,
+          reason: (att.purpose || att.reason || "حضور مساحة العمل") as string,
+        }));
 
       const needsFollowUp = (Array.isArray(applications) ? applications : [])
         .filter((app) => app.status === "pending")
@@ -1812,8 +1949,8 @@ export async function getAdminReportsApi() {
     const attendanceList = Array.isArray((attendanceRaw as { data?: unknown[] })?.data)
       ? (attendanceRaw as { data: Record<string, unknown>[] }).data
       : Array.isArray(attendanceRaw)
-      ? (attendanceRaw as Record<string, unknown>[])
-      : [];
+        ? (attendanceRaw as Record<string, unknown>[])
+        : [];
 
     let students = 0;
     let freelancers = 0;
@@ -1969,7 +2106,7 @@ let warmupDone = false;
 export function warmupBackendApi(): void {
   if (warmupDone || typeof window === "undefined") return;
   warmupDone = true;
-  fetch(`${API_BASE_URL}/health`, { method: "GET", mode: "no-cors" }).catch(() => {});
+  fetch(`${API_BASE_URL}/health`, { method: "GET", mode: "no-cors" }).catch(() => { });
 }
 
 /**
