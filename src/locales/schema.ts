@@ -221,10 +221,12 @@ export const translationSchema = z.object({
     workshopCount: z.string().optional(),
     items: z.array(
       z.object({
-        id: z.string(),
+        id: z.union([z.string(), z.number()]),
         title: z.string(),
         dateBadge: z.string(),
         statusBadge: z.string(),
+        status: z.string().optional(),
+        allow_registration: z.boolean().optional(),
         desc: z.string(),
         tag: z.string(),
         meta: z.string(),

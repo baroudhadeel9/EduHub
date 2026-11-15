@@ -39,9 +39,28 @@ export default function DeleteEventModal({
       if (!res.success) {
         throw new Error(res.message || (isRTL ? "تعذر حذف الورشة" : "Failed to delete event"));
       }
+
+      // Clean up cached announcement if it pointed to this deleted event
+      try {
+        const stored = localStorage.getItem("eduhub_active_announcement");
+        if (stored) {
+          const parsed = JSON.parse(stored);
+          if (!parsed?.event_id || Number(parsed.event_id) === Number(event.id)) {
+            localStorage.removeItem("eduhub_active_announcement");
+          }
+        }
+      } catch {}
+
       if (onDeleted) {
         onDeleted(event.id);
       }
+
+      try {
+        window.dispatchEvent(new Event("eduhub_events_updated"));
+        window.dispatchEvent(new Event("eduhub_announcement_updated"));
+        localStorage.setItem("eduhub_events_last_sync", String(Date.now()));
+      } catch {}
+
       onSuccess();
       onClose();
     } catch (err: unknown) {

@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import TopAnnouncementBar from "@/components/TopAnnouncementBar";
 import Navbar from "@/components/Navbar";
 import HeroSection from "@/components/HeroSection";
 import OperationsDashboard from "@/components/OperationsDashboard";
@@ -32,6 +33,9 @@ export default function Home() {
 
   return (
     <div className="min-h-screen flex flex-col bg-brand-bg text-slate-800 selection:bg-emerald-500 selection:text-white">
+      {/* Top Dynamic Announcement Ribbon (Admin controlled) */}
+      <TopAnnouncementBar />
+
       {/* Navigation Bar with Prominent EN/AR Switcher & Header Status Pill */}
       <Navbar
         onOpenBooking={handleScrollToBooking}

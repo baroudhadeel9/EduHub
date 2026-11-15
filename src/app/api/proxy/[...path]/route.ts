@@ -135,6 +135,7 @@ async function handleProxy(
     }
     resHeaders.set("Content-Length", String(resData.byteLength));
 
+    resHeaders.set("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate");
     resHeaders.set("Access-Control-Allow-Origin", "*");
     resHeaders.set("Access-Control-Allow-Methods", "GET, POST, PUT, PATCH, DELETE, OPTIONS");
     resHeaders.set("Access-Control-Allow-Headers", "*");

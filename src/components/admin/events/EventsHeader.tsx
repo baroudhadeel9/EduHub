@@ -1,8 +1,7 @@
 "use client";
 
 import React from "react";
-import Link from "next/link";
-import { Sparkles, Plus, ExternalLink } from "lucide-react";
+import { Sparkles, Plus } from "lucide-react";
 
 interface EventsHeaderProps {
   onOpenCreate: () => void;
@@ -30,23 +29,11 @@ export default function EventsHeader({ onOpenCreate, isRTL }: EventsHeaderProps)
 
       {/* Action Buttons */}
       <div className="flex items-center gap-2.5 w-full sm:w-auto">
-        {/* Preview on Public Site */}
-        <Link
-          href="/#events"
-          target="_blank"
-          rel="noopener noreferrer"
-          title={isRTL ? "معاينة قسم الورش على الموقع للطلاب" : "View Live on Website"}
-          className="flex-1 sm:flex-none px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold bg-slate-100 hover:bg-slate-200/80 text-slate-700 transition-all flex items-center justify-center gap-2 cursor-pointer border border-slate-200"
-        >
-          <ExternalLink className="w-4 h-4 text-slate-500" />
-          <span>{isRTL ? "معاينة عالموقع" : "Preview on Site"}</span>
-        </Link>
-
         {/* Add New Workshop */}
         <button
           type="button"
           onClick={onOpenCreate}
-          className="flex-1 sm:flex-none px-4.5 py-2.5 rounded-xl text-xs sm:text-sm font-bold bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm hover:shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-95 shrink-0"
+          className="w-full sm:w-auto px-4.5 py-2.5 rounded-xl text-xs sm:text-sm font-bold bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm hover:shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-95 shrink-0"
         >
           <Plus className="w-4 h-4 stroke-[2.5]" />
           <span>{isRTL ? "إضافة ورشة جديدة" : "Add New Workshop"}</span>
