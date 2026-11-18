@@ -27,9 +27,16 @@ async function handleProxy(
   const { path } = await params;
   const segments = path || [];
 
-  // Security check: Disallow path traversal attempts (.. or .)
+  // Security check: Strict segment validation (Path Traversal / SSRF Prevention)
+  const SEGMENT_REGEX = /^[a-zA-Z0-9_.-]+$/;
   for (const seg of segments) {
-    if (seg === ".." || seg === "." || seg.includes("%2e") || seg.includes("%2E")) {
+    if (
+      !SEGMENT_REGEX.test(seg) ||
+      seg === "." ||
+      seg === ".." ||
+      seg.includes("..") ||
+      seg.includes("%")
+    ) {
       return NextResponse.json(
         { success: false, message: "مسار غير صالح." },
         { status: 400 }
@@ -44,11 +51,15 @@ async function handleProxy(
   const forwardHeaders = new Headers();
 
   const auth = req.headers.get("authorization");
-  const queryToken = req.nextUrl.searchParams.get("token");
+  const adminCookieToken = req.cookies.get("eduhub_admin_token")?.value;
+  const memberCookieToken = req.cookies.get("eduhub_member_token")?.value;
+
   if (auth) {
     forwardHeaders.set("Authorization", auth);
-  } else if (queryToken) {
-    forwardHeaders.set("Authorization", `Bearer ${queryToken}`);
+  } else if (adminCookieToken) {
+    forwardHeaders.set("Authorization", `Bearer ${adminCookieToken}`);
+  } else if (memberCookieToken) {
+    forwardHeaders.set("Authorization", `Bearer ${memberCookieToken}`);
   }
 
   const accept = req.headers.get("accept") || "*/*";
@@ -187,19 +198,28 @@ export async function DELETE(
 }
 
 export async function OPTIONS(req: NextRequest) {
-  const origin = req.headers.get("origin") || "";
+  const origin = req.headers.get("origin");
+
+  // Same-origin requests without an origin header
+  if (!origin) {
+    return new NextResponse(null, { status: 204 });
+  }
+
   const allowedOrigins = [
     "https://gazaeduhub.com",
     "https://www.gazaeduhub.com",
     "http://localhost:3000",
     "http://127.0.0.1:3000",
   ];
-  const isAllowed = allowedOrigins.includes(origin);
+
+  if (!allowedOrigins.includes(origin)) {
+    return new NextResponse(null, { status: 403 });
+  }
 
   return new NextResponse(null, {
     status: 204,
     headers: {
-      "Access-Control-Allow-Origin": isAllowed ? origin : "https://gazaeduhub.com",
+      "Access-Control-Allow-Origin": origin,
       "Access-Control-Allow-Methods": "GET, POST, PUT, PATCH, DELETE, OPTIONS",
       "Access-Control-Allow-Headers": "Authorization, Content-Type, Accept",
       "Access-Control-Max-Age": "86400",

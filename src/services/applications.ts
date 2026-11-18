@@ -324,9 +324,6 @@ export function normalizeMembershipApplication(
     raw.charger_photo_name
   );
 
-  const token = getAdminAuthSession()?.token;
-  const tokenSuffix = token ? `?token=${encodeURIComponent(token)}` : "";
-
   const sanitizeFileUrl = (urlVal: unknown, defaultProxyPath: string): string => {
     if (typeof urlVal !== "string" || !urlVal.trim()) return defaultProxyPath;
     const str = urlVal.trim();
@@ -334,17 +331,16 @@ export function normalizeMembershipApplication(
       try {
         const u = new URL(str);
         const relativePath = u.pathname.replace(/^\/api\//, "/api/proxy/");
-        return `${relativePath}${u.search ? u.search : tokenSuffix}`;
+        return `${relativePath}${u.search ? u.search : ""}`;
       } catch {
         return defaultProxyPath;
       }
     }
     if (str.startsWith("/api/proxy/")) {
-      return str.includes("token=") ? str : `${str}${tokenSuffix}`;
+      return str;
     }
     if (str.startsWith("/api/")) {
-      const converted = str.replace(/^\/api\//, "/api/proxy/");
-      return converted.includes("token=") ? converted : `${converted}${tokenSuffix}`;
+      return str.replace(/^\/api\//, "/api/proxy/");
     }
     return defaultProxyPath;
   };
@@ -352,14 +348,14 @@ export function normalizeMembershipApplication(
   const proofFileUrl = hasProof && id
     ? sanitizeFileUrl(
       raw.proofFileUrl || raw.proof_file_url,
-      `/api/proxy/admin/files/proof/${id}${tokenSuffix}`
+      `/api/proxy/admin/files/proof/${id}`
     )
     : "";
 
   const chargerPhotoUrl = hasCharger && id
     ? sanitizeFileUrl(
       raw.chargerPhotoUrl || raw.charger_photo_url,
-      `/api/proxy/admin/files/charger/${id}${tokenSuffix}`
+      `/api/proxy/admin/files/charger/${id}`
     )
     : "";
 
