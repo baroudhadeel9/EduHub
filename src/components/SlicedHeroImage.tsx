@@ -13,7 +13,7 @@ export interface HeroSlide {
 export const DEFAULT_HERO_SLIDES: HeroSlide[] = [
   {
     src: "/images/hero-main.jpg",
-    alt: "Gaza Educational Hub",
+    alt: "Gaza Educational Hub Main Hall",
     caption: "القاعة الرئيسية — مساحة عمل ودراسة جامعية مجانية متكاملة",
   },
   {
@@ -25,6 +25,11 @@ export const DEFAULT_HERO_SLIDES: HeroSlide[] = [
     src: "/images/hero-focus.jpg",
     alt: "Gaza Educational Hub Students",
     caption: "إصرار شباب وطلاب غزة على مواصلة التعلم والابتكار",
+  },
+  {
+    src: "/images/hero-closeup.jpg",
+    alt: "Gaza Educational Hub Facilities",
+    caption: "مساحة متكاملة لخدمة مئات الطلاب والباحثين عن المعرفة يومياً",
   },
 ];
 

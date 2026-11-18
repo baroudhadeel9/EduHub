@@ -130,12 +130,13 @@ export async function getPublicEventsApi(): Promise<{ success: boolean; data: Ev
     });
 
     if (!res.ok) {
-      throw new Error(`Failed to fetch events: ${res.status}`);
+      console.warn(`[getPublicEventsApi] Upstream returned status ${res.status}, using safe fallback.`);
+      return { success: false, data: [] };
     }
 
     return await res.json();
   } catch (error) {
-    console.error("Error fetching public events:", error);
+    console.warn("[getPublicEventsApi] Backend unreachable or sleeping, returning empty list:", error);
     return { success: false, data: [] };
   }
 }

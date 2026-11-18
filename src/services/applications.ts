@@ -727,6 +727,26 @@ export async function getMemberBookingsApi(token: string) {
 }
 
 /**
+ * Fetch member quota fresh from backend (hours used, remaining, renewal date)
+ */
+export async function getMemberQuotaApi(token: string) {
+  const response = await fetch(`${API_BASE_URL}/member/quota`, {
+    method: "GET",
+    headers: {
+      Accept: "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    cache: "no-store",
+  });
+
+  const result = await response.json();
+  if (!response.ok) {
+    throw new Error(result.message || "تعذر جلب رصيد ساعات العضو.");
+  }
+  return result;
+}
+
+/**
  * Member Login with email & password
  */
 export async function memberLoginApi(

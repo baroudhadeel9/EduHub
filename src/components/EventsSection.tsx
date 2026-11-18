@@ -5,6 +5,7 @@ import Image from "next/image";
 import { useLanguage } from "@/context/LanguageContext";
 import { getPublicEventsApi, EventItem } from "@/services/events";
 import EventRegistrationModal from "@/components/events/EventRegistrationModal";
+import { sanitizeExternalUrl } from "@/utils/url";
 import {
   Calendar,
   ChevronLeft,
@@ -473,10 +474,10 @@ export default function EventsSection() {
                             <span>{isRTL ? "انتهى موعد التسجيل" : "Registration Closed"}</span>
                           </span>
                         </div>
-                      ) : event.custom_url ? (
+                      ) : sanitizeExternalUrl(event.custom_url) ? (
                         <div className="w-full flex items-center">
                           <a
-                            href={event.custom_url}
+                            href={sanitizeExternalUrl(event.custom_url)}
                             target="_blank"
                             rel="noopener noreferrer"
                             className="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-black text-xs shadow-2xs hover:shadow-xs transition-all cursor-pointer active:scale-95"

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
-const CLOUD_FALLBACK = "https://eduhub-api-uz1z.onrender.com/api";
+const CLOUD_FALLBACK = "https://api.gazaeduhub.com/api";
 const BACKEND_TARGET =
   process.env.BACKEND_API_URL ||
   (process.env.NODE_ENV === "development"
@@ -12,6 +12,12 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params;
+
+  // Validate ID is numeric to prevent path traversal
+  if (!id || !/^\d+$/.test(id)) {
+    return new NextResponse(null, { status: 400 });
+  }
+
   const targetUrl = `${BACKEND_TARGET}/events/${id}/image`;
 
   try {
@@ -27,14 +33,16 @@ export async function GET(
     }
 
     const data = await res.arrayBuffer();
-    const contentType = res.headers.get("content-type") || "image/jpeg";
+    const rawContentType = res.headers.get("content-type") || "image/jpeg";
+    const allowedMimes = ["image/jpeg", "image/png", "image/webp", "image/gif"];
+    const contentType = allowedMimes.includes(rawContentType) ? rawContentType : "image/jpeg";
 
     return new NextResponse(data, {
       status: 200,
       headers: {
         "Content-Type": contentType,
         "Cache-Control": "public, max-age=86400, stale-while-revalidate=3600",
-        "Access-Control-Allow-Origin": "*",
+        "X-Content-Type-Options": "nosniff",
       },
     });
   } catch (error) {

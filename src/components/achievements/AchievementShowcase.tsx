@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import { sanitizeExternalUrl } from "@/utils/url";
 import {
   Trophy,
   Plus,
@@ -323,9 +324,9 @@ export function AchievementCard({
               <span>معاينة وتفاصيل</span>
             </button>
 
-            {item.link_url && (
+            {sanitizeExternalUrl(item.link_url) && (
               <a
-                href={item.link_url}
+                href={sanitizeExternalUrl(item.link_url)}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center justify-center gap-1 px-3 py-2 rounded-xl border border-slate-200 hover:border-emerald-300 text-slate-600 hover:text-emerald-700 text-xs font-bold transition-all shadow-2xs active:scale-95"
@@ -649,10 +650,10 @@ export function AchievementDetailsModal({
             )}
 
             {/* Live Project URL Button */}
-            {item.link_url && (
+            {sanitizeExternalUrl(item.link_url) && (
               <div className="pt-2">
                 <a
-                  href={item.link_url}
+                  href={sanitizeExternalUrl(item.link_url)}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-bold text-xs sm:text-sm shadow-md active:scale-95 transition-all w-full sm:w-auto"

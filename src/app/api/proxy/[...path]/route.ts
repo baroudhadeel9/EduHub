@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
-const CLOUD_FALLBACK = "https://eduhub-api-uz1z.onrender.com/api";
+const CLOUD_FALLBACK = "https://api.gazaeduhub.com/api";
+const RENDER_DIRECT_FALLBACK = "https://eduhub-api-uz1z.onrender.com/api";
 
 const BACKEND_TARGET =
   process.env.BACKEND_API_URL ||
@@ -24,7 +25,19 @@ async function handleProxy(
   { params }: { params: Promise<{ path: string[] }> }
 ) {
   const { path } = await params;
-  const pathStr = (path || []).join("/");
+  const segments = path || [];
+
+  // Security check: Disallow path traversal attempts (.. or .)
+  for (const seg of segments) {
+    if (seg === ".." || seg === "." || seg.includes("%2e") || seg.includes("%2E")) {
+      return NextResponse.json(
+        { success: false, message: "مسار غير صالح." },
+        { status: 400 }
+      );
+    }
+  }
+
+  const pathStr = segments.join("/");
   const search = req.nextUrl.search;
   const targetUrl = `${BACKEND_TARGET}/${pathStr}${search}`;
 
@@ -86,13 +99,11 @@ async function handleProxy(
       }
     }
 
-    // If server was cold/sleeping, wait 2 seconds and retry once before giving up
+    // If upstream failed or SSL certificate is still pending, retry with Render direct fallback
     if (!upstreamRes) {
       try {
-        await new Promise((r) => setTimeout(r, 2000));
-        const retryUrl = targetUrl.includes("127.0.0.1") || targetUrl.includes("localhost")
-          ? `${CLOUD_FALLBACK}/${pathStr}${search}`
-          : targetUrl;
+        await new Promise((r) => setTimeout(r, 1500));
+        const retryUrl = `${RENDER_DIRECT_FALLBACK}/${pathStr}${search}`;
         upstreamRes = await fetch(retryUrl, {
           method,
           headers: forwardHeaders,
@@ -100,7 +111,7 @@ async function handleProxy(
           cache: "no-store",
         });
       } catch (retryErr) {
-        console.error("Wake-up retry failed:", retryErr);
+        console.error("Direct Render fallback failed:", retryErr);
       }
     }
 
@@ -114,9 +125,6 @@ async function handleProxy(
         },
         {
           status: 502,
-          headers: {
-            "Access-Control-Allow-Origin": "*",
-          },
         }
       );
     }
@@ -136,9 +144,6 @@ async function handleProxy(
     resHeaders.set("Content-Length", String(resData.byteLength));
 
     resHeaders.set("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate");
-    resHeaders.set("Access-Control-Allow-Origin", "*");
-    resHeaders.set("Access-Control-Allow-Methods", "GET, POST, PUT, PATCH, DELETE, OPTIONS");
-    resHeaders.set("Access-Control-Allow-Headers", "*");
 
     return new NextResponse(resData, {
       status: upstreamRes.status,

@@ -9,6 +9,7 @@ import {
   getPublicAnnouncementApi,
 } from "@/services/events";
 import EventRegistrationModal from "@/components/events/EventRegistrationModal";
+import { sanitizeExternalUrl } from "@/utils/url";
 import {
   Sparkles,
   ArrowRight,
@@ -172,9 +173,9 @@ export default function TopAnnouncementBar() {
           {/* Right/End: Compact Cute Action Button + Close */}
           <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
             {actionType === "event_registration" && (
-              activeEvent.custom_url ? (
+              sanitizeExternalUrl(activeEvent.custom_url) ? (
                 <a
-                  href={activeEvent.custom_url}
+                  href={sanitizeExternalUrl(activeEvent.custom_url)}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-flex items-center gap-1 px-2.5 sm:px-3 py-1 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-[11px] sm:text-xs transition-all shadow-2xs hover:shadow-xs active:scale-95 cursor-pointer whitespace-nowrap"
@@ -195,9 +196,9 @@ export default function TopAnnouncementBar() {
               )
             )}
 
-            {actionType === "custom_url" && config.custom_url && (
+            {actionType === "custom_url" && sanitizeExternalUrl(config.custom_url) && (
               <a
-                href={config.custom_url}
+                href={sanitizeExternalUrl(config.custom_url)}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-1 px-2.5 sm:px-3 py-1 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-[11px] sm:text-xs transition-all shadow-2xs hover:shadow-xs active:scale-95 cursor-pointer whitespace-nowrap"

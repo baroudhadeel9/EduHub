@@ -30,6 +30,7 @@ import {
   getMemberAuthSession,
   clearMemberAuthSession,
   getMemberBookingsApi,
+  getMemberQuotaApi,
   setAdminAuthSession,
 } from "@/services/applications";
 
@@ -209,6 +210,30 @@ export default function MemberBookingTab({ onApplyNewMember }: MemberBookingTabP
                 mapRawBookingToMemberBooking(b)
               )
             );
+          })
+          .catch(() => {});
+
+        // Silently sync latest quota & hours from backend so used_hours is always 100% fresh!
+        getMemberQuotaApi(session.token)
+          .then((quotaRes) => {
+            if (!isMounted || !quotaRes || !quotaRes.quota) return;
+            const q = quotaRes.quota;
+            setMemberData((prev) => {
+              if (!prev) return prev;
+              const updated: MemberData = {
+                ...prev,
+                hoursUsed: q.used_hours ?? prev.hoursUsed,
+                monthlyLimit: q.allocated_hours ?? prev.monthlyLimit,
+                hoursRemaining: q.remaining_hours ?? Math.max(0, (q.allocated_hours ?? prev.monthlyLimit) - (q.used_hours ?? 0)),
+                extraHours: q.extra_hours ?? prev.extraHours,
+                dueAmount: q.extra_amount_due ?? prev.dueAmount,
+                renewalDate: q.renewal_date ?? prev.renewalDate,
+                renewalDay: q.renewal_day ?? prev.renewalDay,
+                daysUntilRenewal: q.days_until_renewal ?? prev.daysUntilRenewal,
+              };
+              setMemberAuthSession({ token: session.token, member: updated });
+              return updated;
+            });
           })
           .catch(() => {});
       }
@@ -438,6 +463,27 @@ export default function MemberBookingTab({ onApplyNewMember }: MemberBookingTabP
         );
         setSelectedSeat(null);
         setBookingNotes("");
+
+        if (authToken) {
+          getMemberQuotaApi(authToken)
+            .then((quotaRes) => {
+              if (quotaRes?.quota) {
+                const q = quotaRes.quota;
+                setMemberData((prev) => {
+                  if (!prev) return prev;
+                  const updated: MemberData = {
+                    ...prev,
+                    hoursUsed: q.used_hours ?? prev.hoursUsed,
+                    monthlyLimit: q.allocated_hours ?? prev.monthlyLimit,
+                    hoursRemaining: q.remaining_hours ?? Math.max(0, (q.allocated_hours ?? prev.monthlyLimit) - (q.used_hours ?? 0)),
+                  };
+                  setMemberAuthSession({ token: authToken, member: updated });
+                  return updated;
+                });
+              }
+            })
+            .catch(() => {});
+        }
       } else {
         throw new Error(
           isRTL

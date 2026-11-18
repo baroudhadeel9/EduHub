@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
-import { getAdminAuthSession } from "@/services/applications";
+import { getAdminAuthSession, clearAdminAuthSession } from "@/services/applications";
 import { Loader2 } from "lucide-react";
 
 export default function AdminAuthGuard({ children }: { children: React.ReactNode }) {
@@ -39,9 +39,7 @@ export default function AdminAuthGuard({ children }: { children: React.ReactNode
 
         if (!res.ok) {
           // Token invalid, expired, or rejected by server
-          if (typeof window !== "undefined") {
-            localStorage.removeItem("cehub_admin_session");
-          }
+          clearAdminAuthSession();
           if (isMounted) {
             setAuthorized(false);
             router.replace("/login?redirect=" + encodeURIComponent(pathname));
@@ -54,9 +52,7 @@ export default function AdminAuthGuard({ children }: { children: React.ReactNode
 
         if (serverRole !== "admin") {
           // User is authenticated but NOT an admin (e.g. member/student)
-          if (typeof window !== "undefined") {
-            localStorage.removeItem("cehub_admin_session");
-          }
+          clearAdminAuthSession();
           if (isMounted) {
             setAuthorized(false);
             router.replace("/login?redirect=" + encodeURIComponent(pathname));
@@ -68,9 +64,10 @@ export default function AdminAuthGuard({ children }: { children: React.ReactNode
           setAuthorized(true);
         }
       } catch {
-        // In case of transient network error, allow validated local admin session
+        // Fail-secure: On network error or server down, do not allow unverified access
         if (isMounted) {
-          setAuthorized(true);
+          setAuthorized(false);
+          router.replace("/login?redirect=" + encodeURIComponent(pathname));
         }
       }
     }
