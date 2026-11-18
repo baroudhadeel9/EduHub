@@ -345,6 +345,30 @@ export default function MemberBookingTab({ onApplyNewMember }: MemberBookingTabP
       // Persist member session so refresh keeps the user logged in
       setMemberAuthSession({ token: res.token, member: res.member });
 
+      // Silently sync latest live quota from backend immediately upon login
+      getMemberQuotaApi(res.token)
+        .then((quotaRes) => {
+          if (!quotaRes?.quota) return;
+          const q = quotaRes.quota;
+          setMemberData((prev) => {
+            if (!prev) return prev;
+            const updated: MemberData = {
+              ...prev,
+              hoursUsed: q.used_hours ?? prev.hoursUsed,
+              monthlyLimit: q.allocated_hours ?? prev.monthlyLimit,
+              hoursRemaining: q.remaining_hours ?? Math.max(0, (q.allocated_hours ?? prev.monthlyLimit) - (q.used_hours ?? 0)),
+              extraHours: q.extra_hours ?? prev.extraHours,
+              dueAmount: q.extra_amount_due ?? prev.dueAmount,
+              renewalDate: q.renewal_date ?? prev.renewalDate,
+              renewalDay: q.renewal_day ?? prev.renewalDay,
+              daysUntilRenewal: q.days_until_renewal ?? prev.daysUntilRenewal,
+            };
+            setMemberAuthSession({ token: res.token, member: updated });
+            return updated;
+          });
+        })
+        .catch(() => {});
+
       if (res.member.bookings && res.member.bookings.length > 0) {
         setBookings(
           res.member.bookings.map((b) =>

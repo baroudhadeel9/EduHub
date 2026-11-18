@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { sanitizeExternalUrl } from "@/utils/url";
 import {
   Trophy,
@@ -379,6 +379,28 @@ export function AchievementDetailsModal({
 }: AchievementDetailsModalProps) {
   const [activeImageIndex, setActiveImageIndex] = useState(0);
 
+  const images: AchievementImageItem[] =
+    item?.images && item.images.length > 0
+      ? item.images
+      : item?.cover_image_url || item?.image_url
+      ? [
+          {
+            id: "main",
+            url: item.cover_image_url || item.image_url || "",
+            is_cover: true,
+            caption: "صورة الغلاف الرسمية",
+          },
+        ]
+      : [];
+
+  const handlePrevImage = useCallback(() => {
+    setActiveImageIndex((prev) => (prev > 0 ? prev - 1 : Math.max(0, images.length - 1)));
+  }, [images.length]);
+
+  const handleNextImage = useCallback(() => {
+    setActiveImageIndex((prev) => (prev < images.length - 1 ? prev + 1 : 0));
+  }, [images.length]);
+
   // Reset active image when item changes
   useEffect(() => {
     setActiveImageIndex(0);
@@ -394,36 +416,14 @@ export function AchievementDetailsModal({
     };
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  });
+  }, [isOpen, item, onClose, handleNextImage, handlePrevImage]);
 
   if (!isOpen || !item) return null;
 
   const cat = CATEGORY_METAS[item.category] || CATEGORY_METAS.other;
   const CatIcon = cat.icon;
 
-  const images: AchievementImageItem[] =
-    item.images && item.images.length > 0
-      ? item.images
-      : item.cover_image_url || item.image_url
-      ? [
-          {
-            id: "main",
-            url: item.cover_image_url || item.image_url || "",
-            is_cover: true,
-            caption: "صورة الغلاف الرسمية",
-          },
-        ]
-      : [];
-
   const currentImage = images[activeImageIndex] || null;
-
-  const handlePrevImage = () => {
-    setActiveImageIndex((prev) => (prev > 0 ? prev - 1 : images.length - 1));
-  };
-
-  const handleNextImage = () => {
-    setActiveImageIndex((prev) => (prev < images.length - 1 ? prev + 1 : 0));
-  };
 
   return (
     <div className="fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-md flex items-center justify-center p-0 sm:p-4 md:p-6 overflow-y-auto animate-in fade-in duration-200">

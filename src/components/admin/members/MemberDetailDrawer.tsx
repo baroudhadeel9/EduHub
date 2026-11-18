@@ -442,14 +442,7 @@ export default function MemberDetailDrawer({
       <AdjustMemberHoursModal
         isOpen={adjustHoursModalOpen}
         onClose={() => setAdjustHoursModalOpen(false)}
-        onSuccess={(updated) => {
-          if (updated && member) {
-            member.hoursLimit = updated.allocated_hours;
-            member.hoursUsed = updated.used_hours;
-            member.extraHours = updated.extra_hours;
-            member.remainingHours = updated.remaining_hours;
-            member.dueAmount = updated.extra_amount_due;
-          }
+        onSuccess={() => {
           if (onMemberUpdated) onMemberUpdated();
         }}
         memberId={member.id}

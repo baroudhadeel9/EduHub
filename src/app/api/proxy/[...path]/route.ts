@@ -186,13 +186,22 @@ export async function DELETE(
   return handleProxy(req, ctx);
 }
 
-export async function OPTIONS() {
+export async function OPTIONS(req: NextRequest) {
+  const origin = req.headers.get("origin") || "";
+  const allowedOrigins = [
+    "https://gazaeduhub.com",
+    "https://www.gazaeduhub.com",
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
+  ];
+  const isAllowed = allowedOrigins.includes(origin);
+
   return new NextResponse(null, {
     status: 204,
     headers: {
-      "Access-Control-Allow-Origin": "*",
+      "Access-Control-Allow-Origin": isAllowed ? origin : "https://gazaeduhub.com",
       "Access-Control-Allow-Methods": "GET, POST, PUT, PATCH, DELETE, OPTIONS",
-      "Access-Control-Allow-Headers": "*",
+      "Access-Control-Allow-Headers": "Authorization, Content-Type, Accept",
       "Access-Control-Max-Age": "86400",
     },
   });
