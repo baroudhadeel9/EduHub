@@ -14,6 +14,12 @@ export default function AdminAuthGuard({ children }: { children: React.ReactNode
     let isMounted = true;
 
     async function verifyAdmin() {
+      // Allow admin login page directly
+      if (pathname === "/admin/login") {
+        if (isMounted) setAuthorized(true);
+        return;
+      }
+
       const session = getAdminAuthSession();
       const token = session?.token;
       const role = (session?.admin as { role?: string })?.role;
