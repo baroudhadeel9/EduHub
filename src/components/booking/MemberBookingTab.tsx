@@ -564,7 +564,7 @@ export default function MemberBookingTab({ onApplyNewMember }: MemberBookingTabP
   };
 
   return (
-    <div>
+    <div className="w-full max-w-4xl min-w-0 overflow-hidden">
       {!isLoggedIn ? (
         <MemberLoginForm
           email={memberEmail}
@@ -576,7 +576,7 @@ export default function MemberBookingTab({ onApplyNewMember }: MemberBookingTabP
         />
       ) : (
         /* Member Hub: Hours Balance Bar, Booking Form & My Bookings (Single Unified Card) */
-        <div className="max-w-4xl w-full mx-auto bg-white rounded-3xl border border-slate-200/90 shadow-xl p-5 sm:p-8 md:p-10 space-y-6 animate-in fade-in">
+        <div className="max-w-4xl w-full mx-auto bg-white rounded-2xl sm:rounded-3xl border border-slate-200/90 shadow-xl p-3.5 sm:p-8 md:p-10 space-y-5 sm:space-y-6 animate-in fade-in min-w-0 overflow-hidden">
           <MemberQuotaHeader
             memberName={memberData?.name || ""}
             memberEmail={memberData?.email || memberEmail}

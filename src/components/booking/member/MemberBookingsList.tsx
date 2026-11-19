@@ -169,9 +169,9 @@ export default function MemberBookingsList({
   }, [bookings, activeFilter]);
 
   return (
-    <div className="space-y-4 pt-1">
+    <div className="space-y-4 pt-1 w-full min-w-0">
       {/* ── Policy Notice ── */}
-      <div className="flex items-center gap-2 p-3 rounded-2xl bg-slate-50 border border-slate-200/80 text-xs text-slate-600">
+      <div className="flex items-center gap-2 p-3 rounded-2xl bg-slate-50 border border-slate-200/80 text-xs text-slate-600 w-full min-w-0">
         <Info className="w-4 h-4 text-emerald-600 shrink-0" />
         <p className="leading-relaxed">
           {isRTL
@@ -182,130 +182,132 @@ export default function MemberBookingsList({
 
       {/* ── Interactive Category Filter Chips ── */}
       {bookings.length > 0 && (
-        <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none text-xs font-bold">
-          <button
-            type="button"
-            onClick={() => setActiveFilter("all")}
-            className={`px-3 py-1.5 rounded-xl border transition-all cursor-pointer whitespace-nowrap flex items-center gap-1.5 ${
-              activeFilter === "all"
-                ? "bg-[#0c2340] text-white border-[#0c2340] shadow-xs"
-                : "bg-white text-slate-600 border-slate-200 hover:bg-slate-50"
-            }`}
-          >
-            <span>{isRTL ? "جميع الحجوزات والزيارات" : "All Records"}</span>
-            <span
-              className={`px-1.5 py-0.2 rounded-full text-[10px] ${
-                activeFilter === "all" ? "bg-white/20 text-white" : "bg-slate-100 text-slate-700"
-              }`}
-            >
-              {counts.all}
-            </span>
-          </button>
-
-          {counts.attended > 0 && (
+        <div className="w-full max-w-full min-w-0 overflow-hidden">
+          <div className="flex items-center gap-1.5 overflow-x-auto pb-2 pt-0.5 scrollbar-none text-xs font-bold w-full max-w-full touch-pan-x">
             <button
               type="button"
-              onClick={() => setActiveFilter("attended")}
-              className={`px-3 py-1.5 rounded-xl border transition-all cursor-pointer whitespace-nowrap flex items-center gap-1.5 ${
-                activeFilter === "attended"
-                  ? "bg-emerald-600 text-white border-emerald-600 shadow-xs"
-                  : "bg-emerald-50 text-emerald-800 border-emerald-200 hover:bg-emerald-100/60"
+              onClick={() => setActiveFilter("all")}
+              className={`px-3 py-1.5 rounded-xl border transition-all cursor-pointer whitespace-nowrap flex items-center gap-1.5 shrink-0 ${
+                activeFilter === "all"
+                  ? "bg-[#0c2340] text-white border-[#0c2340] shadow-xs"
+                  : "bg-white text-slate-600 border-slate-200 hover:bg-slate-50"
               }`}
             >
-              <CheckCircle2 className="w-3.5 h-3.5" />
-              <span>{isRTL ? "حضر بنجاح" : "Attended"}</span>
+              <span>{isRTL ? "جميع الحجوزات والزيارات" : "All Records"}</span>
               <span
                 className={`px-1.5 py-0.2 rounded-full text-[10px] ${
-                  activeFilter === "attended" ? "bg-white/25 text-white" : "bg-emerald-100 text-emerald-900"
+                  activeFilter === "all" ? "bg-white/20 text-white" : "bg-slate-100 text-slate-700"
                 }`}
               >
-                {counts.attended}
+                {counts.all}
               </span>
             </button>
-          )}
 
-          {counts.inside > 0 && (
-            <button
-              type="button"
-              onClick={() => setActiveFilter("inside")}
-              className={`px-3 py-1.5 rounded-xl border transition-all cursor-pointer whitespace-nowrap flex items-center gap-1.5 ${
-                activeFilter === "inside"
-                  ? "bg-emerald-700 text-white border-emerald-700 shadow-xs animate-pulse"
-                  : "bg-emerald-100/80 text-emerald-900 border-emerald-300 hover:bg-emerald-200/60"
-              }`}
-            >
-              <span>{isRTL ? "داخل المساحة الآن 🟢" : "Inside Now 🟢"}</span>
-              <span className="px-1.5 py-0.2 rounded-full text-[10px] bg-white/30 text-white">
-                {counts.inside}
-              </span>
-            </button>
-          )}
-
-          {counts.confirmed > 0 && (
-            <button
-              type="button"
-              onClick={() => setActiveFilter("confirmed")}
-              className={`px-3 py-1.5 rounded-xl border transition-all cursor-pointer whitespace-nowrap flex items-center gap-1.5 ${
-                activeFilter === "confirmed"
-                  ? "bg-sky-600 text-white border-sky-600 shadow-xs"
-                  : "bg-sky-50 text-sky-800 border-sky-200 hover:bg-sky-100/60"
-              }`}
-            >
-              <Clock className="w-3.5 h-3.5" />
-              <span>{isRTL ? "قادم ومؤكد" : "Upcoming"}</span>
-              <span
-                className={`px-1.5 py-0.2 rounded-full text-[10px] ${
-                  activeFilter === "confirmed" ? "bg-white/25 text-white" : "bg-sky-100 text-sky-900"
+            {counts.attended > 0 && (
+              <button
+                type="button"
+                onClick={() => setActiveFilter("attended")}
+                className={`px-3 py-1.5 rounded-xl border transition-all cursor-pointer whitespace-nowrap flex items-center gap-1.5 shrink-0 ${
+                  activeFilter === "attended"
+                    ? "bg-emerald-600 text-white border-emerald-600 shadow-xs"
+                    : "bg-emerald-50 text-emerald-800 border-emerald-200 hover:bg-emerald-100/60"
                 }`}
               >
-                {counts.confirmed}
-              </span>
-            </button>
-          )}
+                <CheckCircle2 className="w-3.5 h-3.5" />
+                <span>{isRTL ? "حضر بنجاح" : "Attended"}</span>
+                <span
+                  className={`px-1.5 py-0.2 rounded-full text-[10px] ${
+                    activeFilter === "attended" ? "bg-white/25 text-white" : "bg-emerald-100 text-emerald-900"
+                  }`}
+                >
+                  {counts.attended}
+                </span>
+              </button>
+            )}
 
-          {counts.no_show > 0 && (
-            <button
-              type="button"
-              onClick={() => setActiveFilter("no_show")}
-              className={`px-3 py-1.5 rounded-xl border transition-all cursor-pointer whitespace-nowrap flex items-center gap-1.5 ${
-                activeFilter === "no_show"
-                  ? "bg-amber-600 text-white border-amber-600 shadow-xs"
-                  : "bg-amber-50 text-amber-800 border-amber-200 hover:bg-amber-100/60"
-              }`}
-            >
-              <AlertTriangle className="w-3.5 h-3.5" />
-              <span>{isRTL ? "لم يحضر" : "No-Show"}</span>
-              <span
-                className={`px-1.5 py-0.2 rounded-full text-[10px] ${
-                  activeFilter === "no_show" ? "bg-white/25 text-white" : "bg-amber-100 text-amber-900"
+            {counts.inside > 0 && (
+              <button
+                type="button"
+                onClick={() => setActiveFilter("inside")}
+                className={`px-3 py-1.5 rounded-xl border transition-all cursor-pointer whitespace-nowrap flex items-center gap-1.5 shrink-0 ${
+                  activeFilter === "inside"
+                    ? "bg-emerald-700 text-white border-emerald-700 shadow-xs animate-pulse"
+                    : "bg-emerald-100/80 text-emerald-900 border-emerald-300 hover:bg-emerald-200/60"
                 }`}
               >
-                {counts.no_show}
-              </span>
-            </button>
-          )}
+                <span>{isRTL ? "داخل المساحة الآن 🟢" : "Inside Now 🟢"}</span>
+                <span className="px-1.5 py-0.2 rounded-full text-[10px] bg-white/30 text-white">
+                  {counts.inside}
+                </span>
+              </button>
+            )}
 
-          {counts.cancelled > 0 && (
-            <button
-              type="button"
-              onClick={() => setActiveFilter("cancelled")}
-              className={`px-3 py-1.5 rounded-xl border transition-all cursor-pointer whitespace-nowrap flex items-center gap-1.5 ${
-                activeFilter === "cancelled"
-                  ? "bg-rose-600 text-white border-rose-600 shadow-xs"
-                  : "bg-rose-50 text-rose-800 border-rose-200 hover:bg-rose-100/60"
-              }`}
-            >
-              <XCircle className="w-3.5 h-3.5" />
-              <span>{isRTL ? "ملغي" : "Cancelled"}</span>
-              <span
-                className={`px-1.5 py-0.2 rounded-full text-[10px] ${
-                  activeFilter === "cancelled" ? "bg-white/25 text-white" : "bg-rose-100 text-rose-900"
+            {counts.confirmed > 0 && (
+              <button
+                type="button"
+                onClick={() => setActiveFilter("confirmed")}
+                className={`px-3 py-1.5 rounded-xl border transition-all cursor-pointer whitespace-nowrap flex items-center gap-1.5 shrink-0 ${
+                  activeFilter === "confirmed"
+                    ? "bg-sky-600 text-white border-sky-600 shadow-xs"
+                    : "bg-sky-50 text-sky-800 border-sky-200 hover:bg-sky-100/60"
                 }`}
               >
-                {counts.cancelled}
-              </span>
-            </button>
-          )}
+                <Clock className="w-3.5 h-3.5" />
+                <span>{isRTL ? "قادم ومؤكد" : "Upcoming"}</span>
+                <span
+                  className={`px-1.5 py-0.2 rounded-full text-[10px] ${
+                    activeFilter === "confirmed" ? "bg-white/25 text-white" : "bg-sky-100 text-sky-900"
+                  }`}
+                >
+                  {counts.confirmed}
+                </span>
+              </button>
+            )}
+
+            {counts.no_show > 0 && (
+              <button
+                type="button"
+                onClick={() => setActiveFilter("no_show")}
+                className={`px-3 py-1.5 rounded-xl border transition-all cursor-pointer whitespace-nowrap flex items-center gap-1.5 shrink-0 ${
+                  activeFilter === "no_show"
+                    ? "bg-amber-600 text-white border-amber-600 shadow-xs"
+                    : "bg-amber-50 text-amber-800 border-amber-200 hover:bg-amber-100/60"
+                }`}
+              >
+                <AlertTriangle className="w-3.5 h-3.5" />
+                <span>{isRTL ? "لم يحضر" : "No-Show"}</span>
+                <span
+                  className={`px-1.5 py-0.2 rounded-full text-[10px] ${
+                    activeFilter === "no_show" ? "bg-white/25 text-white" : "bg-amber-100 text-amber-900"
+                  }`}
+                >
+                  {counts.no_show}
+                </span>
+              </button>
+            )}
+
+            {counts.cancelled > 0 && (
+              <button
+                type="button"
+                onClick={() => setActiveFilter("cancelled")}
+                className={`px-3 py-1.5 rounded-xl border transition-all cursor-pointer whitespace-nowrap flex items-center gap-1.5 shrink-0 ${
+                  activeFilter === "cancelled"
+                    ? "bg-rose-600 text-white border-rose-600 shadow-xs"
+                    : "bg-rose-50 text-rose-800 border-rose-200 hover:bg-rose-100/60"
+                }`}
+              >
+                <XCircle className="w-3.5 h-3.5" />
+                <span>{isRTL ? "ملغي" : "Cancelled"}</span>
+                <span
+                  className={`px-1.5 py-0.2 rounded-full text-[10px] ${
+                    activeFilter === "cancelled" ? "bg-white/25 text-white" : "bg-rose-100 text-rose-900"
+                  }`}
+                >
+                  {counts.cancelled}
+                </span>
+              </button>
+            )}
+          </div>
         </div>
       )}
 
@@ -323,15 +325,15 @@ export default function MemberBookingsList({
           <p className="text-xs text-slate-500">
             {bookings.length === 0
               ? isRTL
-                ? "يمكنك حجز مقعد دراسي أو مكتبي من تبويب 'حجز موعد مقعد جديد' بالأعلى."
-                : "You can reserve a desk from the 'Book a New Desk' tab above."
+                ? "يمكنك حجز مقعد دراسي أو مكتبي من تبويب 'حجز مقعد جديد' بالأعلى."
+                : "You can reserve a desk from the 'Book a Desk' tab above."
               : isRTL
               ? "جرّب اختيار 'جميع الحجوزات والزيارات' لعرض كافة السجلات."
               : "Try switching to 'All Records' to see your complete history."}
           </p>
         </div>
       ) : (
-        <div className="space-y-3.5">
+        <div className="space-y-3.5 w-full min-w-0">
           {filteredBookings.map((booking) => {
             const meta = getBookingMeta(booking);
             const isCancelling = cancellingId === booking.id;
@@ -343,23 +345,23 @@ export default function MemberBookingsList({
             return (
               <div
                 key={booking.id}
-                className={`p-4 sm:p-5 rounded-2xl sm:rounded-3xl border transition-all ${meta.cardBorder}`}
+                className={`p-3.5 sm:p-5 rounded-2xl sm:rounded-3xl border transition-all w-full min-w-0 overflow-hidden ${meta.cardBorder}`}
               >
                 {/* ── Top Bar: Day & Status ── */}
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 pb-3 border-b border-slate-200/60">
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <span className="flex items-center gap-1.5 text-xs sm:text-sm font-black text-[#0c2340]">
-                      <Calendar className="w-4 h-4 text-emerald-600" />
-                      <span>{dayTitle}</span>
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 pb-3 border-b border-slate-200/60 w-full min-w-0">
+                  <div className="flex items-center gap-2 flex-wrap min-w-0">
+                    <span className="flex items-center gap-1.5 text-xs sm:text-sm font-black text-[#0c2340] min-w-0">
+                      <Calendar className="w-4 h-4 text-emerald-600 shrink-0" />
+                      <span className="truncate">{dayTitle}</span>
                     </span>
 
-                    <span className="font-mono text-[11px] text-slate-400 bg-slate-100/80 px-2 py-0.5 rounded-md">
+                    <span className="font-mono text-[11px] text-slate-400 bg-slate-100/80 px-2 py-0.5 rounded-md shrink-0">
                       #{booking.id.replace("att_", "زيارة-")}
                     </span>
                   </div>
 
                   {/* Status Badge */}
-                  <div className="flex items-center gap-2 self-start sm:self-auto">
+                  <div className="flex items-center gap-2 self-start sm:self-auto shrink-0">
                     <span
                       className={`px-3 py-1 rounded-full text-xs font-black border flex items-center gap-1.5 ${meta.badgeClass}`}
                     >
@@ -369,15 +371,15 @@ export default function MemberBookingsList({
                 </div>
 
                 {/* ── Middle: Desk, Space & Times ── */}
-                <div className="py-3 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5 text-xs">
+                <div className="py-3 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-2.5 text-xs w-full min-w-0">
                   {/* Seat / Desk */}
-                  <div className="flex items-center gap-2 bg-white/70 px-3 py-2 rounded-xl border border-slate-100">
+                  <div className="flex items-center gap-2 bg-white/70 px-3 py-2 rounded-xl border border-slate-100 min-w-0">
                     <Armchair className="w-4 h-4 text-emerald-600 shrink-0" />
-                    <div>
+                    <div className="min-w-0 flex-1">
                       <span className="text-[10px] text-slate-400 block font-medium">
                         {isRTL ? "المقعد المحجوز" : "Reserved Desk"}
                       </span>
-                      <span className="font-extrabold text-slate-800">
+                      <span className="font-extrabold text-slate-800 block truncate">
                         {booking.seatLabel || (booking.seatNumber ? `مقعد ${booking.seatNumber}` : "مقعد دراسي")}
                         {booking.seatCode && (
                           <span className="font-mono text-[10px] text-slate-500 ms-1">({booking.seatCode})</span>
@@ -387,26 +389,26 @@ export default function MemberBookingsList({
                   </div>
 
                   {/* Room / Hall */}
-                  <div className="flex items-center gap-2 bg-white/70 px-3 py-2 rounded-xl border border-slate-100">
+                  <div className="flex items-center gap-2 bg-white/70 px-3 py-2 rounded-xl border border-slate-100 min-w-0">
                     <MapPin className="w-4 h-4 text-emerald-600 shrink-0" />
-                    <div>
+                    <div className="min-w-0 flex-1">
                       <span className="text-[10px] text-slate-400 block font-medium">
                         {isRTL ? "المكان / الصالة" : "Hall / Room"}
                       </span>
-                      <span className="font-bold text-slate-700">
+                      <span className="font-bold text-slate-700 block truncate">
                         {booking.roomName || (isRTL ? "الصالة التعليمية المشتركة" : "Educational Hall")}
                       </span>
                     </div>
                   </div>
 
                   {/* Scheduled Timeslot */}
-                  <div className="flex items-center gap-2 bg-white/70 px-3 py-2 rounded-xl border border-slate-100">
+                  <div className="flex items-center gap-2 bg-white/70 px-3 py-2 rounded-xl border border-slate-100 min-w-0 sm:col-span-2 lg:col-span-1">
                     <Clock className="w-4 h-4 text-slate-500 shrink-0" />
-                    <div>
+                    <div className="min-w-0 flex-1">
                       <span className="text-[10px] text-slate-400 block font-medium">
                         {isRTL ? "الحجز المجدول" : "Scheduled Slot"}
                       </span>
-                      <span className="font-bold text-slate-700 font-mono">
+                      <span className="font-bold text-slate-700 font-mono block truncate">
                         {booking.startTime && booking.endTime
                           ? `${formatHour12(booking.startTime)} – ${formatHour12(booking.endTime)}`
                           : isRTL
@@ -418,12 +420,12 @@ export default function MemberBookingsList({
                 </div>
 
                 {/* ── Primary Attendance Status Banner (Crucial Requirement) ── */}
-                <div className="mt-1 pt-2.5 border-t border-slate-200/50">
+                <div className="mt-1 pt-2.5 border-t border-slate-200/50 w-full min-w-0">
                   {meta.key === "attended" && (
-                    <div className="p-3 rounded-xl bg-emerald-100/70 border border-emerald-300 text-emerald-900 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs">
-                      <div className="flex items-center gap-2">
+                    <div className="p-3 rounded-xl bg-emerald-100/70 border border-emerald-300 text-emerald-900 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs w-full min-w-0">
+                      <div className="flex items-center gap-2 min-w-0">
                         <CheckCircle2 className="w-4 h-4 text-emerald-700 shrink-0" />
-                        <span className="font-extrabold text-sm text-emerald-950">
+                        <span className="font-extrabold text-sm text-emerald-950 leading-snug">
                           {booking.attendanceSummary || (
                             booking.checkInTime && booking.checkOutTime
                               ? isRTL
@@ -436,7 +438,7 @@ export default function MemberBookingsList({
                         </span>
                       </div>
                       {booking.recordedHours !== undefined && (
-                        <span className="font-black text-xs bg-emerald-700 text-white px-2.5 py-1 rounded-lg self-start sm:self-auto">
+                        <span className="font-black text-xs bg-emerald-700 text-white px-2.5 py-1 rounded-lg self-start sm:self-auto shrink-0">
                           {isRTL
                             ? `${booking.recordedHours} ساعة مسجلة من الحصة`
                             : `${booking.recordedHours} hrs recorded`}
@@ -446,10 +448,10 @@ export default function MemberBookingsList({
                   )}
 
                   {meta.key === "inside" && (
-                    <div className="p-3 rounded-xl bg-emerald-600 text-white flex items-center justify-between gap-2 text-xs shadow-xs animate-pulse">
-                      <div className="flex items-center gap-2">
+                    <div className="p-3 rounded-xl bg-emerald-600 text-white flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs shadow-xs animate-pulse w-full min-w-0">
+                      <div className="flex items-center gap-2 min-w-0">
                         <Sparkles className="w-4 h-4 text-amber-300 shrink-0" />
-                        <span className="font-extrabold text-sm">
+                        <span className="font-extrabold text-sm leading-snug">
                           {booking.attendanceSummary || (
                             booking.checkInTime
                               ? isRTL
@@ -461,20 +463,20 @@ export default function MemberBookingsList({
                           )}
                         </span>
                       </div>
-                      <span className="text-[11px] bg-white/20 px-2 py-0.5 rounded font-bold">
+                      <span className="text-[11px] bg-white/20 px-2 py-0.5 rounded font-bold shrink-0 self-start sm:self-auto">
                         {isRTL ? "بانتظار تسجيل الخروج" : "Pending Checkout"}
                       </span>
                     </div>
                   )}
 
                   {meta.key === "no_show" && (
-                    <div className="p-3 rounded-xl bg-amber-50 border border-amber-300 text-amber-900 flex items-center gap-2 text-xs">
-                      <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0" />
-                      <div>
+                    <div className="p-3 rounded-xl bg-amber-50 border border-amber-300 text-amber-900 flex items-start sm:items-center gap-2 text-xs w-full min-w-0">
+                      <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0 mt-0.5 sm:mt-0" />
+                      <div className="min-w-0 flex-1">
                         <span className="font-extrabold text-sm block text-amber-950">
                           {isRTL ? "لم يحضر في موعد الحجز (تغيّب)" : "Did Not Attend (No-Show)"}
                         </span>
-                        <p className="text-[11px] text-amber-800 mt-0.5">
+                        <p className="text-[11px] text-amber-800 mt-0.5 leading-snug">
                           {booking.cancellationReason || (isRTL
                             ? "انقضت ساعات الدوام الرسمي (04:00 م) لهذا اليوم دون تسجيل وصول لدى الاستقبال."
                             : "Working hours ended without check-in at reception.")}
@@ -484,13 +486,13 @@ export default function MemberBookingsList({
                   )}
 
                   {meta.key === "cancelled" && (
-                    <div className="p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 flex items-center gap-2 text-xs">
-                      <XCircle className="w-4 h-4 text-rose-600 shrink-0" />
-                      <div>
+                    <div className="p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 flex items-start sm:items-center gap-2 text-xs w-full min-w-0">
+                      <XCircle className="w-4 h-4 text-rose-600 shrink-0 mt-0.5 sm:mt-0" />
+                      <div className="min-w-0 flex-1">
                         <span className="font-bold text-sm block text-rose-900">
                           {isRTL ? "حجز ملغي" : "Cancelled Reservation"}
                         </span>
-                        <p className="text-[11px] text-rose-700 mt-0.5">
+                        <p className="text-[11px] text-rose-700 mt-0.5 leading-snug">
                           {booking.cancellationReason || (isRTL
                             ? "تم إلغاء حجز المقعد ولم يتم خصم أي ساعات من حصتك الشهرية."
                             : "Reservation cancelled; no hours deducted from your monthly quota.")}
@@ -500,14 +502,14 @@ export default function MemberBookingsList({
                   )}
 
                   {meta.key === "confirmed" && (
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3 rounded-xl bg-sky-50 border border-sky-200 text-xs">
-                      <div className="flex items-center gap-2 text-sky-900">
-                        <Clock className="w-4 h-4 text-sky-600 shrink-0" />
-                        <div>
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3 rounded-xl bg-sky-50 border border-sky-200 text-xs w-full min-w-0">
+                      <div className="flex items-start sm:items-center gap-2 text-sky-900 min-w-0 flex-1">
+                        <Clock className="w-4 h-4 text-sky-600 shrink-0 mt-0.5 sm:mt-0" />
+                        <div className="min-w-0 flex-1">
                           <span className="font-bold text-sm block text-sky-950">
                             {isRTL ? "حجز مؤكد وبانتظار حضورك" : "Confirmed — Awaiting Your Visit"}
                           </span>
-                          <p className="text-[11px] text-sky-700 mt-0.5">
+                          <p className="text-[11px] text-sky-700 mt-0.5 leading-snug">
                             {isRTL
                               ? "يرجى التوجه إلى موظف الاستقبال فور وصولك لتسجيل الدخول."
                               : "Please check in with the receptionist upon your arrival."}
@@ -521,7 +523,7 @@ export default function MemberBookingsList({
                           type="button"
                           onClick={() => onCancelBooking(booking.id)}
                           disabled={isCancelling}
-                          className="px-3.5 py-1.5 rounded-xl border border-rose-200 bg-white hover:bg-rose-50 text-xs font-bold text-rose-600 transition-all cursor-pointer shadow-2xs active:scale-95 disabled:opacity-50 flex items-center gap-1.5 shrink-0 self-end sm:self-auto"
+                          className="px-3.5 py-1.5 rounded-xl border border-rose-200 bg-white hover:bg-rose-50 text-xs font-bold text-rose-600 transition-all cursor-pointer shadow-2xs active:scale-95 disabled:opacity-50 flex items-center justify-center gap-1.5 shrink-0 self-stretch sm:self-auto"
                         >
                           {isCancelling && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
                           <span>{isRTL ? "إلغاء حجز المقعد" : "Cancel Reservation"}</span>
@@ -535,7 +537,7 @@ export default function MemberBookingsList({
                               ? "لا يمكن إلغاء الحجز قبل أقل من ساعة من موعد بدايته"
                               : "Cannot cancel within 1 hour of start time"
                           }
-                          className="px-2.5 py-1 rounded-lg bg-slate-100 border border-slate-200 text-[11px] font-bold text-slate-500 self-end sm:self-auto cursor-help"
+                          className="px-2.5 py-1 rounded-lg bg-slate-100 border border-slate-200 text-[11px] font-bold text-slate-500 self-stretch sm:self-auto text-center cursor-help shrink-0"
                         >
                           {isRTL ? "مغلق للإلغاء (< ساعة)" : "Locked (< 1h)"}
                         </span>
@@ -546,7 +548,7 @@ export default function MemberBookingsList({
 
                 {/* Notes if provided */}
                 {booking.notes && (
-                  <p className="text-[11px] text-slate-500 font-normal mt-2 pt-2 border-t border-slate-100 italic">
+                  <p className="text-[11px] text-slate-500 font-normal mt-2 pt-2 border-t border-slate-100 italic break-words">
                     {isRTL ? "ملاحظة الحجز: " : "Note: "}
                     {booking.notes}
                   </p>

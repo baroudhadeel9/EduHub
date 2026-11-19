@@ -79,7 +79,7 @@ export default function MemberLoginForm({
   };
 
   return (
-    <div className="max-w-md w-full mx-auto p-6 sm:p-8 rounded-3xl bg-white border border-slate-200/90 shadow-xl space-y-6 animate-in fade-in">
+    <div className="max-w-md w-full mx-auto p-4 sm:p-8 rounded-2xl sm:rounded-3xl bg-white border border-slate-200/90 shadow-xl space-y-5 sm:space-y-6 animate-in fade-in min-w-0">
       <div className="text-center space-y-1.5 pb-2 border-b border-slate-100">
         <div className="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-700 mx-auto flex items-center justify-center mb-2 shadow-2xs">
           <LogIn className="w-6 h-6" />

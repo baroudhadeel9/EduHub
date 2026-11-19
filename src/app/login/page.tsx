@@ -14,10 +14,10 @@ export default function LoginPage() {
   const isRTL = locale === "ar";
 
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col selection:bg-emerald-500 selection:text-white" dir={isRTL ? "rtl" : "ltr"}>
+    <div className="min-h-screen bg-slate-50 flex flex-col selection:bg-emerald-500 selection:text-white overflow-x-hidden w-full max-w-full" dir={isRTL ? "rtl" : "ltr"}>
       {/* ── Top Navigation Bar ── */}
       <header className="sticky top-0 z-30 bg-white/95 backdrop-blur-md border-b border-slate-200/90 shadow-2xs">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 h-18 flex items-center justify-between">
+        <div className="max-w-5xl mx-auto px-3.5 sm:px-6 lg:px-8 h-16 sm:h-18 flex items-center justify-between">
           
           {/* Logo */}
           <Link
@@ -78,7 +78,7 @@ export default function LoginPage() {
       </header>
 
       {/* ── Main Content: Clean Centered Layout (Single Card) ── */}
-      <main className="flex-1 w-full mx-auto px-3.5 sm:px-6 lg:px-8 py-6 sm:py-12 flex flex-col justify-center items-center">
+      <main className="flex-1 w-full max-w-4xl mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-10 flex flex-col justify-start sm:justify-center items-center min-w-0 overflow-x-hidden">
         <MemberBookingTab
           onApplyNewMember={() => {
             router.push("/join");
