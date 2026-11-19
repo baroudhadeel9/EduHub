@@ -85,6 +85,7 @@ export default function BookingSection() {
             <div className="pt-6 relative z-10">
               <Link
                 href="/login"
+                prefetch={true}
                 className="w-full inline-flex items-center justify-center gap-2.5 py-3.5 px-6 rounded-2xl bg-white text-emerald-950 hover:bg-emerald-50 font-black text-sm sm:text-base shadow-lg transition-all active:scale-98 cursor-pointer"
               >
                 <LogIn className="w-4 h-4 text-emerald-700" />
@@ -124,6 +125,7 @@ export default function BookingSection() {
             <div className="pt-6 relative z-10">
               <Link
                 href="/visit"
+                prefetch={true}
                 className="w-full inline-flex items-center justify-center gap-2.5 py-3.5 px-6 rounded-2xl bg-teal-700 hover:bg-teal-800 text-white font-black text-sm sm:text-base shadow-md shadow-teal-700/20 transition-all active:scale-98 cursor-pointer"
               >
                 <Compass className="w-4 h-4 text-teal-200" />
@@ -159,6 +161,7 @@ export default function BookingSection() {
 
             <Link
               href="/join"
+              prefetch={true}
               className="w-full sm:w-auto inline-flex items-center justify-center gap-2 py-3 px-6 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs sm:text-sm shadow-sm shadow-emerald-700/20 transition-all active:scale-95 shrink-0 whitespace-nowrap cursor-pointer"
             >
               <UserPlus className="w-4 h-4" />

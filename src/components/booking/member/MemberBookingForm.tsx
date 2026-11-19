@@ -1,0 +1,592 @@
+"use client";
+
+import React from "react";
+import {
+  Calendar,
+  Clock,
+  CheckCircle2,
+  AlertCircle,
+  CalendarCheck,
+  Loader2,
+  Armchair,
+  Zap,
+} from "lucide-react";
+import { RoomItem, SeatItem } from "@/services/roomSeats";
+
+export interface MemberBookingFormProps {
+  bookingDate: string;
+  setBookingDate: (date: string) => void;
+  todayStr: string;
+  maxBookingDateStr: string | null;
+  windowNotice: string | null;
+  bookingStartTime: string;
+  setBookingStartTime: (time: string) => void;
+  bookingEndTime: string;
+  setBookingEndTime: (time: string) => void;
+  selectedSeat: SeatItem | null;
+  setSelectedSeat: (seat: SeatItem | null) => void;
+  availableRooms: RoomItem[];
+  selectedRoomId: number | null;
+  setSelectedRoomId: (roomId: number | null) => void;
+  loadingSeats: boolean;
+  bookingNotes: string;
+  setBookingNotes: (notes: string) => void;
+  bookingLoading: boolean;
+  bookingError: string | null;
+  bookingSuccess: string | null;
+  bookingWarning: string | null;
+  onSubmit: (e: React.FormEvent) => void;
+  isRTL: boolean;
+  bp?: Record<string, string>;
+}
+
+export const formatHour12 = (timeStr?: string): string => {
+  if (!timeStr) return "";
+  const clean = String(timeStr).trim().replace(/[A-Za-z]/g, "");
+  const parts = clean.split(":");
+  let hour = parseInt(parts[0], 10);
+  if (isNaN(hour)) return timeStr;
+  const minute = parts[1] && parts[1].length >= 2 ? parts[1].slice(0, 2) : "00";
+  const period = hour >= 12 ? "م" : "ص";
+  if (hour > 12) hour -= 12;
+  if (hour === 0) hour = 12;
+  return minute === "00" ? `${hour} ${period}` : `${hour}:${minute} ${period}`;
+};
+
+export const getFormattedRoomName = (nameAr: string, roomKey?: string) => {
+  if (roomKey === "female_hall" || nameAr?.includes("إناث") || nameAr?.includes("صبايا")) {
+    return "صالة الإناث";
+  }
+  return "صالة الشباب";
+};
+
+export default function MemberBookingForm({
+  bookingDate,
+  setBookingDate,
+  todayStr,
+  maxBookingDateStr,
+  windowNotice,
+  bookingStartTime,
+  setBookingStartTime,
+  bookingEndTime,
+  setBookingEndTime,
+  selectedSeat,
+  setSelectedSeat,
+  availableRooms,
+  selectedRoomId,
+  setSelectedRoomId,
+  loadingSeats,
+  bookingNotes,
+  setBookingNotes,
+  bookingLoading,
+  bookingError,
+  bookingSuccess,
+  bookingWarning,
+  onSubmit,
+  isRTL,
+  bp,
+}: MemberBookingFormProps) {
+  const activeRoom = availableRooms.find((r) => r.id === selectedRoomId) || availableRooms[0];
+
+  return (
+    <form onSubmit={onSubmit} className="space-y-5 pt-2">
+      {bookingError && (
+        <div className="p-3.5 rounded-xl bg-red-50 border border-red-200 text-xs font-bold text-red-700 flex items-center gap-2 animate-in fade-in">
+          <AlertCircle className="w-4 h-4 shrink-0" />
+          <span>{bookingError}</span>
+        </div>
+      )}
+
+      {bookingSuccess && (
+        <div className="p-3.5 rounded-xl bg-emerald-50 border border-emerald-200 text-xs font-bold text-emerald-800 flex items-center gap-2 animate-in fade-in">
+          <CheckCircle2 className="w-4 h-4 shrink-0 text-emerald-600" />
+          <span>{bookingSuccess}</span>
+        </div>
+      )}
+
+      {bookingWarning && (
+        <div className="p-3.5 rounded-xl bg-amber-50 border border-amber-200 text-xs font-bold text-amber-800 flex items-center gap-2 animate-in fade-in">
+          <AlertCircle className="w-4 h-4 shrink-0 text-amber-600" />
+          <span>{bookingWarning}</span>
+        </div>
+      )}
+
+      <div className="space-y-4">
+        {/* Important Attendance Rule Notice */}
+        <div className="p-3 sm:p-3.5 rounded-2xl bg-amber-50/90 border border-amber-200/90 flex items-start gap-2.5 text-amber-950 text-xs">
+          <AlertCircle className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+          <div className="space-y-0.5">
+            <div className="font-extrabold text-amber-950">
+              {isRTL ? "تنبيه هام بشأن سياسة الحضور والالتزام:" : "Important Attendance Policy:"}
+            </div>
+            <p className="text-[11.5px] text-amber-900/90 leading-relaxed font-medium">
+              {isRTL
+                ? "يرجى الالتزام بالحضور في الموعد المحجوز. في حال عدم الحضور وتكرار الغياب لأكثر من 3 أيام خلال الشهر، سيتم إلغاء/توقيف عضويتك حفاظاً على حق باقي الأعضاء في الاستفادة من المقاعد."
+                : "Please adhere to your reserved schedule. Missing your reservations for more than 3 days in a month will result in membership suspension."}
+            </p>
+          </div>
+        </div>
+
+        {/* 1. Date Selector */}
+        <div>
+          <div className="flex items-center justify-between mb-1.5">
+            <label htmlFor="member-booking-date" className="block text-xs font-bold text-slate-700 flex items-center gap-1.5">
+              <Calendar className="w-4 h-4 text-emerald-600" />
+              <span>{bp?.bookingDate || (isRTL ? "تاريخ اليوم المطلوب حجزه" : "Reservation Date")}</span>
+            </label>
+            <span className="text-[11px] font-bold text-slate-400 font-mono">
+              {isRTL ? "الدوام: السبت – الخميس (الجمعة عطلة)" : "Sat – Thu (Fri Closed)"}
+            </span>
+          </div>
+          <input
+            id="member-booking-date"
+            type="date"
+            value={bookingDate}
+            min={todayStr}
+            max={maxBookingDateStr || undefined}
+            onChange={(e) => {
+              setBookingDate(e.target.value);
+              setSelectedSeat(null);
+            }}
+            className="w-full px-4 py-3 rounded-2xl border border-slate-200 hover:border-slate-300 text-sm font-bold outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition-all shadow-2xs bg-white text-slate-800"
+            required
+          />
+          {windowNotice && (
+            <div className="mt-2 p-2.5 rounded-xl bg-indigo-50/70 border border-indigo-100 text-[11px] text-indigo-900 flex items-center gap-2 font-medium">
+              <Clock className="w-3.5 h-3.5 text-indigo-600 shrink-0" />
+              <span>{windowNotice}</span>
+            </div>
+          )}
+        </div>
+
+        {/* 2. Flexible Hourly Time Range Selector */}
+        <div className="p-4 sm:p-5 rounded-3xl bg-white border border-slate-200/90 shadow-2xs space-y-3.5">
+          <div className="flex items-center justify-between flex-wrap gap-2">
+            <div>
+              <h4 className="text-xs sm:text-sm font-black text-slate-900 flex items-center gap-1.5">
+                <Clock className="w-4 h-4 text-emerald-600" />
+                <span>{isRTL ? "حدد وقت حضورك وانصرافك بالساعات" : "Choose Your Arrival & Departure Hours"}</span>
+              </h4>
+              <p className="text-[11px] sm:text-xs text-slate-500 font-medium mt-1 leading-relaxed">
+                {isRTL
+                  ? "أنت حراً تماماً في اختيار وقتك (مثلاً من 10:00 ص إلى 02:00 م)، ويمكن لأي طالب آخر حجز المقعد قبلك أو بعدك!"
+                  : "You are completely free to choose your hours (e.g. from 10:00 AM to 02:00 PM), and other members can reserve the desk before or after you!"}
+              </p>
+            </div>
+
+            <button
+              type="button"
+              onClick={() => {
+                setBookingStartTime("09:00");
+                setBookingEndTime("16:00");
+                setSelectedSeat(null);
+              }}
+              className="px-3.5 py-1.5 rounded-full text-xs font-black bg-emerald-600 hover:bg-emerald-700 text-white flex items-center gap-1.5 shadow-xs cursor-pointer transition-all active:scale-95"
+            >
+              <Clock className="w-3.5 h-3.5" />
+              <span>{isRTL ? "9 ص – 4 م" : "9 AM – 4 PM"}</span>
+              <span className="opacity-90 font-bold">{isRTL ? "7 ساعات" : "7 hrs"}</span>
+            </button>
+          </div>
+
+          {/* Two Large Modern Hour Pickers: From and To */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+            {/* Start Hour Picker */}
+            <div className="p-3.5 rounded-2xl bg-slate-50/80 border border-slate-200 hover:border-emerald-300 transition-all group">
+              <label className="block text-xs font-bold text-slate-700 mb-2 flex items-center justify-between">
+                <span className="flex items-center gap-1.5">
+                  <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-[0_0_6px_rgba(16,185,129,0.5)]" />
+                  <span className="text-slate-800 font-extrabold">{isRTL ? "وقت الحضور" : "Arrival Time"}</span>
+                </span>
+                <span className="text-[10px] text-slate-400 font-mono">09:00 ص – 03:00 م</span>
+              </label>
+              <select
+                value={bookingStartTime}
+                onChange={(e) => {
+                  const newStart = e.target.value;
+                  setBookingStartTime(newStart);
+                  if (newStart >= bookingEndTime) {
+                    const startH = parseInt(newStart.split(":")[0]);
+                    const nextH = Math.min(16, startH + 2);
+                    setBookingEndTime(`${String(nextH).padStart(2, "0")}:00`);
+                  }
+                  setSelectedSeat(null);
+                }}
+                className="w-full bg-white border border-slate-200/90 rounded-xl px-3 py-2.5 text-xs sm:text-sm font-black text-slate-800 shadow-2xs focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none cursor-pointer hover:border-slate-300 transition-all"
+              >
+                <option value="09:00">09:00 ص</option>
+                <option value="10:00">10:00 ص</option>
+                <option value="11:00">11:00 ص</option>
+                <option value="12:00">12:00 ظهراً</option>
+                <option value="13:00">01:00 م</option>
+                <option value="14:00">02:00 م</option>
+                <option value="15:00">03:00 م</option>
+              </select>
+            </div>
+
+            {/* End Hour Picker */}
+            <div className="p-3.5 rounded-2xl bg-slate-50/80 border border-slate-200 hover:border-teal-300 transition-all group">
+              <label className="block text-xs font-bold text-slate-700 mb-2 flex items-center justify-between">
+                <span className="flex items-center gap-1.5">
+                  <span className="w-2.5 h-2.5 rounded-full bg-teal-500 shadow-[0_0_6px_rgba(20,184,166,0.5)]" />
+                  <span className="text-slate-800 font-extrabold">{isRTL ? "وقت المغادرة" : "Departure Time"}</span>
+                </span>
+                <span className="text-[10px] text-slate-400 font-mono">حتى 04:00 م</span>
+              </label>
+              <select
+                value={bookingEndTime}
+                onChange={(e) => {
+                  setBookingEndTime(e.target.value);
+                  setSelectedSeat(null);
+                }}
+                className="w-full bg-white border border-slate-200/90 rounded-xl px-3 py-2.5 text-xs sm:text-sm font-black text-slate-800 shadow-2xs focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 outline-none cursor-pointer hover:border-slate-300 transition-all"
+              >
+                {[
+                  { v: "09:00", l: "09:00 ص" },
+                  { v: "10:00", l: "10:00 ص" },
+                  { v: "11:00", l: "11:00 ص" },
+                  { v: "12:00", l: "12:00 ظهراً" },
+                  { v: "13:00", l: "01:00 م" },
+                  { v: "14:00", l: "02:00 م" },
+                  { v: "15:00", l: "03:00 م" },
+                  { v: "16:00", l: "04:00 م" },
+                ]
+                  .filter((t) => t.v > bookingStartTime)
+                  .map((t) => (
+                    <option key={t.v} value={t.v}>{t.l}</option>
+                  ))}
+              </select>
+            </div>
+          </div>
+        </div>
+
+        {/* 3. Interactive Seat Picker (Desks 1 to 20) */}
+        <div className="p-4 sm:p-5 rounded-2xl bg-white border border-slate-200/90 shadow-2xs space-y-3.5">
+          <div className="flex items-center justify-between flex-wrap gap-2">
+            <div className="flex items-center gap-2">
+              <div className="w-7 h-7 rounded-lg bg-emerald-100 text-emerald-800 flex items-center justify-center font-bold">
+                <Armchair className="w-4 h-4 text-emerald-700" />
+              </div>
+              <div>
+                <h4 className="text-xs sm:text-sm font-black text-slate-900">
+                  {isRTL ? "اختر مقعدك المفضل (من 1 إلى 20)" : "Select Your Desk (1 to 20)"}
+                </h4>
+                <p className="text-[11px] text-slate-400">
+                  {isRTL
+                    ? `المقاعد المتاحة في الفترة (${bookingStartTime} - ${bookingEndTime})`
+                    : `Desks available for (${bookingStartTime} - ${bookingEndTime})`}
+                </p>
+              </div>
+            </div>
+
+            {selectedSeat && (
+              <button
+                type="button"
+                onClick={() => setSelectedSeat(null)}
+                className="text-xs text-rose-600 hover:text-rose-700 font-bold underline cursor-pointer"
+              >
+                {isRTL ? "إلغاء التحديد" : "Clear selection"}
+              </button>
+            )}
+          </div>
+
+          {/* Single Room Header for Youth (1 room) and Females (1 room) */}
+          {availableRooms.length === 1 && (
+            <div className="flex items-center justify-between p-2.5 rounded-xl bg-slate-50 border border-slate-200/80">
+              <div className="flex items-center gap-2">
+                <span className="text-base">{availableRooms[0].room_key === "female_hall" ? "👩" : "🚹"}</span>
+                <span className="text-xs font-bold text-slate-800">
+                  {getFormattedRoomName(availableRooms[0].name_ar, availableRooms[0].room_key)}
+                </span>
+              </div>
+              <span className="text-[11px] text-slate-500 font-mono font-bold">
+                ({availableRooms[0].total_seats_count || 20} مقعد)
+              </span>
+            </div>
+          )}
+
+          {/* Fallback multiple rooms toggle if multiple rooms exist */}
+          {availableRooms.length > 1 && (
+            <div className="flex items-center gap-2 overflow-x-auto pb-1 pt-1">
+              {availableRooms.map((rm) => (
+                <button
+                  key={rm.id}
+                  type="button"
+                  onClick={() => {
+                    setSelectedRoomId(rm.id);
+                    setSelectedSeat(null);
+                  }}
+                  className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 shrink-0 ${
+                    (selectedRoomId === rm.id || (!selectedRoomId && availableRooms[0]?.id === rm.id))
+                      ? "bg-[#0c2340] text-white shadow-xs"
+                      : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                  }`}
+                >
+                  <span>{rm.room_key === "female_hall" ? "👩" : "🚹"}</span>
+                  <span>{getFormattedRoomName(rm.name_ar, rm.room_key)}</span>
+                  <span className="text-[10px] opacity-75 font-mono">({rm.total_seats_count} مقعد)</span>
+                </button>
+              ))}
+            </div>
+          )}
+
+          {loadingSeats ? (
+            <div className="p-8 rounded-xl border border-slate-100 bg-slate-50/50 text-center space-y-2">
+              <Loader2 className="w-5 h-5 animate-spin text-emerald-600 mx-auto" />
+              <span className="text-xs text-slate-500 font-medium block">
+                {isRTL ? "جارٍ فحص المقاعد المتاحة في هذه الفترة..." : "Checking available desk slots..."}
+              </span>
+            </div>
+          ) : (() => {
+            if (!activeRoom || !activeRoom.seats || activeRoom.seats.length === 0) {
+              return (
+                <div className="p-6 rounded-xl border border-slate-100 bg-slate-50 text-center text-xs text-slate-400">
+                  {isRTL ? "لا توجد مقاعد متاحة في هذا اليوم." : "No desks available."}
+                </div>
+              );
+            }
+
+            return (
+              <div className="space-y-3">
+                {/* Administrative Room Closure Notice */}
+                {(activeRoom.has_full_day_closure || (activeRoom.is_closed && !activeRoom.has_partial_closure)) ? (
+                  <div className="p-3.5 rounded-xl bg-amber-50 border border-amber-200 text-xs text-amber-900 space-y-1 animate-in fade-in">
+                    <div className="flex items-center gap-2 font-bold text-amber-950">
+                      <AlertCircle className="w-4 h-4 text-amber-600 shrink-0" />
+                      <span>
+                        {isRTL
+                          ? `عذراً، ${getFormattedRoomName(activeRoom.name_ar, activeRoom.room_key)} مغلقة طوال هذا اليوم ومنع الحجز بها.`
+                          : `Notice: This room is closed for the entire day.`}
+                      </span>
+                    </div>
+                    <p className="text-[11px] text-amber-800 pr-6">
+                      {isRTL ? `سبب الإغلاق: ${activeRoom.closure_reason || "أمر إداري طارئ"}` : `Reason: ${activeRoom.closure_reason}`}
+                    </p>
+                  </div>
+                ) : activeRoom.has_partial_closure ? (
+                  <div className="p-3.5 rounded-xl bg-amber-50/80 border border-amber-200 text-xs text-amber-950 space-y-2 animate-in fade-in">
+                    <div className="flex items-start gap-2.5">
+                      <Clock className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+                      <div className="space-y-1 flex-1">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <span className="font-extrabold text-amber-950">
+                            {isRTL
+                              ? `إغلاق جزئي مؤقت في ${getFormattedRoomName(activeRoom.name_ar, activeRoom.room_key)}:`
+                              : `Partial Closure in ${getFormattedRoomName(activeRoom.name_ar, activeRoom.room_key)}:`}
+                          </span>
+                          {activeRoom.closure_start_time && activeRoom.closure_end_time && (
+                            <span dir="ltr" className="font-mono bg-amber-200/90 text-amber-950 px-2 py-0.5 rounded-md font-bold text-[11px]">
+                              {activeRoom.closure_start_time} – {activeRoom.closure_end_time}
+                            </span>
+                          )}
+                        </div>
+                        <p className="text-[11px] text-amber-900 leading-relaxed">
+                          {activeRoom.closure_reason}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                ) : null}
+
+                {/* Status Key Indicator */}
+                <div className="flex flex-wrap items-center justify-end gap-3 text-[10.5px] text-slate-500 font-semibold px-1">
+                  <span className="flex items-center gap-1.5">
+                    <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-2xs" />
+                    <span>{isRTL ? "متاح بالكامل" : "Fully Available"}</span>
+                  </span>
+                  <span className="flex items-center gap-1.5">
+                    <span className="w-2.5 h-2.5 rounded-full bg-blue-500 shadow-2xs" />
+                    <span>{isRTL ? "محجوز جزئياً" : "Partially Booked"}</span>
+                  </span>
+                  <span className="flex items-center gap-1.5">
+                    <span className="w-2.5 h-2.5 rounded-full bg-white border border-slate-300 shadow-2xs" />
+                    <span>{isRTL ? "غير متاح" : "Unavailable"}</span>
+                  </span>
+                </div>
+
+                {/* Desk grid (4 rows of 5 desks = 20 desks) */}
+                <div className="grid grid-cols-4 sm:grid-cols-5 md:grid-cols-5 gap-2">
+                  {activeRoom.seats.map((seat) => {
+                    const isSelected = selectedSeat?.id === seat.id;
+                    const isFullClosure = Boolean(activeRoom.has_full_day_closure || (activeRoom.is_closed && !activeRoom.has_partial_closure));
+                    const isLocked = seat.is_locked || seat.status === "locked" || isFullClosure;
+                    const isFullyBooked = seat.status === "fully_booked" || isFullClosure;
+                    const isPartiallyBooked = seat.status === "partially_booked" && !isLocked && !isFullyBooked;
+                    const isAvailableForCurrentShift = Boolean(seat.is_available) && !isFullClosure && !isLocked && !isFullyBooked;
+                    const canSelect = !isLocked && !isFullyBooked && (isAvailableForCurrentShift || Boolean(seat.can_book_remaining) || (isPartiallyBooked && seat.free_intervals && seat.free_intervals.length > 0));
+
+                    const statusLabel = isSelected
+                      ? (isRTL ? "محدد" : "Selected")
+                      : isFullClosure
+                      ? (isRTL ? "غير متاح" : "Unavailable")
+                      : (seat.availability_label || (isAvailableForCurrentShift ? (isRTL ? "متاح بالكامل" : "Fully Available") : (isRTL ? "غير متاح" : "Unavailable")));
+
+                    return (
+                      <button
+                        key={seat.id}
+                        type="button"
+                        disabled={!canSelect}
+                        onClick={() => {
+                          if (!isAvailableForCurrentShift && isPartiallyBooked && seat.first_free_start && seat.first_free_end) {
+                            setBookingStartTime(seat.first_free_start);
+                            setBookingEndTime(seat.first_free_end);
+                            setSelectedSeat(seat);
+                          } else {
+                            setSelectedSeat(seat);
+                          }
+                        }}
+                        title={
+                          isFullClosure
+                            ? `الصالة مغلقة: ${activeRoom.closure_reason}`
+                            : isPartiallyBooked
+                            ? `${seat.booked_hours_text || "محجوز جزئياً"} • ${seat.available_hours_text || "متاح في الساعات الشاغرة"}`
+                            : (seat.available_hours_text || statusLabel)
+                        }
+                        className={`p-2 rounded-xl border transition-all text-center relative select-none flex flex-col items-center justify-between min-h-[86px] ${
+                          isSelected
+                            ? "bg-emerald-600 border-emerald-700 text-white shadow-md ring-2 ring-emerald-500/30 scale-102 cursor-pointer"
+                            : isLocked || isFullyBooked
+                            ? "bg-white border-slate-200 text-slate-400 opacity-60 cursor-not-allowed shadow-none"
+                            : isPartiallyBooked
+                            ? "bg-blue-50/90 border-blue-300 text-blue-950 hover:border-blue-500 hover:bg-blue-100/90 cursor-pointer shadow-xs"
+                            : "bg-emerald-50/70 border-emerald-300 text-emerald-950 hover:border-emerald-500 hover:bg-emerald-100/80 cursor-pointer shadow-2xs"
+                        }`}
+                      >
+                        <div className="flex items-center justify-between w-full">
+                          <span className={`text-[9px] font-mono ${isSelected ? "text-white/80" : "text-slate-400"}`}>
+                            {seat.code}
+                          </span>
+                          {seat.has_power && (
+                            <Zap className={`w-3 h-3 ${isSelected ? "text-amber-300" : "text-amber-500"}`} />
+                          )}
+                        </div>
+
+                        <div className="font-black text-sm my-0.5">
+                          {seat.seat_number < 10 ? `0${seat.seat_number}` : seat.seat_number}
+                        </div>
+
+                        <div className="flex flex-col items-center justify-center w-full px-0.5">
+                          {isSelected ? (
+                            <span className="text-[8.5px] leading-tight font-extrabold text-emerald-100">
+                              {isRTL ? "محدد" : "Selected"}
+                            </span>
+                          ) : isLocked || isFullyBooked ? (
+                            <span className="text-[8.5px] leading-tight font-extrabold text-slate-400">
+                              {isLocked ? (isRTL ? "مغلق" : "Locked") : (isRTL ? "غير متاح" : "Unavailable")}
+                            </span>
+                          ) : isPartiallyBooked ? (
+                            <div className="w-full text-center space-y-1 mt-0.5 px-0.5">
+                              {(seat.booked_hours_text || (seat.booked_intervals && seat.booked_intervals.length > 0)) && (
+                                <span
+                                  className="text-[7.5px] font-mono text-rose-700 bg-rose-50 border border-rose-200/90 rounded px-1 py-0.5 font-bold block truncate leading-tight shadow-2xs"
+                                  title={seat.booked_hours_text || (seat.booked_intervals ? `محجوز ${seat.booked_intervals.map((i) => `من ${i.start} إلى ${i.end}`).join(" و ")}` : "")}
+                                >
+                                  {seat.booked_hours_text || (seat.booked_intervals ? `محجوز ${seat.booked_intervals.map((i) => `من ${i.start} إلى ${i.end}`).join(" و ")}` : "")}
+                                </span>
+                              )}
+                              {(seat.available_hours_text || (seat.free_intervals && seat.free_intervals.length > 0)) && (
+                                <span
+                                  className="text-[7.5px] font-mono text-emerald-800 bg-emerald-50 border border-emerald-200/90 rounded px-1 py-0.5 font-extrabold block truncate leading-tight shadow-2xs"
+                                  title={seat.available_hours_text || (seat.free_intervals ? `متاح ${seat.free_intervals.map((i) => `من ${i.start} إلى ${i.end}`).join(" و ")}` : "")}
+                                >
+                                  {seat.available_hours_text || (seat.free_intervals ? `متاح ${seat.free_intervals.map((i) => `من ${i.start} إلى ${i.end}`).join(" و ")}` : "")}
+                                </span>
+                              )}
+                            </div>
+                          ) : (
+                            <span className="text-[8.5px] leading-tight font-extrabold text-emerald-700">
+                              {isRTL ? "متاح بالكامل" : "Fully Available"}
+                            </span>
+                          )}
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+
+                {/* Selected Seat Confirmation Notice */}
+                {selectedSeat && (
+                  <div className="p-3.5 bg-emerald-50 border border-emerald-300 rounded-2xl text-xs font-bold text-emerald-950 space-y-1.5 animate-in fade-in">
+                    <div className="flex items-center justify-between flex-wrap gap-2">
+                      <div className="flex items-center gap-2">
+                        <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                        <span>
+                          {isRTL
+                            ? `المقعد المختار: ${selectedSeat.label} (${getFormattedRoomName(activeRoom.name_ar, activeRoom.room_key)})`
+                            : `Selected Desk: ${selectedSeat.label} (${getFormattedRoomName(activeRoom.name_ar, activeRoom.room_key)})`}
+                        </span>
+                      </div>
+                      <span className="font-mono text-[11px] text-emerald-900 bg-white px-2.5 py-1 rounded-lg border border-emerald-200 shadow-2xs font-extrabold">
+                        {formatHour12(bookingStartTime)} – {formatHour12(bookingEndTime)} ({Math.max(1, parseInt(bookingEndTime.split(":")[0]) - parseInt(bookingStartTime.split(":")[0]))} ساعات)
+                      </span>
+                    </div>
+
+                    {selectedSeat.booked_hours_text && (
+                      <p className="text-[11px] text-emerald-800 font-medium pt-0.5">
+                        {isRTL
+                          ? `💡 ملاحظة: هذا المقعد ${selectedSeat.booked_hours_text}، وأنت تحجزه في الفترة المتاحة (${formatHour12(bookingStartTime)} – ${formatHour12(bookingEndTime)}) بعد انتهاء حجز الطالب الأول.`
+                          : `Note: This desk is ${selectedSeat.booked_hours_text}. You are reserving it during available hours (${formatHour12(bookingStartTime)} - ${formatHour12(bookingEndTime)}).`}
+                      </p>
+                    )}
+                  </div>
+                )}
+              </div>
+            );
+          })()}
+        </div>
+      </div>
+
+      {/* Optional Notes */}
+      <div>
+        <label htmlFor="member-booking-notes" className="block text-xs font-bold text-slate-700 mb-1">
+          {isRTL ? "ملاحظات إضافية (اختياري)" : "Notes (Optional)"}
+        </label>
+        <input
+          id="member-booking-notes"
+          type="text"
+          value={bookingNotes}
+          onChange={(e) => setBookingNotes(e.target.value)}
+          placeholder={
+            isRTL
+              ? "مثال: أحتاج مقعداً هادئاً للمذاكرة..."
+              : "e.g., Study session, quiet desk needed..."
+          }
+          className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200/90 hover:border-slate-300 text-sm outline-none focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition-all shadow-2xs bg-white"
+        />
+      </div>
+
+      {/* Submit Direct Booking */}
+      <button
+        type="submit"
+        disabled={!bookingDate || !selectedSeat || bookingLoading || Boolean(activeRoom?.is_closed)}
+        className={`w-full py-3.5 rounded-2xl text-sm sm:text-base font-bold text-white transition-all shadow-md flex items-center justify-center gap-2 cursor-pointer ${
+          !bookingDate || !selectedSeat || bookingLoading || Boolean(activeRoom?.is_closed)
+            ? "bg-slate-400 cursor-not-allowed"
+            : "bg-emerald-600 hover:bg-emerald-700 active:scale-[0.98]"
+        }`}
+      >
+        {bookingLoading ? (
+          <>
+            <Loader2 className="w-5 h-5 animate-spin" />
+            <span>{isRTL ? "جاري تأكيد الحجز..." : "Confirming reservation..."}</span>
+          </>
+        ) : activeRoom?.is_closed ? (
+          <>
+            <AlertCircle className="w-5 h-5 text-amber-200" />
+            <span>{isRTL ? "الصالة مغلقة في هذا اليوم، الحجز غير متاح" : "Hall is closed on this date"}</span>
+          </>
+        ) : !selectedSeat ? (
+          <>
+            <Armchair className="w-5 h-5 text-slate-200" />
+            <span>{isRTL ? "يرجى تحديد مقعد من القائمة للمتابعة" : "Select a desk to proceed"}</span>
+          </>
+        ) : (
+          <>
+            <CalendarCheck className="w-5 h-5 text-emerald-100" />
+            <span>{bp?.confirmBtn || (isRTL ? "تأكيد حجز المقعد الآن" : "Confirm Desk Reservation")}</span>
+          </>
+        )}
+      </button>
+    </form>
+  );
+}

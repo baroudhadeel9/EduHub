@@ -179,6 +179,7 @@ export default function MemberLoginForm({
         <div className="text-center pt-2">
           <Link
             href="/join"
+            prefetch={true}
             onClick={onApplyNewMember}
             className="text-xs text-slate-500 hover:text-emerald-700 font-semibold cursor-pointer transition-colors inline-flex items-center gap-1"
           >

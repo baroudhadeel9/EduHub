@@ -1,9 +1,11 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import dynamic from "next/dynamic";
 import { useLanguage } from "@/context/LanguageContext";
 import { MembershipApplication, ApplicationStatus } from "./data";
-import ApplicationDetailModal from "./ApplicationDetailModal";
+
+const ApplicationDetailModal = dynamic(() => import("./ApplicationDetailModal"), { ssr: false });
 import {
   getAdminMembershipApplications,
   updateApplicationStatusApi,

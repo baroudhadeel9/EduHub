@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useMemo, useEffect } from "react";
+import dynamic from "next/dynamic";
 import { useLanguage } from "@/context/LanguageContext";
 import {
   Search,
@@ -16,9 +17,10 @@ import {
   Menu,
 } from "lucide-react";
 import { MemberRecord, MemberType, MemberStatus } from "./data";
-import MemberDetailDrawer from "./MemberDetailDrawer";
 import { getAdminMembersApi, updateAdminMemberApi, deleteAdminMemberApi } from "@/services/applications";
 import { Trash2, AlertTriangle, AlertCircle, Loader2 } from "lucide-react";
+
+const MemberDetailDrawer = dynamic(() => import("./MemberDetailDrawer"), { ssr: false });
 
 type SortOption = "most_active" | "least_active" | "students_first" | "freelancers_first" | "newest";
 

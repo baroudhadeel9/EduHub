@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useLanguage } from "@/context/LanguageContext";
 import {
@@ -16,9 +17,10 @@ import {
   KeyRound,
 } from "lucide-react";
 import { MemberRecord } from "./data";
-import { MemberResendActivationModal } from "./MemberResendActivationModal";
-import { MemberWhatsAppModal } from "./MemberWhatsAppModal";
-import AdjustMemberHoursModal from "./AdjustMemberHoursModal";
+
+const MemberResendActivationModal = dynamic(() => import("./MemberResendActivationModal").then((m) => m.MemberResendActivationModal), { ssr: false });
+const MemberWhatsAppModal = dynamic(() => import("./MemberWhatsAppModal").then((m) => m.MemberWhatsAppModal), { ssr: false });
+const AdjustMemberHoursModal = dynamic(() => import("./AdjustMemberHoursModal"), { ssr: false });
 
 interface MemberDetailDrawerProps {
   member: MemberRecord | null;

@@ -116,6 +116,7 @@ export default function CompactMemberForm({ onReturnToHub }: CompactMemberFormPr
         <div className="pt-4 flex flex-col sm:flex-row items-center justify-center gap-3">
           <Link
             href="/login"
+            prefetch={true}
             className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs sm:text-sm shadow-md transition-all cursor-pointer"
           >
             <LogIn className="w-4 h-4" />
@@ -124,6 +125,7 @@ export default function CompactMemberForm({ onReturnToHub }: CompactMemberFormPr
 
           <Link
             href="/"
+            prefetch={true}
             onClick={onReturnToHub}
             className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs sm:text-sm transition-all cursor-pointer"
           >

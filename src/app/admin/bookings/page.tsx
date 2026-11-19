@@ -1,12 +1,14 @@
 "use client";
 
 import React, { useState } from "react";
+import dynamic from "next/dynamic";
 import { useLanguage } from "@/context/LanguageContext";
 import AdminSidebar from "@/components/admin/AdminSidebar";
 import AdminHeader from "@/components/admin/AdminHeader";
 import BookingsTable from "@/components/admin/bookings/BookingsTable";
-import AdminQuickBookingModal from "@/components/admin/overview/AdminQuickBookingModal";
-import RoomClosureModal from "@/components/admin/bookings/RoomClosureModal";
+
+const AdminQuickBookingModal = dynamic(() => import("@/components/admin/overview/AdminQuickBookingModal"), { ssr: false });
+const RoomClosureModal = dynamic(() => import("@/components/admin/bookings/RoomClosureModal"), { ssr: false });
 import { Plus, Lock } from "lucide-react";
 
 export default function AdminBookingsPage() {

@@ -216,6 +216,7 @@ export default function AdminSidebar({
                 <Link
                   key={item.id}
                   href={item.href}
+                  prefetch={true}
                   onClick={() => {
                     if (onTabChange) onTabChange(item.id);
                     if (onClose) onClose();

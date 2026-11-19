@@ -1,14 +1,16 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import dynamic from "next/dynamic";
 import { useLanguage } from "@/context/LanguageContext";
 import AdminSidebar from "@/components/admin/AdminSidebar";
 import OverviewHeader from "@/components/admin/overview/OverviewHeader";
 import QuickActionsBar from "@/components/admin/overview/QuickActionsBar";
 import OverviewTopCards from "@/components/admin/overview/OverviewTopCards";
 import TodayBookingsPanel from "@/components/admin/overview/TodayBookingsPanel";
-import CheckInModal from "@/components/admin/CheckInModal";
-import AdminQuickBookingModal from "@/components/admin/overview/AdminQuickBookingModal";
+
+const CheckInModal = dynamic(() => import("@/components/admin/CheckInModal"), { ssr: false });
+const AdminQuickBookingModal = dynamic(() => import("@/components/admin/overview/AdminQuickBookingModal"), { ssr: false });
 import { AttendanceRecord } from "@/components/admin/types";
 import { getAdminOverviewApi, createManualAttendanceApi } from "@/services/applications";
 

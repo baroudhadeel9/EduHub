@@ -1,15 +1,17 @@
 "use client";
 
 import React, { useState, useEffect, useCallback } from "react";
+import dynamic from "next/dynamic";
 import { useLanguage } from "@/context/LanguageContext";
 import AdminSidebar from "@/components/admin/AdminSidebar";
 import AdminHeader from "@/components/admin/AdminHeader";
 import EventsFilterBar from "@/components/admin/events/EventsFilterBar";
 import EventCard from "@/components/admin/events/EventCard";
-import EventFormModal from "@/components/admin/events/EventFormModal";
-import DeleteEventModal from "@/components/admin/events/DeleteEventModal";
-import EventRegistrationsModal from "@/components/admin/events/EventRegistrationsModal";
-import AdminAttendeesView from "@/components/admin/events/AdminAttendeesView";
+
+const EventFormModal = dynamic(() => import("@/components/admin/events/EventFormModal"), { ssr: false });
+const DeleteEventModal = dynamic(() => import("@/components/admin/events/DeleteEventModal"), { ssr: false });
+const EventRegistrationsModal = dynamic(() => import("@/components/admin/events/EventRegistrationsModal"), { ssr: false });
+const AdminAttendeesView = dynamic(() => import("@/components/admin/events/AdminAttendeesView"), { ssr: false });
 import {
   EventItem,
   getAdminEventsApi,

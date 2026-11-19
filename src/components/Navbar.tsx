@@ -154,6 +154,7 @@ export default function Navbar({ onOpenBooking, onOpenDonation }: NavbarProps) {
             {/* Member Login CTA (Clean secondary outline / soft button) */}
             <Link
               href="/login"
+              prefetch={true}
               className="inline-flex items-center gap-1.5 px-3 py-1.5 xl:px-3.5 xl:py-2 rounded-xl text-xs xl:text-sm font-bold text-slate-700 hover:text-emerald-800 bg-slate-100 hover:bg-emerald-50 border border-slate-200 hover:border-emerald-200 shadow-2xs transition-all active:scale-95 cursor-pointer whitespace-nowrap focus-visible:ring-2 focus-visible:ring-emerald-500"
             >
               <LogIn className="w-3.5 h-3.5 text-emerald-700 shrink-0" />
@@ -270,6 +271,7 @@ export default function Navbar({ onOpenBooking, onOpenDonation }: NavbarProps) {
           <div className="pt-3 border-t border-slate-100 flex flex-col gap-2.5">
             <Link
               href="/login"
+              prefetch={true}
               onClick={() => setMobileMenuOpen(false)}
               className="w-full py-3 rounded-xl font-bold text-white bg-emerald-600 hover:bg-emerald-700 flex items-center justify-center gap-2 cursor-pointer shadow-sm text-base"
             >
@@ -279,6 +281,7 @@ export default function Navbar({ onOpenBooking, onOpenDonation }: NavbarProps) {
 
             <Link
               href="/join"
+              prefetch={true}
               onClick={() => setMobileMenuOpen(false)}
               className="w-full py-3 rounded-xl font-bold text-emerald-900 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 flex items-center justify-center gap-2 cursor-pointer shadow-sm text-base"
             >
@@ -288,6 +291,7 @@ export default function Navbar({ onOpenBooking, onOpenDonation }: NavbarProps) {
 
             <Link
               href="/visit"
+              prefetch={true}
               onClick={() => setMobileMenuOpen(false)}
               className="w-full py-3 rounded-xl font-bold text-slate-700 bg-slate-100 hover:bg-slate-200 border border-slate-200 flex items-center justify-center gap-2 cursor-pointer shadow-sm text-base"
             >

@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useLanguage } from "@/context/LanguageContext";
 import AdminSidebar from "@/components/admin/AdminSidebar";
@@ -21,14 +22,15 @@ import {
   getAdminMemberSupportTicketsApi,
   SupportTicketItem,
 } from "@/services/supportTickets";
-import MemberProfileTicketsTab from "@/components/admin/members/profile/MemberProfileTicketsTab";
-import MemberProfileSmsModal from "@/components/admin/members/profile/MemberProfileSmsModal";
-import MemberProfileAchievementsTab from "@/components/admin/members/profile/MemberProfileAchievementsTab";
-import MemberProfileBookingsTab from "@/components/admin/members/profile/MemberProfileBookingsTab";
-import MemberProfileDuesTab from "@/components/admin/members/profile/MemberProfileDuesTab";
-import { MemberResendActivationModal } from "@/components/admin/members/MemberResendActivationModal";
-import { MemberWhatsAppModal } from "@/components/admin/members/MemberWhatsAppModal";
-import AdjustMemberHoursModal from "@/components/admin/members/AdjustMemberHoursModal";
+
+const MemberProfileTicketsTab = dynamic(() => import("@/components/admin/members/profile/MemberProfileTicketsTab"), { ssr: false });
+const MemberProfileSmsModal = dynamic(() => import("@/components/admin/members/profile/MemberProfileSmsModal"), { ssr: false });
+const MemberProfileAchievementsTab = dynamic(() => import("@/components/admin/members/profile/MemberProfileAchievementsTab"), { ssr: false });
+const MemberProfileBookingsTab = dynamic(() => import("@/components/admin/members/profile/MemberProfileBookingsTab"), { ssr: false });
+const MemberProfileDuesTab = dynamic(() => import("@/components/admin/members/profile/MemberProfileDuesTab"), { ssr: false });
+const MemberResendActivationModal = dynamic(() => import("@/components/admin/members/MemberResendActivationModal").then((m) => m.MemberResendActivationModal), { ssr: false });
+const MemberWhatsAppModal = dynamic(() => import("@/components/admin/members/MemberWhatsAppModal").then((m) => m.MemberWhatsAppModal), { ssr: false });
+const AdjustMemberHoursModal = dynamic(() => import("@/components/admin/members/AdjustMemberHoursModal"), { ssr: false });
 import {
   ArrowLeft,
   ArrowRight,
