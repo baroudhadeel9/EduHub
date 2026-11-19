@@ -201,6 +201,19 @@ export default function MemberBookingTab({ onApplyNewMember }: MemberBookingTabP
           );
         }
 
+        const handleAuthExpired = () => {
+          clearMemberAuthSession();
+          setIsLoggedIn(false);
+          setAuthToken("");
+          setMemberData(null);
+          setBookings([]);
+          setLoginError(
+            isRTL
+              ? "انتهت صلاحية جلسة تسجيل الدخول السابقة لأسباب أمنية. يرجى كتابة كلمة المرور لتسجيل الدخول ومزامنة رصيد ساعاتك وحجوزاتك."
+              : "Your previous session has expired. Please log in again to sync your hours and bookings."
+          );
+        };
+
         // Silently sync latest bookings with full attendance from backend
         getMemberBookingsApi(session.token)
           .then((freshBookings) => {
@@ -211,7 +224,12 @@ export default function MemberBookingTab({ onApplyNewMember }: MemberBookingTabP
               )
             );
           })
-          .catch(() => {});
+          .catch((err: unknown) => {
+            const msg = err instanceof Error ? err.message : "";
+            if (msg.toLowerCase().includes("unauthenticated") || msg.includes("401")) {
+              if (isMounted) handleAuthExpired();
+            }
+          });
 
         // Silently sync latest quota & hours from backend so used_hours is always 100% fresh!
         getMemberQuotaApi(session.token)
@@ -235,7 +253,12 @@ export default function MemberBookingTab({ onApplyNewMember }: MemberBookingTabP
               return updated;
             });
           })
-          .catch(() => {});
+          .catch((err: unknown) => {
+            const msg = err instanceof Error ? err.message : "";
+            if (msg.toLowerCase().includes("unauthenticated") || msg.includes("401")) {
+              if (isMounted) handleAuthExpired();
+            }
+          });
       }
     });
     return () => {
@@ -294,6 +317,19 @@ export default function MemberBookingTab({ onApplyNewMember }: MemberBookingTabP
       .catch((err) => {
         if (isCancelled) return;
         const msg = err instanceof Error ? err.message : "";
+        if (msg.toLowerCase().includes("unauthenticated") || msg.includes("401")) {
+          clearMemberAuthSession();
+          setIsLoggedIn(false);
+          setAuthToken("");
+          setMemberData(null);
+          setBookings([]);
+          setLoginError(
+            isRTL
+              ? "انتهت صلاحية جلسة تسجيل الدخول السابقة لأسباب أمنية. يرجى إدخال كلمة المرور لتسجيل الدخول ومزامنة رصيد ساعاتك وحجوزاتك."
+              : "Your previous session has expired. Please log in again to sync your hours and bookings."
+          );
+          return;
+        }
         if (msg) setBookingError(msg);
       })
       .finally(() => {
