@@ -71,12 +71,12 @@ export default function Navbar({ onOpenBooking, onOpenDonation }: NavbarProps) {
             <a
               href="#hero"
               className="flex items-center group focus-visible:ring-2 focus-visible:ring-emerald-600 rounded-xl transition-transform active:scale-95"
-              aria-label="cehub Gaza Home"
+              aria-label="EduHub Gaza | إديو هب غزة"
             >
               <div className="relative h-11 sm:h-12 w-36 sm:w-40 shrink-0 transition-transform group-hover:scale-105">
                 <Image
                   src="/images/logo.png"
-                  alt="cehub - Gaza Educational Hub"
+                  alt="إديو هب غزة | EduHub Gaza"
                   fill
                   className="object-contain object-start"
                   priority

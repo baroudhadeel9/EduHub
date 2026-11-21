@@ -28,7 +28,7 @@
     "liveStatusBadge": "The center is open now for students and professionals (until 04:00 PM)",
     "titlePart1": "A Lifeline for Education and Work",
     "titleHighlight": "in the Heart of Gaza",
-    "description": "A non-profit community initiative empowering young people to continue learning, develop their skills, and access digital work opportunities through sustainable energy, reliable internet, and equipped learning environments, addressing the challenges of power outages, damaged infrastructure, and limited educational and employment opportunities",
+    "description": "EduHub Gaza (إديو هب غزة) is a non-profit community project that empowers students and youth to continue education, build skills, and access digital work opportunities through sustainable solar energy, high-speed 100 Mbps internet, and equipped study workstations in Gaza.",
     "bookSeatFreeCta": "Book your seat",
     "supportZeffyCta": "Support via Zeffy",
     "trustBadge": "100% Free for Students | Funded Entirely by Community Giving",
@@ -131,8 +131,8 @@
   },
   "pillars": {
     "badge": "Community Pillars",
-    "title": "What Does the Hub Provide for Gaza's Youth?",
-    "subtitle": "We provide comprehensive tech and educational infrastructure to protect academic and professional futures during power and telecom blackouts.",
+    "title": "What does EduHub Gaza provide for youth and students?",
+    "subtitle": "EduHub Gaza provides integrated technical and educational infrastructure to prevent academic and career loss amid power outages and infrastructure damage.",
     "cards": [
       {
         "id": "workspace",
@@ -525,8 +525,8 @@
     "donationUrl": "https://www.zeffy.com/en-US/donation-form/gaza-education-hub?utm_source=ig&utm_medium=social&utm_content=link_in_bio&fbclid=PAb21jcAVFvLBleHRuA2FlbQIxMQBwZG9mAnNydGMGYXBwX2lkDzU2NzA2NzM0MzM1MjQyNwABpwp255SgaYdkj3D7ygehqdTput2WDY9GP_-tPbjrGDBfJVI_L_hLH-0k8oq6_aem_mKc9gZwDE_yYG1QS-p900A"
   },
   "footer": {
-    "aboutTitle": "EduHub Gaza",
-    "aboutDesc": "A non-profit community space providing an educational and tech lifeline for Gaza's youth, supported by independent solar energy and continuous high-speed internet.",
+    "aboutTitle": "EduHub Gaza | إديو هب",
+    "aboutDesc": "EduHub Gaza (إديو هب) is a non-profit community sanctuary providing an educational and technical lifeline for Gaza students and youth, powered by continuous solar energy and high-speed internet.",
     "nonProfitBadge": "Serving students & remote workers daily",
     "quickLinksTitle": "Quick Links",
     "quickLinks": [

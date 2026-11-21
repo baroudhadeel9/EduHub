@@ -49,7 +49,7 @@ export default function Footer({ onOpenDonation }: FooterProps) {
             <div className="relative h-11 sm:h-12 w-36 sm:w-40 shrink-0">
               <Image
                 src="/images/logo-footer.png"
-                alt="cehub - Gaza Educational Hub"
+                alt="إديو هب غزة | EduHub Gaza"
                 fill
                 className="object-contain object-start"
                 unoptimized

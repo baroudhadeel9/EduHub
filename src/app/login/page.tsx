@@ -28,7 +28,7 @@ export default function LoginPage() {
             <div className="relative h-10 w-36 shrink-0 transition-transform group-hover:scale-105">
               <Image
                 src="/images/logo.png"
-                alt="EduHub - Gaza Educational Hub"
+                alt="إديو هب غزة | EduHub Gaza"
                 fill
                 className="object-contain object-start"
                 priority

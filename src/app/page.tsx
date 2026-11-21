@@ -1,92 +1,148 @@
-"use client";
+import type { Metadata } from "next";
+import HomePageClient from "@/components/HomePageClient";
 
-import React, { useState } from "react";
-import TopAnnouncementBar from "@/components/TopAnnouncementBar";
-import Navbar from "@/components/Navbar";
-import HeroSection from "@/components/HeroSection";
-import OperationsDashboard from "@/components/OperationsDashboard";
-import PillarsSection from "@/components/PillarsSection";
-import TransparencyWall from "@/components/TransparencyWall";
-import BookingSection from "@/components/BookingSection";
-import EventsSection from "@/components/EventsSection";
-import StoriesSection from "@/components/StoriesSection";
-import FaqSection from "@/components/FaqSection";
-import CtaBanner from "@/components/CtaBanner";
-import Footer from "@/components/Footer";
-import DonationModal from "@/components/DonationModal";
+export const metadata: Metadata = {
+  title: "إديو هب غزة | EduHub Gaza - مساحة تعليمية للطلاب وعمل حر",
+  description:
+    "مساحة إديو هب غزة (EduHub Gaza) هي مساحة تعليمية وعمل مشتركة غير ربحية في قطاع غزة، توفر طاقة شمسية مستمرة وإنترنت فايبر 100 Mbps ومقاعد مجهزة مجاناً للطلاب والمستقلين.",
+  alternates: {
+    canonical: "https://gazaeduhub.com",
+  },
+  keywords: [
+    "إديو هب",
+    "إديو هب غزة",
+    "غزة إديو هب",
+    "EduHub",
+    "Edu Hub",
+    "EduHub Gaza",
+    "غزة EduHub",
+    "اديو هب",
+    "ايديو هب",
+    "ايديو هاب",
+    "إيديو هوب",
+    "مساحة عمل مشتركة غزة",
+    "مساحة تعليمية غزة",
+    "حجز مقاعد طلاب غزة",
+    "طاقة شمسية وإنترنت غزة",
+    "ملاذ تعليمي للطلاب غزة",
+  ],
+  openGraph: {
+    title: "إديو هب غزة | EduHub Gaza - مساحة تعليمية للطلاب وعمل حر",
+    description:
+      "مساحة إديو هب غزة (EduHub Gaza) هي مساحة تعليمية وعمل مشتركة غير ربحية في قطاع غزة، توفر طاقة شمسية مستمرة وإنترنت 100 Mbps ومقاعد مجهزة مجاناً للطلاب والمستقلين.",
+    url: "https://gazaeduhub.com",
+    siteName: "إديو هب - EduHub Gaza",
+    locale: "ar_AR",
+    type: "website",
+    images: [
+      {
+        url: "/images/hero-workspace.jpg",
+        width: 1200,
+        height: 630,
+        alt: "إديو هب غزة | EduHub Gaza - مساحة عمل وتعليم",
+      },
+    ],
+  },
+};
+
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "EducationalOrganization",
+      "@id": "https://gazaeduhub.com/#organization",
+      name: "EduHub Gaza",
+      alternateName: [
+        "إديو هب",
+        "إديو هب غزة",
+        "غزة إديو هب",
+        "اديو هب",
+        "ايديو هب",
+        "ايديو هاب",
+        "إيديو هوب",
+        "EduHub",
+        "Edu Hub",
+        "EduHub Gaza",
+        "غزة EduHub",
+      ],
+      url: "https://gazaeduhub.com",
+      logo: "https://gazaeduhub.com/images/logo.png",
+      image: "https://gazaeduhub.com/images/hero-workspace.jpg",
+      description:
+        "مساحة إديو هب غزة (EduHub Gaza) هي مساحة تعليمية وعمل مشتركة غير ربحية توفر الطاقة الشمسية والإنترنت عالي السرعة للطلاب والمستقلين في قطاع غزة.",
+      email: "eduhubgaza@gmail.com",
+      address: {
+        "@type": "PostalAddress",
+        addressLocality: "Gaza",
+        addressCountry: "PS",
+      },
+      sameAs: [
+        "https://www.instagram.com/gaza_edhub?rpxt=dGJjcWtna3pxaHBz",
+        "https://www.linkedin.com/company/gaza-edu-hub/",
+        "https://www.facebook.com/share/1BrEBigQbH/",
+        "https://www.zeffy.com/en-US/donation-form/gaza-education-hub",
+      ],
+    },
+    {
+      "@type": "CoworkingSpace",
+      "@id": "https://gazaeduhub.com/#coworkingspace",
+      name: "EduHub Gaza Coworking Sanctuary | مساحة إديو هب غزة",
+      alternateName: ["إديو هب", "EduHub", "EduHub Gaza", "إديو هب غزة"],
+      url: "https://gazaeduhub.com",
+      image: "https://gazaeduhub.com/images/hero-workspace.jpg",
+      priceRange: "Free / 0 USD",
+      isAccessibleForFree: true,
+      openingHoursSpecification: [
+        {
+          "@type": "OpeningHoursSpecification",
+          dayOfWeek: [
+            "Saturday",
+            "Sunday",
+            "Monday",
+            "Tuesday",
+            "Wednesday",
+            "Thursday",
+          ],
+          opens: "09:00",
+          closes: "16:00",
+        },
+      ],
+      amenityFeature: [
+        {
+          "@type": "LocationFeatureSpecification",
+          name: "Continuous Solar Energy",
+          value: true,
+        },
+        {
+          "@type": "LocationFeatureSpecification",
+          name: "High-Speed Fiber Internet 100 Mbps",
+          value: true,
+        },
+        {
+          "@type": "LocationFeatureSpecification",
+          name: "Quiet Study Desks",
+          value: true,
+        },
+        {
+          "@type": "LocationFeatureSpecification",
+          name: "Separate Female Hall",
+          value: true,
+        },
+      ],
+    },
+  ],
+};
 
 export default function Home() {
-  const [isDonationOpen, setIsDonationOpen] = useState(false);
-  const [donationAmount, setDonationAmount] = useState<number | undefined>(undefined);
-
-  const handleOpenDonation = (amount?: number) => {
-    setDonationAmount(amount);
-    setIsDonationOpen(true);
-  };
-
-  const handleScrollToBooking = () => {
-    const el = document.getElementById("booking-section");
-    if (el) {
-      el.scrollIntoView({ behavior: "smooth", block: "start" });
-    }
-  };
-
   return (
-    <div className="min-h-screen flex flex-col bg-brand-bg text-slate-800 selection:bg-emerald-500 selection:text-white">
-      {/* Top Dynamic Announcement Ribbon (Admin controlled) */}
-      <TopAnnouncementBar />
-
-      {/* Navigation Bar with Prominent EN/AR Switcher & Header Status Pill */}
-      <Navbar
-        onOpenBooking={handleScrollToBooking}
-        onOpenDonation={handleOpenDonation}
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c"),
+        }}
       />
-
-      {/* Main Landing Page Content */}
-      <main className="flex-1">
-        {/* 1. Hero Section (2 Clean CTAs, No Clutter, Photography Slot) */}
-        <HeroSection
-          onOpenBooking={handleScrollToBooking}
-          onOpenDonation={handleOpenDonation}
-        />
-
-        {/* 2. Unified Operations & Verified Field Impact Dashboard (Honest Audit Timestamp, No Duplication) */}
-        <OperationsDashboard />
-
-        {/* 3. Community Service Pillars */}
-        <PillarsSection />
-
-        {/* 4. Single Unified Transparency & Donation Section (Where Every Dollar Goes + Impact Calculator + Sponsorship Tiers) */}
-        <TransparencyWall onOpenDonation={handleOpenDonation} />
-
-        {/* 5. Instant Seat Reservation (Accessible 2-Step Form) */}
-        <BookingSection />
-
-        {/* 6. Current Events & Bootcamps */}
-        <EventsSection />
-
-        {/* 7. Stories of Resilience (Testimonials with Avatar Slots & Clear Name/Role) */}
-        <StoriesSection />
-
-        {/* 8. Frequently Asked Questions (Accessible Accordion) */}
-        <FaqSection />
-
-        {/* 9. Final Pre-Footer Call to Action Strip (Donation CTA #3) */}
-        <CtaBanner
-          onOpenBooking={handleScrollToBooking}
-          onOpenDonation={handleOpenDonation}
-        />
-      </main>
-
-      {/* 10. Comprehensive Accessible Footer */}
-      <Footer onOpenDonation={handleOpenDonation} />
-
-      {/* High-Converting Interactive Donation Modal */}
-      <DonationModal
-        isOpen={isDonationOpen}
-        onClose={() => setIsDonationOpen(false)}
-        initialAmount={donationAmount}
-      />
-    </div>
+      <HomePageClient />
+    </>
   );
 }

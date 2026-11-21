@@ -34,7 +34,7 @@ export default function VisitorPassPage() {
               <div className="relative h-10 sm:h-11 w-32 sm:w-36 transition-transform group-hover:scale-105">
                 <Image
                   src="/images/logo.png"
-                  alt="cehub - Gaza Educational Hub"
+                  alt="إديو هب غزة | EduHub Gaza"
                   fill
                   className="object-contain object-start"
                   priority

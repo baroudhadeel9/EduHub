@@ -17,6 +17,21 @@ const nextConfig: NextConfig = {
       },
     },
   },
+  async redirects() {
+    return [
+      {
+        source: "/:path*",
+        has: [
+          {
+            type: "host",
+            value: "www.gazaeduhub.com",
+          },
+        ],
+        destination: "https://gazaeduhub.com/:path*",
+        permanent: true,
+      },
+    ];
+  },
   async headers() {
     return [
       {

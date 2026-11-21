@@ -1,23 +1,22 @@
 import { MetadataRoute } from "next";
 
 export default function robots(): MetadataRoute.Robots {
-  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://gazaeduhub.com";
-
   return {
     rules: [
       {
         userAgent: "*",
-        allow: ["/", "/join", "/visit", "/login"],
+        allow: ["/", "/join", "/visit"],
         disallow: [
           "/admin",
           "/admin/*",
-          "/api/*",
           "/member",
           "/member/*",
+          "/login",
           "/set-password",
+          "/api/*",
         ],
       },
     ],
-    sitemap: `${baseUrl}/sitemap.xml`,
+    sitemap: "https://gazaeduhub.com/sitemap.xml",
   };
 }
