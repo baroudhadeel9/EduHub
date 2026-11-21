@@ -151,10 +151,12 @@ export default function Footer({ onOpenDonation }: FooterProps) {
                 <a
                   href={
                     t.footer.instagramUrl ||
-                    "https://www.instagram.com/gaza_edhub?rpxt=dGJjcWtna3pxaHBz"
+                    "https://www.instagram.com/gaza_edhub"
                   }
                   target="_blank"
                   rel="noopener noreferrer"
+                  aria-label={dir === "rtl" ? "حساب إديو هب غزة الرسمي على انستغرام (Instagram: @gaza_edhub)" : "Official EduHub Gaza Instagram profile"}
+                  title="إديو هب غزة على انستغرام - EduHub Instagram"
                   className="flex items-center gap-3 text-slate-300 hover:text-white transition-colors group"
                 >
                   <svg
@@ -185,6 +187,8 @@ export default function Footer({ onOpenDonation }: FooterProps) {
                   }
                   target="_blank"
                   rel="noopener noreferrer"
+                  aria-label={dir === "rtl" ? "صفحة إديو هب غزة الرسمية على لينكد إن (LinkedIn: gaza-edu-hub)" : "Official EduHub Gaza LinkedIn page"}
+                  title="إديو هب غزة على لينكد إن - EduHub LinkedIn"
                   className="flex items-center gap-3 text-slate-300 hover:text-white transition-colors group"
                 >
                   <svg
@@ -215,6 +219,8 @@ export default function Footer({ onOpenDonation }: FooterProps) {
                   }
                   target="_blank"
                   rel="noopener noreferrer"
+                  aria-label={dir === "rtl" ? "صفحة إديو هب غزة الرسمية على فيسبوك (Facebook)" : "Official EduHub Gaza Facebook page"}
+                  title="إديو هب غزة على فيسبوك - EduHub Facebook"
                   className="flex items-center gap-3 text-slate-300 hover:text-white transition-colors group"
                 >
                   <svg
