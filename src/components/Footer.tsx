@@ -16,15 +16,23 @@ export default function Footer({ onOpenDonation }: FooterProps) {
 
   const quickLinks = [
     {
-      label: t.footer.quickLinks[0],
+      label: t.footer.quickLinks[0] || (dir === "rtl" ? "احجز مقعدك الدراسي" : "Book Your Seat"),
       href: "#booking-section",
     },
     {
-      label: t.footer.quickLinks[1],
+      label: dir === "rtl" ? "طلب عضوية جديدة" : "New Membership",
+      href: "/join",
+    },
+    {
+      label: dir === "rtl" ? "تصريح زيارة استثنائية" : "1-Day Visitor Pass",
+      href: "/visit",
+    },
+    {
+      label: t.footer.quickLinks[1] || (dir === "rtl" ? "التدريبات وورش العمل" : "Training & Workshops"),
       href: "#events",
     },
     {
-      label: t.footer.quickLinks[2],
+      label: t.footer.quickLinks[2] || (dir === "rtl" ? "تبرع لدعم استمرار المركز" : "Donate to Support"),
       onClick: () =>
         onOpenDonation
           ? onOpenDonation()
@@ -99,6 +107,13 @@ export default function Footer({ onOpenDonation }: FooterProps) {
                     >
                       {item.label}
                     </button>
+                  ) : item.href && item.href.startsWith("/") ? (
+                    <Link
+                      href={item.href}
+                      className="hover:text-emerald-400 transition-colors block py-0.5"
+                    >
+                      {item.label}
+                    </Link>
                   ) : (
                     <a
                       href={item.href}

@@ -130,6 +130,99 @@ const jsonLd = {
         },
       ],
     },
+    {
+      "@type": "WebSite",
+      "@id": "https://gazaeduhub.com/#website",
+      "url": "https://gazaeduhub.com",
+      "name": "إديو هب غزة | EduHub Gaza",
+      "alternateName": [
+        "إديو هب",
+        "EduHub",
+        "غزة إديو هب",
+        "اديو هب",
+        "ايديو هب",
+        "EduHub Gaza",
+        "Edu Hub"
+      ],
+      "description":
+        "الملاذ التعليمي ومساحة العمل المشتركة المجانية للطلاب والمستقلين في قطاع غزة.",
+      "inLanguage": "ar",
+      "publisher": {
+        "@id": "https://gazaeduhub.com/#organization"
+      },
+      "hasPart": [
+        {
+          "@type": "WebPage",
+          "@id": "https://gazaeduhub.com/join",
+          "url": "https://gazaeduhub.com/join",
+          "name": "طلب عضوية جديدة",
+          "description":
+            "تقديم طلب رسمي للانضمام المجاني لعائلة إديو هب غزة والاستفادة من خدمات قاعات الدراسة والإنترنت السريع."
+        },
+        {
+          "@type": "WebPage",
+          "@id": "https://gazaeduhub.com/visit",
+          "url": "https://gazaeduhub.com/visit",
+          "name": "تصريح زيارة استثنائية (ليوم واحد)",
+          "description":
+            "طلب تصريح زيارة مؤقت ليوم واحد لغير الأعضاء لحضور امتحان إلكتروني، مقابلة عمل أو شحن الحواسيب."
+        },
+        {
+          "@type": "WebPage",
+          "@id": "https://gazaeduhub.com/#booking-section",
+          "url": "https://gazaeduhub.com/#booking-section",
+          "name": "حجز المقاعد والإنترنت",
+          "description":
+            "حجز مقاعد الدراسة والعمل المجهزة بإنترنت فايبر 100 Mbps وطاقة شمسية مستمرة في قطاع غزة."
+        },
+        {
+          "@type": "WebPage",
+          "@id": "https://gazaeduhub.com/#faq",
+          "url": "https://gazaeduhub.com/#faq",
+          "name": "الأسئلة الشائعة",
+          "description":
+            "إجابات واضحة وشفافة حول كيفية الحجز وشروط المركز ومجانية كافة الخدمات للطلاب والمستقلين."
+        }
+      ]
+    },
+    {
+      "@type": "FAQPage",
+      "@id": "https://gazaeduhub.com/#faqpage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "هل حجز المقاعد والإنترنت مجاني تماماً للطلاب؟",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "نعم، حجز المقاعد والكهرباء والإنترنت مجاني 100% لجميع طلاب الجامعات والخريجين والمستقلين في إديو هب غزة."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "كيف أصل للمركز وما هي شروط الحجز الأساسية؟",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "يقع المركز في مدينة غزة - شارع الوحدة، عمارة سندس (طابق 1). شروط الحجز تتطلب التسجيل المسبق عبر الموقع لإصدار كود الدخول والالتزام بمواعيد الفترات المحجوزة لإتاحة الفرصة للجميع."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "كيف يمكنني التبرع والتأكد من وصول الدعم للمركز مباشرة؟",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "يمكنك التبرع مباشرة عبر منصة Zeffy الرسمية الخالية من أي رسوم استقطاع 0%، حيث تصل جميع التبرعات مباشرة لحساب المبادرة لشراء الوقود، صيانة الطاقة الشمسية واشتراكات الإنترنت عالي السرعة."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "ماذا تفعلون في حال حدوث طارئ أو انقطاع غير متوقع؟",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "يمتلك المركز منظومة طاقة هجينة مع بطاريات ومولدات لضمان استمرار الخدمة والكهرباء والإنترنت بنسبة 100% دون أي توقف."
+          }
+        }
+      ]
+    },
   ],
 };
 
