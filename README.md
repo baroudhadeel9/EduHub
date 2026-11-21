@@ -1,36 +1,55 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# إديو هب غزة | EduHub Gaza 🎓⚡
 
-## Getting Started
+> **الموقع الرسمي الحي:** [https://gazaeduhub.com](https://gazaeduhub.com)  
+> **Official Website:** [https://gazaeduhub.com](https://gazaeduhub.com)
 
-First, run the development server:
+---
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+## 🌟 نبذة عن المبادرة (About EduHub Gaza)
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+**إديو هب غزة (EduHub Gaza)** هي مساحة تعليمية وعمل مشتركة غير ربحية في قطاع غزة، صُممت لتكون شريان حياة وملاذاً تعليمياً آمناً لطلاب الجامعات والمستقلين (Freelancers) في ظل التحديات الصعبة وانقطاع الكهرباء والإنترنت.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+يوفر المركز كافة الخدمات مجاناً بنسبة **100%**:
+- ☀️ **طاقة شمسية مستمرة:** منظومة هجينة مع بطاريات ومولدات لضمان عدم انقطاع الكهرباء.
+- 🚀 **إنترنت فايبر فائق السرعة:** اتصال ثابت ومستقر بسرعة 100 Mbps لتقديم الامتحانات والعمل عن بعد.
+- 🪑 **مقاعد دراسة وعمل مجهزة:** بيئة هادئة ومكيفة تشمل قاعات دراسة عامة وقاعة مخصصة ومستقلة للطالبات.
+- 🛠️ **ورش عمل وتدريبات مهنية:** دورات تدريبية متخصصة في المجالات الطبية والتقنية وريادة الأعمال.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+---
 
-## Learn More
+## 🔗 الروابط السريعة (Quick Links)
 
-To learn more about Next.js, take a look at the following resources:
+* 🌐 **الرئيسية (Home):** [https://gazaeduhub.com](https://gazaeduhub.com)
+* 📝 **طلب عضوية جديدة (Join Membership):** [https://gazaeduhub.com/join](https://gazaeduhub.com/join)
+* 🎫 **طلب تصريح زيارة استثنائية (1-Day Visitor Pass):** [https://gazaeduhub.com/visit](https://gazaeduhub.com/visit)
+* 📅 **حجز مقعد دراسي (Book Seat):** [https://gazaeduhub.com/#booking-section](https://gazaeduhub.com/#booking-section)
+* 🎓 **الفعاليات وورش العمل (Workshops & Events):** [https://gazaeduhub.com/#events](https://gazaeduhub.com/#events)
+* ❓ **الأسئلة الشائعة (FAQ):** [https://gazaeduhub.com/#faq](https://gazaeduhub.com/#faq)
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+---
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## 📱 قنوات التواصل الرسمية (Official Social Channels)
 
-## Deploy on Vercel
+* 📸 **انستغرام (Instagram):** [@gaza_edhub](https://www.instagram.com/gaza_edhub)
+* 💼 **لينكد إن (LinkedIn):** [EduHub Gaza](https://www.linkedin.com/company/gaza-edu-hub/)
+* 📘 **فيسبوك (Facebook):** [EduHub Gaza Facebook](https://www.facebook.com/share/1BrEBigQbH/)
+* 💚 **منصة التبرع الرسمية (Zeffy 0% Fees):** [Gaza Education Hub](https://www.zeffy.com/en-US/donation-form/gaza-education-hub)
+* ✉️ **البريد الإلكتروني:** [eduhubgaza@gmail.com](mailto:eduhubgaza@gmail.com)
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+---
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## 📍 الموقع الجغرافي (Location)
+* **غزة - شارع الوحدة، عمارة سندس (الطابق الأول).**
+* **ساعات العمل:** من السبت إلى الخميس (09:00 صباحاً حتى 04:00 مساءً).
+
+---
+
+## 💻 التقنيات المستخدمة (Tech Stack)
+* **Frontend:** Next.js 16 (App Router), React 19, TypeScript, Tailwind CSS.
+* **Internationalization:** Multi-language support (العربية & English) with native RTL/LTR layout.
+* **SEO & Metadata:** Rich Schema.org structured data (`EducationalOrganization`, `CoworkingSpace`, `EducationEvent`, `BreadcrumbList`, `FAQPage`, `WebSite`).
+* **Deployment:** Vercel Edge Network.
+
+---
+
+© 2026 إديو هب غزة (EduHub Gaza). All rights reserved.
