@@ -55,13 +55,16 @@ export default function BookingSection() {
         {/* ── 2 Main Action Gateway Cards: Members vs 1-Day Visitors ── */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-5xl mx-auto mb-10">
           
-          {/* Card 1: Active Members (تسجيل دخول الأعضاء لحجز مقعد) */}
-          <div className="bg-gradient-to-br from-emerald-900 via-emerald-800 to-teal-950 rounded-3xl p-6 sm:p-8 text-white shadow-xl shadow-emerald-950/20 border border-emerald-600/30 flex flex-col justify-between relative overflow-hidden group hover:border-emerald-400/50 transition-all">
+          {/* Card 1: Active Members (تسجيل دخول الأعضاء لحجز مقعد - البطاقة بأكملها قابلة للنقر) */}
+          <Link
+            href="/login"
+            className="bg-gradient-to-br from-emerald-900 via-emerald-800 to-teal-950 rounded-3xl p-6 sm:p-8 text-white shadow-xl shadow-emerald-950/20 border border-emerald-600/30 flex flex-col justify-between relative overflow-hidden group hover:border-emerald-400/60 hover:shadow-2xl hover:scale-[1.01] active:scale-[0.99] transition-all cursor-pointer block select-none"
+          >
             <div className="absolute top-0 end-0 -mt-8 -me-8 w-44 h-44 bg-emerald-500/20 rounded-full blur-3xl group-hover:bg-emerald-400/30 transition-all pointer-events-none" />
             
             <div className="space-y-4 relative z-10">
               <div className="flex items-center justify-between">
-                <div className="w-12 h-12 rounded-2xl bg-white/15 backdrop-blur-md flex items-center justify-center border border-white/20">
+                <div className="w-12 h-12 rounded-2xl bg-white/15 backdrop-blur-md flex items-center justify-center border border-white/20 group-hover:scale-105 transition-transform">
                   <UserCheck className="w-6 h-6 text-emerald-200" />
                 </div>
                 <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-200 text-xs font-bold border border-emerald-400/30">
@@ -71,7 +74,7 @@ export default function BookingSection() {
               </div>
 
               <div>
-                <h3 className="text-xl sm:text-2xl font-black tracking-tight text-white mb-2">
+                <h3 className="text-xl sm:text-2xl font-black tracking-tight text-white mb-2 group-hover:text-emerald-100 transition-colors">
                   {isRTL ? "تسجيل دخول الأعضاء وحجز مقعد" : "Member Login & Desk Booking"}
                 </h3>
                 <p className="text-xs sm:text-sm text-emerald-100/90 leading-relaxed font-normal">
@@ -83,25 +86,26 @@ export default function BookingSection() {
             </div>
 
             <div className="pt-6 relative z-10">
-              <Link
-                href="/login"
-                prefetch={true}
-                className="w-full inline-flex items-center justify-center gap-2.5 py-3.5 px-6 rounded-2xl bg-white text-emerald-950 hover:bg-emerald-50 font-black text-sm sm:text-base shadow-lg transition-all active:scale-98 cursor-pointer"
+              <div
+                className="w-full inline-flex items-center justify-center gap-2.5 py-3.5 px-6 rounded-2xl bg-white text-emerald-950 group-hover:bg-emerald-50 font-black text-sm sm:text-base shadow-lg transition-all"
               >
                 <LogIn className="w-4 h-4 text-emerald-700" />
                 <span>{isRTL ? "تسجيل دخول الأعضاء وحجز المقعد" : "Sign In & Reserve Desk"}</span>
-                <ArrowIcon className="w-4 h-4" />
-              </Link>
+                <ArrowIcon className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+              </div>
             </div>
-          </div>
+          </Link>
 
-          {/* Card 2: 1-Day Visitor Pass (تسجيل زيارة ليوم واحد - صفحة مخصصة) */}
-          <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/90 shadow-xl shadow-slate-200/40 flex flex-col justify-between group hover:border-teal-400 transition-all relative overflow-hidden">
+          {/* Card 2: 1-Day Visitor Pass (تسجيل زيارة ليوم واحد - البطاقة بأكملها قابلة للنقر) */}
+          <Link
+            href="/visit"
+            className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/90 shadow-xl shadow-slate-200/40 flex flex-col justify-between group hover:border-teal-400 hover:shadow-2xl hover:scale-[1.01] active:scale-[0.99] transition-all relative overflow-hidden cursor-pointer block select-none"
+          >
             <div className="absolute top-0 end-0 -mt-8 -me-8 w-44 h-44 bg-teal-50 rounded-full blur-3xl pointer-events-none" />
 
             <div className="space-y-4 relative z-10">
               <div className="flex items-center justify-between">
-                <div className="w-12 h-12 rounded-2xl bg-teal-50 text-teal-700 flex items-center justify-center border border-teal-200/60">
+                <div className="w-12 h-12 rounded-2xl bg-teal-50 text-teal-700 flex items-center justify-center border border-teal-200/60 group-hover:scale-105 transition-transform">
                   <Compass className="w-6 h-6" />
                 </div>
                 <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-100 text-slate-700 text-xs font-bold border border-slate-200">
@@ -111,7 +115,7 @@ export default function BookingSection() {
               </div>
 
               <div>
-                <h3 className="text-xl sm:text-2xl font-black tracking-tight text-slate-900 mb-2">
+                <h3 className="text-xl sm:text-2xl font-black tracking-tight text-slate-900 mb-2 group-hover:text-teal-800 transition-colors">
                   {isRTL ? "تسجيل زيارة استثنائية (ليوم واحد)" : "1-Day Visitor Pass Request"}
                 </h3>
                 <p className="text-xs sm:text-sm text-slate-600 leading-relaxed font-normal">
@@ -123,17 +127,15 @@ export default function BookingSection() {
             </div>
 
             <div className="pt-6 relative z-10">
-              <Link
-                href="/visit"
-                prefetch={true}
-                className="w-full inline-flex items-center justify-center gap-2.5 py-3.5 px-6 rounded-2xl bg-teal-700 hover:bg-teal-800 text-white font-black text-sm sm:text-base shadow-md shadow-teal-700/20 transition-all active:scale-98 cursor-pointer"
+              <div
+                className="w-full inline-flex items-center justify-center gap-2.5 py-3.5 px-6 rounded-2xl bg-teal-700 group-hover:bg-teal-800 text-white font-black text-sm sm:text-base shadow-md shadow-teal-700/20 transition-all"
               >
                 <Compass className="w-4 h-4 text-teal-200" />
                 <span>{isRTL ? "تقديم طلب تصريح زيارة الآن" : "Apply for Visitor Pass"}</span>
-                <ArrowIcon className="w-4 h-4" />
-              </Link>
+                <ArrowIcon className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+              </div>
             </div>
-          </div>
+          </Link>
 
         </div>
 
