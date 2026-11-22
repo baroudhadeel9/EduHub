@@ -158,13 +158,36 @@ export default function EventsSection() {
     getPublicEventsApi()
       .then((res) => {
         if (res.success && Array.isArray(res.data) && res.data.length > 0) {
+          // Ensure the official opening event is never removed by live API sync
+          const hasOpening = res.data.some(
+            (ev) =>
+              String(ev.id) === "event-opening" ||
+              ev.title?.includes("الافتتاح") ||
+              ev.title?.toLowerCase().includes("opening")
+          );
+
+          if (!hasOpening) {
+            const localList = (t.eventsSection.items || []) as unknown as EventItem[];
+            const openingCard = localList.find(
+              (it) =>
+                String(it.id) === "event-opening" ||
+                it.title?.includes("الافتتاح") ||
+                it.title?.toLowerCase().includes("opening")
+            );
+
+            if (openingCard) {
+              setEvents([openingCard, ...res.data]);
+              return;
+            }
+          }
+
           setEvents(res.data);
         }
       })
       .catch((err) => {
         console.warn("Failed to load live events, falling back to local items:", err);
       });
-  }, []);
+  }, [t.eventsSection.items]);
 
   // Fetch on mount + auto-sync on window focus or admin update events
   useEffect(() => {
