@@ -85,6 +85,14 @@ export default function EventsSection() {
       const matched = localItems.find((item) => {
         if (String(item.id) === String(event.id)) return true;
         if (
+          item.id === "event-opening" &&
+          (String(event.id) === "event-opening" ||
+            event.title?.includes("الافتتاح") ||
+            event.title?.toLowerCase().includes("opening"))
+        ) {
+          return true;
+        }
+        if (
           item.id === "event-dentistry" &&
           (event.id === 1 ||
             event.title?.includes("طب أسنان") ||
@@ -149,7 +157,7 @@ export default function EventsSection() {
   const fetchLiveEvents = useCallback(() => {
     getPublicEventsApi()
       .then((res) => {
-        if (res.success && Array.isArray(res.data)) {
+        if (res.success && Array.isArray(res.data) && res.data.length > 0) {
           setEvents(res.data);
         }
       })
@@ -561,11 +569,16 @@ export default function EventsSection() {
                     {/* Bottom Meta & Action Bar (Compact & Sleek) */}
                     <div className={`px-4 sm:px-6 ${isTwoCards ? "py-2.5 sm:py-3" : "py-3 sm:py-3.5"} bg-slate-50/80 border-t border-slate-100 flex items-center justify-between text-xs font-semibold text-slate-700 group-hover:bg-slate-50 transition-colors`}>
                       {isCompleted ? (
-                        <div className="w-full flex items-center justify-start">
-                          <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 text-slate-600 font-bold text-xs border border-slate-200/90">
-                            <CheckCircle2 className="w-3.5 h-3.5 text-slate-500 shrink-0" />
-                            <span>{isRTL ? "تمت الورشة" : "Completed"}</span>
+                        <div className="w-full flex items-center justify-between">
+                          <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 text-slate-700 font-bold text-xs border border-slate-200/90">
+                            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                            <span>{event.statusBadge || (isRTL ? "تمت الفعالية" : "Completed")}</span>
                           </span>
+                          {event.meta && (
+                            <span className="text-[11px] font-bold text-slate-500 bg-white px-2 py-1 rounded-lg border border-slate-200/70 shadow-2xs">
+                              {event.meta}
+                            </span>
+                          )}
                         </div>
                       ) : isRegistrationClosed ? (
                         <div className="w-full flex items-center justify-between gap-2">

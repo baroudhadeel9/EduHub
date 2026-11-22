@@ -352,6 +352,18 @@
     "workshopCount": "{count} active workshops",
     "items": [
       {
+        "id": "event-opening",
+        "title": "Official Grand Opening & Welcoming First 100 Youth Cohort",
+        "dateBadge": "November 9, 2026",
+        "statusBadge": "Official Opening",
+        "status": "completed",
+        "allow_registration": false,
+        "desc": "EduHub Gaza officially opened its doors on November 9, 2026, welcoming an inspiring first cohort of 100 ambitious youth and university students, providing them with reliable power, high-speed internet, and a collaborative educational sanctuary.",
+        "tag": "Official Launch × EduHub",
+        "meta": "100 Youth Welcomed",
+        "image": "/images/event-opening-ceremony.jpg"
+      },
+      {
         "id": "event-dentistry",
         "title": "Cavity Preparation for Amalgam (Class I & II) — Dental Training",
         "dateBadge": "March 3, 2026",
