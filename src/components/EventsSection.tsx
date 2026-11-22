@@ -367,12 +367,11 @@ export default function EventsSection() {
       `}</style>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        
+
         {/* -- Centered Section Header -- */}
         <div
-          className={`text-center max-w-3xl mx-auto mb-8 sm:mb-12 anim-header transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] ${
-            isInView ? "opacity-100 translate-y-0" : "opacity-100 translate-y-0"
-          }`}
+          className={`text-center max-w-3xl mx-auto mb-8 sm:mb-12 anim-header transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] ${isInView ? "opacity-100 translate-y-0" : "opacity-100 translate-y-0"
+            }`}
         >
           <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] sm:text-xs font-bold bg-emerald-50 text-emerald-800 border border-emerald-200/80 mb-2.5 sm:mb-3.5 shadow-2xs">
             <Sparkles className="w-3 sm:w-3.5 h-3 sm:h-3.5 text-emerald-600 shrink-0" />
@@ -447,13 +446,12 @@ export default function EventsSection() {
             onMouseMove={handleMouseMove}
             onMouseUp={handleMouseUpOrLeave}
             onMouseLeave={handleMouseUpOrLeave}
-            className={`flex items-stretch overflow-x-auto scrollbar-none snap-x snap-mandatory pt-1 pb-6 touch-pan-x cursor-grab active:cursor-grabbing select-none ${
-              isTwoCards
+            className={`flex items-stretch overflow-x-auto scrollbar-none snap-x snap-mandatory pt-1 pb-6 touch-pan-x cursor-grab active:cursor-grabbing select-none ${isTwoCards
                 ? "justify-start sm:justify-center gap-6 sm:gap-8 md:gap-10 lg:gap-12 max-w-7xl mx-auto -mx-4 sm:mx-auto px-4 sm:px-2"
                 : isOneCard
-                ? "justify-center gap-4 max-w-xl mx-auto px-4"
-                : "justify-start gap-4 sm:gap-6 lg:gap-8 -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8"
-            }`}
+                  ? "justify-center gap-4 max-w-xl mx-auto px-4"
+                  : "justify-start gap-4 sm:gap-6 lg:gap-8 -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8"
+              }`}
             style={{
               scrollPaddingLeft: "1rem",
               scrollPaddingRight: "1rem",
@@ -495,35 +493,33 @@ export default function EventsSection() {
                     style={{
                       transitionDelay: isInView ? staggerDelay : "0ms",
                     }}
-                    className={`anim-event-card ${
-                      isOneCard
+                    className={`anim-event-card ${isOneCard
                         ? "w-full max-w-[460px] mx-auto"
                         : isTwoCards
-                        ? "w-[92vw] max-w-[420px] sm:w-[380px] md:w-[480px] lg:w-[560px] xl:w-[600px] 2xl:w-[620px]"
-                        : "w-[85vw] max-w-[340px] sm:w-[360px] md:w-[370px] lg:w-[380px]"
-                    } shrink-0 snap-center sm:snap-start bg-white rounded-2xl sm:rounded-3xl border border-slate-200/90 shadow-2xs hover:shadow-xl hover:shadow-emerald-950/10 hover:border-emerald-300 hover:-translate-y-1.5 transition-all duration-300 overflow-hidden flex flex-col justify-between group select-none active:scale-[0.99] ${
-                      isCompleted ? "cursor-default" : "cursor-pointer"
-                    }`}
+                          ? "w-[92vw] max-w-[420px] sm:w-[380px] md:w-[480px] lg:w-[560px] xl:w-[600px] 2xl:w-[620px]"
+                          : "w-[85vw] max-w-[340px] sm:w-[360px] md:w-[370px] lg:w-[380px]"
+                      } shrink-0 snap-center sm:snap-start bg-white rounded-2xl sm:rounded-3xl border border-slate-200/90 shadow-2xs hover:shadow-xl hover:shadow-emerald-950/10 hover:border-emerald-300 hover:-translate-y-1.5 transition-all duration-300 overflow-hidden flex flex-col justify-between group select-none active:scale-[0.99] ${isCompleted ? "cursor-default" : "cursor-pointer"
+                      }`}
                   >
                     <div>
                       {/* Event Image Container with Zoom & Sheen (Sleek widescreen aspect ratio) */}
-                      <div className={`relative w-full bg-slate-100 overflow-hidden rounded-t-2xl sm:rounded-t-3xl ${
-                        isTwoCards ? "h-36 sm:h-40 md:h-44 lg:h-48" : "h-44 sm:h-52 lg:h-56"
-                      }`}>
+                      <div className={`relative w-full bg-slate-100 overflow-hidden rounded-t-2xl sm:rounded-t-3xl ${isTwoCards ? "h-36 sm:h-40 md:h-44 lg:h-48" : "h-44 sm:h-52 lg:h-56"
+                        }`}>
                         <Image
                           src={event.image || event.image_url || "/images/hero-workspace.jpg"}
                           alt={`${loc.title} workshop at EduHub`}
                           fill
                           draggable={false}
+                          quality={92}
                           unoptimized={Boolean(
                             (event.image && event.image.startsWith("/api/")) ||
                             (event.image_url && event.image_url.startsWith("/api/")) ||
                             (event.image && event.image.startsWith("http"))
                           )}
-                          sizes="(max-width: 768px) 90vw, 570px"
-                          className="object-cover group-hover:scale-105 transition-transform duration-700 ease-out select-none pointer-events-none"
+                          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 450px"
+                          className="object-cover object-center group-hover:scale-105 transition-transform duration-700 ease-out select-none pointer-events-none"
                         />
-                        <div className="absolute inset-0 bg-gradient-to-t from-slate-950/70 via-transparent to-transparent pointer-events-none" />
+                        <div className="absolute inset-0 bg-gradient-to-t from-slate-950/20 via-transparent to-transparent pointer-events-none" />
 
                         {/* Top Start: Date Badge (Always visible, frosted glass) */}
                         <div className="absolute top-2.5 start-2.5 sm:top-3.5 sm:start-3.5 z-10 flex items-center gap-1.5 pointer-events-none">
@@ -651,9 +647,8 @@ export default function EventsSection() {
 
         {/* -- Bottom Carousel Indicators (Centered & Responsive for Mobile) -- */}
         {events.length > 1 && (
-          <div className={`flex items-center justify-between gap-3 pt-3 px-1 sm:px-2 max-w-5xl mx-auto ${
-            isTwoCards ? "sm:hidden" : ""
-          }`}>
+          <div className={`flex items-center justify-between gap-3 pt-3 px-1 sm:px-2 max-w-5xl mx-auto ${isTwoCards ? "sm:hidden" : ""
+            }`}>
             {/* Mobile swipe helper text */}
             <div className="flex items-center gap-1 text-slate-400 text-[11px] sm:text-xs font-medium">
               {isRTL ? (
@@ -675,11 +670,10 @@ export default function EventsSection() {
                   type="button"
                   onClick={() => scrollToCard(i)}
                   aria-label={`Slide ${i + 1}`}
-                  className={`h-2 rounded-full transition-all duration-300 cursor-pointer ${
-                    activeIndex === i
+                  className={`h-2 rounded-full transition-all duration-300 cursor-pointer ${activeIndex === i
                       ? "w-6 sm:w-7 bg-emerald-600 shadow-2xs"
                       : "w-2 bg-slate-200 hover:bg-slate-300"
-                  }`}
+                    }`}
                 />
               ))}
             </div>
