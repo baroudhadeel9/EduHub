@@ -1,9 +1,8 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
-import Image from "next/image";
+import React from "react";
 import { useLanguage } from "@/context/LanguageContext";
-import SlicedHeroImage, { DEFAULT_HERO_SLIDES, HeroSlide } from "./SlicedHeroImage";
+import HeroOpeningVideo from "./HeroOpeningVideo";
 import {
   CalendarCheck,
   Heart,
@@ -27,28 +26,6 @@ export default function HeroSection({ onOpenBooking, onOpenDonation }: HeroSecti
   const { t, locale } = useLanguage();
   const isRTL = locale === "ar";
   const ArrowIcon = isRTL ? ArrowLeft : ArrowRight;
-
-  const slides: HeroSlide[] = (t.hero.slides as HeroSlide[]) || DEFAULT_HERO_SLIDES;
-
-  const [lightboxOpen, setLightboxOpen] = useState(false);
-  const [activeLightboxSlide, setActiveLightboxSlide] = useState<HeroSlide>(slides[0]);
-
-  // Close lightbox on Escape
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setLightboxOpen(false);
-    };
-    if (lightboxOpen) {
-      document.body.style.overflow = "hidden";
-      window.addEventListener("keydown", handleKeyDown);
-    } else {
-      document.body.style.overflow = "unset";
-    }
-    return () => {
-      document.body.style.overflow = "unset";
-      window.removeEventListener("keydown", handleKeyDown);
-    };
-  }, [lightboxOpen]);
 
   return (
     <section
@@ -243,25 +220,14 @@ export default function HeroSection({ onOpenBooking, onOpenDonation }: HeroSecti
           </div>
 
           {/* ═══════════════════════════════════════════
-              IMAGE COLUMN: Glides in slowly, then settles firmly in place
+              VIDEO COLUMN: Opening Day Reel with Inspiring Quote
              ═══════════════════════════════════════════ */}
           <div
             className={`lg:col-span-6 relative w-full flex items-center justify-center ${
               isRTL ? "anim-image-slow-rtl" : "anim-image-slow-ltr"
             }`}
           >
-            <div className="relative w-full max-w-lg lg:max-w-xl">
-              {/* Complete Full-Image Showcase Slider (Clean, borderless & shadowless) */}
-              <SlicedHeroImage
-                slides={slides}
-                holdDurationMs={2800}
-                onOpenLightbox={(slide) => {
-                  setActiveLightboxSlide(slide);
-                  setLightboxOpen(true);
-                }}
-                isRTL={isRTL}
-              />
-            </div>
+            <HeroOpeningVideo videoSrc="/videos/opening-day.mp4" />
           </div>
         </div>
 
@@ -305,50 +271,6 @@ export default function HeroSection({ onOpenBooking, onOpenDonation }: HeroSecti
           </div>
         </div>
       </div>
-
-      {/* ═══════════════════════════════════════════
-          Lightbox Modal: High-Res Photo View
-         ═══════════════════════════════════════════ */}
-      {lightboxOpen && (
-        <div
-          className="fixed inset-0 z-50 bg-black/90 backdrop-blur-md flex items-center justify-center p-4 sm:p-6 animate-in fade-in duration-200"
-          onClick={() => setLightboxOpen(false)}
-        >
-          <div
-            className="relative max-w-5xl w-full max-h-[90vh] flex flex-col items-center"
-            onClick={(e) => e.stopPropagation()}
-          >
-            {/* Close button */}
-            <button
-              type="button"
-              onClick={() => setLightboxOpen(false)}
-              className="absolute -top-12 end-0 text-white/80 hover:text-white p-2 rounded-full bg-white/10 hover:bg-white/20 transition-all cursor-pointer"
-              aria-label={t.hero.closeLightbox || (isRTL ? "إغلاق" : "Close")}
-            >
-              <X className="w-6 h-6" />
-            </button>
-
-            {/* Expanded Image */}
-            <div className="relative w-full aspect-[16/10] max-h-[80vh] rounded-2xl overflow-hidden border border-white/20 shadow-2xl">
-              <Image
-                src={activeLightboxSlide.src}
-                alt={activeLightboxSlide.alt}
-                fill
-                sizes="95vw"
-                className="object-contain bg-black/50"
-                priority
-              />
-            </div>
-
-            {/* Caption in lightbox */}
-            {activeLightboxSlide.caption && (
-              <p className="mt-3 text-sm text-slate-300 font-medium text-center">
-                {activeLightboxSlide.caption}
-              </p>
-            )}
-          </div>
-        </div>
-      )}
     </section>
   );
 }
