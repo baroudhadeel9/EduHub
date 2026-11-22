@@ -98,7 +98,8 @@ export const metadata: Metadata = {
   },
   openGraph: {
     type: "website",
-    locale: "ar_AR",
+    locale: "en_US",
+    alternateLocale: ["ar_AR"],
     url: SITE_URL,
     siteName: "إديو هب - EduHub Gaza",
     title: "إديو هب غزة | EduHub Gaza - مساحة تعليمية للطلاب",
@@ -139,7 +140,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="ar" dir="rtl" className={`${plusJakartaSans.variable} ${cairo.variable}`} suppressHydrationWarning>
+    <html lang="en" dir="ltr" className={`${plusJakartaSans.variable} ${cairo.variable}`} suppressHydrationWarning>
       <body className="min-h-screen bg-brand-bg text-slate-800 antialiased selection:bg-emerald-500 selection:text-white" suppressHydrationWarning>
         <LanguageProvider>
           {children}

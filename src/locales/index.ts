@@ -13,7 +13,7 @@ export const translations: Record<Locale, Translation> = {
   en: enTranslation,
 };
 
-export const defaultLocale: Locale = "ar";
+export const defaultLocale: Locale = "en";
 
 export function getTranslations(locale: Locale): Translation {
   return translations[locale] || translations[defaultLocale];

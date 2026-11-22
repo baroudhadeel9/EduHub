@@ -151,16 +151,6 @@ export default function Navbar({ onOpenBooking, onOpenDonation }: NavbarProps) {
               </button>
             </div>
 
-            {/* Join Membership CTA */}
-            <Link
-              href="/join"
-              prefetch={true}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 xl:px-3.5 xl:py-2 rounded-xl text-xs xl:text-sm font-bold text-emerald-800 bg-emerald-50 hover:bg-emerald-100/80 border border-emerald-200/90 shadow-2xs transition-all active:scale-95 cursor-pointer whitespace-nowrap focus-visible:ring-2 focus-visible:ring-emerald-500"
-            >
-              <UserPlus className="w-3.5 h-3.5 text-emerald-700 shrink-0" />
-              <span>{locale === "ar" ? "طلب عضوية" : "Join"}</span>
-            </Link>
-
             {/* Member Login CTA (Clean secondary outline / soft button) */}
             <Link
               href="/login"

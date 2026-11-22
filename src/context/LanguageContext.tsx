@@ -31,7 +31,7 @@ function subscribe(callback: () => void) {
 function getSnapshot(): Locale {
   if (typeof window === "undefined") return defaultLocale;
   try {
-    const saved = localStorage.getItem("cehub_locale");
+    const saved = localStorage.getItem("eduhub_user_locale");
     if (saved === "ar" || saved === "en") {
       return saved;
     }
@@ -50,7 +50,7 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
 
   const setLocale = (newLocale: Locale) => {
     try {
-      localStorage.setItem("cehub_locale", newLocale);
+      localStorage.setItem("eduhub_user_locale", newLocale);
     } catch {
       // Ignore
     }
