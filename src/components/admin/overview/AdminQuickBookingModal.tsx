@@ -84,6 +84,7 @@ export default function AdminQuickBookingModal({
 
   const [availableSeats, setAvailableSeats] = useState<AvailableSeatOption[]>([]);
   const [loadingSeats, setLoadingSeats] = useState(false);
+  const [seatsError, setSeatsError] = useState<string | null>(null);
   const [selectedSeatId, setSelectedSeatId] = useState<string>("");
   const [hallName, setHallName] = useState<string>("");
 
@@ -128,6 +129,7 @@ export default function AdminQuickBookingModal({
 
     let isMounted = true;
     setLoadingSeats(true);
+    setSeatsError(null);
     setSelectedSeatId("");
 
     const memberGender = selectedMember?.gender || undefined;
@@ -164,12 +166,28 @@ export default function AdminQuickBookingModal({
         // Sort seats by seat number
         seatsList.sort((a, b) => a.seat_number - b.seat_number);
 
-        setHallName(detectedHall || (isRTL ? "الصالة العامة" : "Workspace Hall"));
+        let finalHallName = isRTL ? "كافة الصالات" : "All Halls";
+        if (memberGender === "female") {
+          finalHallName = isRTL ? "صالة الإناث" : "Women Hall";
+        } else if (memberGender === "male") {
+          finalHallName = isRTL ? "صالة الشباب" : "Youth Hall";
+        } else if (detectedHall) {
+          finalHallName = detectedHall;
+        }
+
+        setHallName(finalHallName);
         setAvailableSeats(seatsList);
       })
       .catch((err) => {
         console.warn("Could not load available seats overview:", err);
-        if (isMounted) setAvailableSeats([]);
+        if (isMounted) {
+          setAvailableSeats([]);
+          setSeatsError(
+            err instanceof Error
+              ? err.message
+              : (isRTL ? "تعذر فحص توفر المقاعد." : "Failed to check seats availability.")
+          );
+        }
       })
       .finally(() => {
         if (isMounted) setLoadingSeats(false);
@@ -545,6 +563,10 @@ export default function AdminQuickBookingModal({
                   <Loader2 className="w-3 h-3 animate-spin text-emerald-600" />
                   <span>{isRTL ? "جاري الفحص..." : "Checking..."}</span>
                 </span>
+              ) : seatsError ? (
+                <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-red-50 text-red-700 border border-red-200">
+                  {isRTL ? "خطأ في الاتصال" : "Connection error"}
+                </span>
               ) : (
                 <span className={`text-[11px] font-bold px-2 py-0.5 rounded-full ${
                   availableSeats.length > 0 ? "bg-emerald-50 text-emerald-700 border border-emerald-200" : "bg-red-50 text-red-700 border border-red-200"
@@ -574,7 +596,14 @@ export default function AdminQuickBookingModal({
               ))}
             </select>
 
-            {availableSeats.length === 0 && !loadingSeats && (
+            {seatsError && !loadingSeats && (
+              <p className="text-[11px] text-red-600 font-semibold mt-1 flex items-center gap-1">
+                <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+                <span>{seatsError}</span>
+              </p>
+            )}
+
+            {!seatsError && availableSeats.length === 0 && !loadingSeats && (
               <p className="text-[11px] text-amber-600 font-semibold mt-1">
                 {isRTL
                   ? `جميع مقاعد ${hallName} محجوزة في هذه الفترة. يرجى تجربة تغيير وقت البداية أو النهاية.`

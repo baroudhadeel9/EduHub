@@ -154,9 +154,7 @@ export async function getRoomsOverviewApi(
     ? { Accept: "application/json", Authorization: `Bearer ${token}` }
     : getAdminHeaders();
 
-  const url = token
-    ? `${API_BASE_URL}/rooms/overview?${params.toString()}`
-    : `${API_BASE_URL}/admin/rooms/overview?${params.toString()}`;
+  const url = `${API_BASE_URL}/rooms/overview?${params.toString()}`;
 
   const response = await fetch(url, {
     method: "GET",

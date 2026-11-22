@@ -31,6 +31,105 @@ export default function EventsSection() {
   const [events, setEvents] = useState<EventItem[]>(() => t.eventsSection.items as unknown as EventItem[]);
   const [selectedEventForReg, setSelectedEventForReg] = useState<EventItem | null>(null);
 
+  // Helper to format Arabic/ISO dates into proper English dates
+  const formatEnglishDate = useCallback((raw?: string | null): string => {
+    if (!raw) return "";
+    if (/^\d{4}-\d{2}-\d{2}$/.test(raw)) {
+      const [y, m, d] = raw.split("-").map(Number);
+      const months = [
+        "January", "February", "March", "April", "May", "June",
+        "July", "August", "September", "October", "November", "December"
+      ];
+      return `${months[m - 1]} ${d}, ${y}`;
+    }
+    const arMonths: Record<string, string> = {
+      يناير: "January", فبراير: "February", مارس: "March", أبريل: "April",
+      مايو: "May", يونيو: "June", يوليو: "July", أغسطس: "August",
+      سبتمبر: "September", أكتوبر: "October", نوفمبر: "November", ديسمبر: "December"
+    };
+    let formatted = raw;
+    for (const [ar, en] of Object.entries(arMonths)) {
+      if (formatted.includes(ar)) {
+        const match = formatted.match(/(\d+)\s+([^\s]+)\s+(\d{4})/);
+        if (match) {
+          return `${en} ${match[1]}, ${match[3]}`;
+        }
+        formatted = formatted.replace(ar, en);
+      }
+    }
+    return formatted;
+  }, []);
+
+  // Helper to resolve localized event fields based on current language
+  const getLocalizedEvent = useCallback(
+    (event: EventItem) => {
+      if (locale === "ar") {
+        return {
+          title: event.title,
+          desc: event.desc || event.description,
+          dateBadge: event.dateBadge || event.event_date,
+          tag: event.tag,
+          location: "مساحة إديوهب",
+        };
+      }
+
+      // Locale is English ('en')
+      const localItems = (t.eventsSection.items || []) as unknown as Array<{
+        id?: string | number;
+        title: string;
+        desc: string;
+        dateBadge?: string;
+        tag?: string;
+      }>;
+
+      const matched = localItems.find((item) => {
+        if (String(item.id) === String(event.id)) return true;
+        if (
+          item.id === "event-dentistry" &&
+          (event.id === 1 ||
+            event.title?.includes("طب أسنان") ||
+            event.title?.includes("الكافيتي") ||
+            event.title?.toLowerCase().includes("dentistry") ||
+            event.title?.toLowerCase().includes("amalgam"))
+        ) {
+          return true;
+        }
+        if (
+          item.id === "event-chess" &&
+          (event.id === 2 ||
+            event.title?.includes("الشطرنج") ||
+            event.title?.toLowerCase().includes("chess"))
+        ) {
+          return true;
+        }
+        return false;
+      });
+
+      if (matched) {
+        return {
+          title: matched.title,
+          desc: matched.desc,
+          dateBadge: matched.dateBadge || formatEnglishDate(event.event_date || event.dateBadge),
+          tag: matched.tag || event.tag,
+          location: "EduHub Space",
+        };
+      }
+
+      const enDate = formatEnglishDate(event.event_date || event.dateBadge);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const anyEv = event as any;
+
+      return {
+        title: anyEv.title_en || event.title,
+        desc: anyEv.desc_en || anyEv.description_en || event.desc || event.description,
+        dateBadge: enDate || event.dateBadge,
+        tag: anyEv.tag_en || event.tag,
+        location: "EduHub Space",
+      };
+    },
+    [locale, t.eventsSection.items, formatEnglishDate]
+  );
+
   // Slider state
   const [activeIndex, setActiveIndex] = useState(0);
   const [canScrollPrev, setCanScrollPrev] = useState(false);
@@ -344,6 +443,7 @@ export default function EventsSection() {
               </div>
             ) : (
               events.map((event, idx) => {
+                const loc = getLocalizedEvent(event);
                 const staggerDelay = `${Math.min(idx, 4) * 120}ms`;
                 const isCompleted =
                   event.status === "completed" ||
@@ -381,7 +481,7 @@ export default function EventsSection() {
                       }`}>
                         <Image
                           src={event.image || event.image_url || "/images/hero-workspace.jpg"}
-                          alt={`${event.title} workshop at EduHub`}
+                          alt={`${loc.title} workshop at EduHub`}
                           fill
                           draggable={false}
                           unoptimized={Boolean(
@@ -398,7 +498,7 @@ export default function EventsSection() {
                         <div className="absolute top-2.5 start-2.5 sm:top-3.5 sm:start-3.5 z-10 flex items-center gap-1.5 pointer-events-none">
                           <span className={`inline-flex items-center gap-1.5 ${isTwoCards ? "px-3 sm:px-3.5 py-1 sm:py-1.5 text-xs sm:text-[13px]" : "px-2.5 sm:px-3 py-1 text-[11px] sm:text-xs"} font-bold bg-white/95 text-slate-800 shadow-xs backdrop-blur-md border border-white/70 rounded-full`}>
                             <Calendar className="w-3.5 sm:w-4 h-3.5 sm:h-4 text-emerald-600" />
-                            <span>{event.dateBadge || event.event_date}</span>
+                            <span>{loc.dateBadge}</span>
                           </span>
                         </div>
 
@@ -424,24 +524,24 @@ export default function EventsSection() {
                       <div className={isTwoCards ? "p-4 sm:p-5 lg:p-6" : "p-4 sm:p-6"}>
                         {/* Micro Category Tag & Location Row */}
                         <div className="flex items-center justify-between gap-2 mb-2 sm:mb-2.5">
-                          {event.tag ? (
+                          {loc.tag ? (
                             <span className={`inline-flex items-center px-2.5 sm:px-3 py-0.5 sm:py-1 rounded-lg ${isTwoCards ? "text-xs sm:text-[13px]" : "text-[10px] sm:text-[11px]"} font-extrabold bg-emerald-50 text-emerald-800 border border-emerald-200/70 truncate max-w-[170px]`}>
-                              {event.tag}
+                              {loc.tag}
                             </span>
                           ) : <span />}
 
                           <span className={`inline-flex items-center gap-1 ${isTwoCards ? "text-xs sm:text-[13px]" : "text-[10px] sm:text-[11px]"} font-semibold text-slate-500 shrink-0`}>
                             <MapPin className="w-3.5 h-3.5 text-slate-400" />
-                            <span>{isRTL ? "مساحة إديوهب" : "EduHub Space"}</span>
+                            <span>{loc.location}</span>
                           </span>
                         </div>
 
                         <h3 className={`text-base sm:text-lg ${isTwoCards ? "lg:text-xl font-black mb-1.5 sm:mb-2" : "font-black mb-1.5"} text-brand-navy line-clamp-2 group-hover:text-emerald-700 transition-colors leading-snug`}>
-                          {event.title}
+                          {loc.title}
                         </h3>
 
                         <p className="text-xs sm:text-sm text-slate-600 leading-relaxed font-normal line-clamp-2">
-                          {event.desc || event.description}
+                          {loc.desc}
                         </p>
 
                         {/* Registration Deadline Warning (Only for active events approaching deadline) */}
@@ -490,7 +590,14 @@ export default function EventsSection() {
                         <div className="w-full flex items-center">
                           <button
                             type="button"
-                            onClick={() => setSelectedEventForReg(event)}
+                            onClick={() =>
+                              setSelectedEventForReg({
+                                ...event,
+                                title: loc.title,
+                                desc: loc.desc,
+                                dateBadge: loc.dateBadge,
+                              })
+                            }
                             className="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-black text-xs shadow-2xs hover:shadow-xs transition-all cursor-pointer active:scale-95"
                           >
                             <CalendarCheck className="w-3.5 h-3.5" />
