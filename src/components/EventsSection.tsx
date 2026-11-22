@@ -563,11 +563,11 @@ export default function EventsSection() {
                           </span>
                         </div>
 
-                        <h3 className={`text-base sm:text-lg ${isTwoCards ? "lg:text-xl font-black mb-1.5 sm:mb-2" : "font-black mb-1.5"} text-brand-navy line-clamp-2 group-hover:text-emerald-700 transition-colors leading-snug`}>
+                        <h3 className={`text-base sm:text-lg ${isTwoCards ? "lg:text-xl font-black mb-1.5 sm:mb-2" : "font-black mb-1.5"} text-brand-navy group-hover:text-emerald-700 transition-colors leading-snug`}>
                           {loc.title}
                         </h3>
 
-                        <p className="text-xs sm:text-sm text-slate-600 leading-relaxed font-normal line-clamp-2">
+                        <p className="text-xs sm:text-sm text-slate-600 leading-relaxed font-normal">
                           {loc.desc}
                         </p>
 
