@@ -1,8 +1,8 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useLanguage } from "@/context/LanguageContext";
-import { Check, X, Send, Mail, MessageSquare, Loader2, CheckCircle2, Sparkles } from "lucide-react";
+import { Check, X, Mail, MessageSquare, Loader2, CheckCircle2, AlertCircle, RefreshCw } from "lucide-react";
 import { VisitorRequest } from "./types";
 import { sendVisitorPassEmailApi } from "@/services/applications";
 
@@ -24,11 +24,46 @@ export default function ApproveSuccessModal({
   const [emailSent, setEmailSent] = useState(false);
   const [emailError, setEmailError] = useState<string | null>(null);
   const [whatsAppOpened, setWhatsAppOpened] = useState(false);
+  const lastSentIdRef = useRef<number | string | null>(null);
+
+  const hasPhone = Boolean(request?.phone && request.phone.trim());
+  const hasEmail = Boolean(request?.email && request.email.trim() && request.email.includes("@"));
+
+  // ── Auto-send email immediately upon approval ("خليها تصل عالايميل وخلص") ──
+  useEffect(() => {
+    if (!isOpen || !request || !hasEmail) return;
+    if (lastSentIdRef.current === request.id) return; // Prevent duplicate send on re-render
+
+    let isMounted = true;
+    lastSentIdRef.current = request.id;
+    setSendingEmail(true);
+    setEmailError(null);
+    setEmailSent(false);
+
+    sendVisitorPassEmailApi(request.id)
+      .then(() => {
+        if (isMounted) {
+          setEmailSent(true);
+        }
+      })
+      .catch((err: unknown) => {
+        if (isMounted) {
+          const msg = err instanceof Error ? err.message : (isRTL ? "تعذر إرسال البريد الإلكتروني" : "Failed to send email");
+          setEmailError(msg);
+        }
+      })
+      .finally(() => {
+        if (isMounted) {
+          setSendingEmail(false);
+        }
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, [isOpen, request, hasEmail, isRTL]);
 
   if (!isOpen || !request) return null;
-
-  const hasPhone = Boolean(request.phone && request.phone.trim());
-  const hasEmail = Boolean(request.email && request.email.trim() && request.email.includes("@"));
 
   const cleanPhone = request.phone ? request.phone.replace(/[^0-9]/g, "") : "";
   const formattedPhone = cleanPhone.startsWith("05")
@@ -50,7 +85,7 @@ export default function ApproveSuccessModal({
     setWhatsAppOpened(true);
   };
 
-  const handleSendEmail = async () => {
+  const handleRetryEmail = async () => {
     if (!hasEmail) return;
     setSendingEmail(true);
     setEmailError(null);
@@ -58,17 +93,10 @@ export default function ApproveSuccessModal({
       await sendVisitorPassEmailApi(request.id);
       setEmailSent(true);
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : "تعذر إرسال البريد الإلكتروني";
+      const msg = err instanceof Error ? err.message : (isRTL ? "تعذر إرسال البريد الإلكتروني" : "Failed to send email");
       setEmailError(msg);
     } finally {
       setSendingEmail(false);
-    }
-  };
-
-  const handleSendBoth = async () => {
-    handleSendWhatsApp();
-    if (hasEmail && !emailSent) {
-      await handleSendEmail();
     }
   };
 
@@ -76,6 +104,7 @@ export default function ApproveSuccessModal({
     setEmailSent(false);
     setEmailError(null);
     setWhatsAppOpened(false);
+    lastSentIdRef.current = null;
     onClose();
   };
 
@@ -83,7 +112,7 @@ export default function ApproveSuccessModal({
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-xs animate-in fade-in duration-200">
       <div
         dir={dir}
-        className="relative w-full max-w-lg bg-white rounded-3xl shadow-2xl border border-slate-100 p-6 sm:p-7 text-center overflow-hidden transform transition-all animate-in zoom-in-95 duration-200"
+        className="relative w-full max-w-lg bg-white rounded-3xl shadow-2xl border border-slate-100 p-6 sm:p-8 text-center overflow-hidden transform transition-all animate-in zoom-in-95 duration-200"
       >
         {/* Close Button */}
         <button
@@ -101,21 +130,21 @@ export default function ApproveSuccessModal({
         </div>
 
         {/* Title */}
-        <h3 className="text-lg sm:text-xl font-black text-slate-900 mb-1.5 tracking-tight">
+        <h3 className="text-xl sm:text-2xl font-black text-slate-900 mb-1.5 tracking-tight">
           {isRTL
-            ? `تم اعتماد طلب زيارة ${request.name} بنجاح`
+            ? `تم اعتماد الزيارة لـ ${request.name}`
             : `Visit Approved for ${request.name}`}
         </h3>
 
         {/* Subtitle description */}
         <p className="text-xs sm:text-sm text-slate-600 leading-relaxed max-w-md mx-auto mb-5 font-normal">
           {isRTL
-            ? `تم تفعيل التصريح رسميـاً ليوم (${request.visitDate}). حدد طريقة إشعار الزائر بتأكيد الحجز:`
-            : `Pass officially approved for (${request.visitDate}). Choose how to notify the visitor:`}
+            ? `تم تفعيل تصريح الدخول رسمياً ليوم (${request.visitDate}) بنجاح.`
+            : `Entry pass officially activated for (${request.visitDate}).`}
         </p>
 
         {/* Summary Card of Applicant */}
-        <div className="mb-5 p-3.5 rounded-2xl bg-slate-50 border border-slate-200/80 text-xs text-slate-700 flex flex-col sm:flex-row items-center justify-between gap-2.5">
+        <div className="mb-5 p-4 rounded-2xl bg-slate-50 border border-slate-200/80 text-xs text-slate-700 flex flex-col sm:flex-row items-center justify-between gap-2.5">
           <div className="flex items-center gap-2">
             <span className="font-semibold text-slate-500">{isRTL ? "الهاتف:" : "Phone:"}</span>
             <span className="font-bold text-slate-800 font-mono" dir="ltr">
@@ -123,118 +152,93 @@ export default function ApproveSuccessModal({
             </span>
           </div>
           <div className="flex items-center gap-2">
-            <span className="font-semibold text-slate-500">{isRTL ? "المقعد المحجوز:" : "Assigned Seat:"}</span>
-            <span className="font-bold text-emerald-800 bg-emerald-100/90 px-2 py-0.5 rounded-md border border-emerald-300">
+            <span className="font-semibold text-slate-500">{isRTL ? "المقعد المخصص:" : "Assigned Seat:"}</span>
+            <span className="font-bold text-emerald-800 bg-emerald-100/90 px-2.5 py-1 rounded-lg border border-emerald-300">
               {seatText}
             </span>
           </div>
         </div>
 
-        {/* Dynamic Notification Status Alert */}
-        {emailSent && (
-          <div className="mb-4 p-3 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-semibold flex items-center justify-center gap-2 animate-in fade-in">
-            <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-            <span>
+        {/* ── Automatic Email Status Block ── */}
+        {hasEmail ? (
+          <div className="mb-6">
+            {sendingEmail && (
+              <div className="p-4 rounded-2xl bg-blue-50 border border-blue-200 text-blue-900 text-xs sm:text-sm font-semibold flex items-center justify-center gap-3 animate-pulse">
+                <Loader2 className="w-5 h-5 animate-spin text-blue-600 shrink-0" />
+                <span>
+                  {isRTL
+                    ? `جاري إرسال تصريح الزيارة وكلمة المرور إلى (${request.email})...`
+                    : `Sending official pass and passcode to (${request.email})...`}
+                </span>
+              </div>
+            )}
+
+            {emailSent && (
+              <div className="p-4 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-900 text-xs sm:text-sm font-bold flex items-center justify-center gap-3 animate-in fade-in">
+                <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0" />
+                <div className="text-start">
+                  <div>
+                    {isRTL
+                      ? "تم إرسال تصريح الزيارة وكلمة المرور إلى البريد الإلكتروني بنجاح ✓"
+                      : "Official pass and passcode sent to email successfully ✓"}
+                  </div>
+                  <div className="text-xs font-normal text-emerald-700 font-mono mt-0.5" dir="ltr">
+                    {request.email}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {emailError && (
+              <div className="p-4 rounded-2xl bg-rose-50 border border-rose-200 text-rose-800 text-xs sm:text-sm font-semibold flex flex-col sm:flex-row items-center justify-between gap-3 animate-in fade-in">
+                <div className="flex items-center gap-2">
+                  <AlertCircle className="w-5 h-5 text-rose-600 shrink-0" />
+                  <span>{emailError}</span>
+                </div>
+                <button
+                  type="button"
+                  onClick={handleRetryEmail}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white border border-rose-300 text-rose-700 hover:bg-rose-100 font-bold text-xs transition-all cursor-pointer shadow-2xs"
+                >
+                  <RefreshCw className="w-3.5 h-3.5" />
+                  <span>{isRTL ? "إعادة المحاولة" : "Retry"}</span>
+                </button>
+              </div>
+            )}
+          </div>
+        ) : (
+          /* Visitor has NO email provided -> offer WhatsApp as a fallback */
+          <div className="mb-6 p-4 rounded-2xl bg-amber-50 border border-amber-200 text-amber-900 text-xs sm:text-sm text-start space-y-2">
+            <div className="font-bold flex items-center gap-2">
+              <AlertCircle className="w-4 h-4 text-amber-600" />
+              <span>{isRTL ? "الزائر لم يُدخل بريداً إلكترونياً" : "No email address provided"}</span>
+            </div>
+            <p className="text-xs text-amber-700">
               {isRTL
-                ? `تم إرسال بريد التأكيد الرسمي بنجاح إلى (${request.email}) ✓`
-                : `Official confirmation email sent to (${request.email}) ✓`}
-            </span>
-          </div>
-        )}
-
-        {emailError && (
-          <div className="mb-4 p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs font-semibold flex items-center justify-center gap-2 animate-in fade-in">
-            <X className="w-4 h-4 text-rose-600 shrink-0" />
-            <span>{emailError}</span>
-          </div>
-        )}
-
-        {/* Notification Choice Action Buttons */}
-        <div className="space-y-2.5">
-          {/* Option 1: WhatsApp */}
-          <button
-            type="button"
-            disabled={!hasPhone}
-            onClick={handleSendWhatsApp}
-            className={`w-full flex items-center justify-between px-4 py-3 rounded-2xl text-xs sm:text-sm font-bold transition-all shadow-xs active:scale-[0.99] cursor-pointer ${
-              whatsAppOpened
-                ? "bg-emerald-50 border-2 border-emerald-600 text-emerald-800"
-                : "bg-emerald-600 hover:bg-emerald-700 text-white"
-            } disabled:opacity-50 disabled:cursor-not-allowed`}
-          >
-            <div className="flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-xl bg-white/20 flex items-center justify-center shrink-0">
+                ? "يمكنك إرسال تفاصيل التصريح للزائر عبر محادثة واتساب المباشرة:"
+                : "You can send the pass details via direct WhatsApp chat:"}
+            </p>
+            {hasPhone && (
+              <button
+                type="button"
+                onClick={handleSendWhatsApp}
+                className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-xs transition-all cursor-pointer"
+              >
                 <MessageSquare className="w-4 h-4" />
-              </div>
-              <div className="text-start">
-                <div>{isRTL ? "إرسال عبر واتساب (WhatsApp)" : "Send via WhatsApp"}</div>
-                <div className="text-[11px] font-normal opacity-90">
-                  {whatsAppOpened
-                    ? (isRTL ? "تم فتح المحادثة ✓ اضغط لإعادة الفتح" : "Chat opened ✓ Click to reopen")
-                    : (isRTL ? "فتح محادثة واتساب برسالة تأكيد جاهزة" : "Open WhatsApp chat with prefilled message")}
-                </div>
-              </div>
-            </div>
-            <Send className="w-4 h-4 shrink-0 opacity-80" />
-          </button>
+                <span>{whatsAppOpened ? (isRTL ? "تم فتح المحادثة ✓" : "Chat opened ✓") : (isRTL ? "إرسال عبر واتساب" : "Send via WhatsApp")}</span>
+              </button>
+            )}
+          </div>
+        )}
 
-          {/* Option 2: Email via Brevo API */}
-          <button
-            type="button"
-            disabled={!hasEmail || sendingEmail || emailSent}
-            onClick={handleSendEmail}
-            className={`w-full flex items-center justify-between px-4 py-3 rounded-2xl text-xs sm:text-sm font-bold transition-all shadow-xs active:scale-[0.99] cursor-pointer ${
-              emailSent
-                ? "bg-emerald-100/70 border border-emerald-300 text-emerald-800 cursor-default"
-                : "bg-[#0c2340] hover:bg-[#13325b] text-white"
-            } disabled:opacity-50 disabled:cursor-not-allowed`}
-          >
-            <div className="flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-xl bg-white/20 flex items-center justify-center shrink-0">
-                {sendingEmail ? (
-                  <Loader2 className="w-4 h-4 animate-spin text-emerald-300" />
-                ) : (
-                  <Mail className="w-4 h-4" />
-                )}
-              </div>
-              <div className="text-start">
-                <div>
-                  {emailSent
-                    ? (isRTL ? "تم إرسال الإيميل بنجاح ✓" : "Email Sent Successfully ✓")
-                    : (isRTL ? "إرسال بريد إلكتروني رسمي (Email)" : "Send Official Email Pass")}
-                </div>
-                <div className="text-[11px] font-normal opacity-90">
-                  {hasEmail
-                    ? (isRTL ? `إرسال رسالة تصريح رسمية إلى ${request.email}` : `Dispatch official pass to ${request.email}`)
-                    : (isRTL ? "الزائر لم يُدخل بريداً إلكترونياً" : "No email address provided")}
-                </div>
-              </div>
-            </div>
-            <Send className="w-4 h-4 shrink-0 opacity-80" />
-          </button>
-
-          {/* Option 3: Both (WhatsApp + Email) */}
-          {hasPhone && hasEmail && !emailSent && (
-            <button
-              type="button"
-              disabled={sendingEmail}
-              onClick={handleSendBoth}
-              className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-700 text-xs font-bold transition-all cursor-pointer active:scale-[0.99]"
-            >
-              <Sparkles className="w-4 h-4 text-amber-500" />
-              <span>{isRTL ? "إرسال عبر القناتين معاً (واتساب + بريد إلكتروني)" : "Send via Both Channels (WhatsApp + Email)"}</span>
-            </button>
-          )}
-
-          {/* Option 4: Close / Continue */}
-          <button
-            type="button"
-            onClick={handleClose}
-            className="w-full py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 hover:text-slate-900 text-xs sm:text-sm font-semibold transition-all cursor-pointer"
-          >
-            {isRTL ? "متابعة السجل دون إرسال إضافي" : "Close & Continue"}
-          </button>
-        </div>
+        {/* ── Single Action Button: Close & Continue ── */}
+        <button
+          type="button"
+          onClick={handleClose}
+          className="w-full py-3.5 px-6 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-black text-sm sm:text-base shadow-lg shadow-emerald-600/20 active:scale-[0.98] transition-all cursor-pointer"
+        >
+          {isRTL ? "إغلاق ومتابعة" : "Close & Continue"}
+        </button>
       </div>
     </div>
   );
